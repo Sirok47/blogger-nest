@@ -1,0 +1,104 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { BlogsService } from './blogs.service';
+import { BlogsQueryRepo } from './blogs.queryRepo';
+import {
+  BlogDocument,
+  type BlogInputModel,
+  BlogViewModel,
+} from './blogs.models';
+import { Paginated, Paginator } from '../../../Models/paginator.models';
+import { BlogsRepository } from './blogs.repository';
+import { type PostInputModel, PostViewModel } from '../posts/posts.models';
+import { PostsService } from '../posts/posts.service';
+import { PostsQueryRepo } from '../posts/posts.queryRepository';
+
+@Controller('blogs')
+export class BlogsController {
+  constructor(
+    protected service: BlogsService,
+    protected postsService: PostsService,
+    protected queryRepo: BlogsQueryRepo,
+    protected postsQueryRepo: PostsQueryRepo,
+    protected repo: BlogsRepository,
+  ) {}
+
+  @Get()
+  @HttpCode(200)
+  async getBlogs(@Query() query: Paginator): Promise<Paginated<BlogViewModel>> {
+    return await this.queryRepo.findWithSearchAndPagination(query);
+  }
+
+  @Get(':id')
+  @HttpCode(200)
+  async getBlogById(@Param('id') id: string): Promise<BlogViewModel | null> {
+    const result: BlogDocument | null = await this.queryRepo.findById(id);
+    if (!result) {
+      throw new NotFoundException();
+    }
+    return result.mapToViewModel();
+  }
+
+  @Post()
+  @HttpCode(201)
+  async postBlog(@Body() blog: BlogInputModel): Promise<BlogViewModel> {
+    return await this.service.postOneBlog(blog);
+  }
+
+  @Put(':id')
+  @HttpCode(204)
+  async putBlog(
+    @Param('id') id: string,
+    @Body() blog: BlogInputModel,
+  ): Promise<void> {
+    const result = await this.service.putOneBlog(id, blog);
+    if (!result) {
+      throw new NotFoundException();
+    }
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deleteBlog(@Param('id') id: string): Promise<void> {
+    const result: boolean = await this.service.deleteOneBlog(id);
+    if (!result) {
+      throw new NotFoundException();
+    }
+  }
+
+  @Get(':id/posts')
+  @HttpCode(200)
+  async getPostsInBlog(
+    @Param('id') blogId: string,
+    @Query() query: Paginator,
+  ): Promise<Paginated<PostViewModel>> {
+    const blog: BlogDocument | null = await this.repo.findById(blogId);
+    if (!blog) {
+      throw new NotFoundException();
+    }
+    return await this.postsQueryRepo.findWithSearchAndPagination(
+      blog._id.toString(),
+      query,
+    );
+  }
+
+  @Post(':id/posts')
+  @HttpCode(201)
+  async postPostIntoBlog(@Body() post: PostInputModel): Promise<void> {
+    const result: PostViewModel | null =
+      await this.postsService.postOnePost(post);
+    if (!result) {
+      throw new NotFoundException();
+    }
+  }
+}
