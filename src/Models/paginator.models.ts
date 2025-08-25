@@ -1,4 +1,5 @@
 import { Query } from 'mongoose';
+import { Type } from 'class-transformer';
 
 export class Paginator {
   constructor(
@@ -7,7 +8,11 @@ export class Paginator {
     public searchNameTerm: string = '',
     public sortBy: string = 'createdAt',
     public sortDirection: SortDirections = SortDirections.desc,
+    //@ts-expect-error tf you mean 3 parameters
+    @Type(() => Number)
     public pageNumber: number = 1,
+    //@ts-expect-error tf you mean 3 parameters
+    @Type(() => Number)
     public pageSize: number = 10,
   ) {}
 
