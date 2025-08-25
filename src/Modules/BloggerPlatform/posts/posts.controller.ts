@@ -1,6 +1,5 @@
 import {
   Get,
-  Injectable,
   NotFoundException,
   Param,
   Query,
@@ -9,6 +8,7 @@ import {
   Put,
   Delete,
   HttpCode,
+  Controller,
 } from '@nestjs/common';
 import { PostsQueryRepo } from './posts.queryRepository';
 import { PostsService } from './posts.service';
@@ -22,7 +22,7 @@ import { CommentViewModel } from '../comments/comments.models';
 import { CommentsQueryRepo } from '../comments/comments.queryRepo';
 import { PostsRepository } from './posts.repository';
 
-@Injectable()
+@Controller()
 export class PostsController {
   constructor(
     private service: PostsService,
