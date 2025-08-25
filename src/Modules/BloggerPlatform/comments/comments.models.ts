@@ -1,6 +1,6 @@
 import { likeStatus } from '../likes/likes.models';
 import { HydratedDocument, Model } from 'mongoose';
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export class CommentInputModel {
   content: string;
@@ -17,6 +17,7 @@ class CommentatorInfo {
 const CommentatorInfoSchema = SchemaFactory.createForClass(CommentatorInfo);
 CommentatorInfoSchema.loadClass(CommentatorInfo);
 
+@Schema({ timestamps: true })
 export class Comment {
   @Prop({ type: String, required: true, minlength: 1, maxlength: 2000 })
   content: string;
@@ -27,7 +28,7 @@ export class Comment {
   @Prop({ type: CommentatorInfoSchema, required: true })
   commentatorInfo: CommentatorInfo;
 
-  createdAt: Date;
+  readonly createdAt: Date;
 
   constructor(
     postId: string,

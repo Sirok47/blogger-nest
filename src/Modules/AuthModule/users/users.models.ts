@@ -1,5 +1,5 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { generateUuid } from '../../../Helpers/uuid';
 import { addOneDay } from '../../../Helpers/dateHelpers';
 
@@ -27,6 +27,7 @@ export type MeViewModel = {
   email: string;
 };
 
+@Schema({ _id: false })
 class ConfirmationData {
   @Prop({ type: String, maxlength: 100 })
   confirmationCode: string;
@@ -41,6 +42,7 @@ class ConfirmationData {
 const ConfirmationDataSchema = SchemaFactory.createForClass(ConfirmationData);
 ConfirmationDataSchema.loadClass(ConfirmationData);
 
+@Schema({ timestamps: true })
 export class User {
   @Prop({ type: String, required: true, minlength: 1, maxlength: 100 })
   login: string;
@@ -51,20 +53,22 @@ export class User {
   @Prop({ type: String, required: true, minlength: 1, maxlength: 100 })
   email: string;
 
-  @Prop({ type: ConfirmationDataSchema, required: true })
+  @Prop({ type: () => ConfirmationData, required: true })
   confirmationData: ConfirmationData;
 
-  createdAt: Date;
+  readonly createdAt: Date;
 
-  constructor(inputUser: UserInputModel) {
-    this.login = inputUser.login;
-    this.email = inputUser.email;
+  private static userSkeleton(inputUser: UserInputModel) {
+    const instance = new this();
+    instance.login = inputUser.login;
+    instance.email = inputUser.email;
     //TODO: toHash()
-    this.password = inputUser.password;
+    instance.password = inputUser.password;
+    return instance;
   }
 
   static CreateRegularUser(inputUser: UserInputModel): UserDocument {
-    const user = new this(inputUser);
+    const user = this.userSkeleton(inputUser);
     user.confirmationData = {
       confirmationCode: generateUuid(),
       confirmationCodeExpDate: addOneDay(new Date()),
@@ -74,7 +78,7 @@ export class User {
   }
 
   static CreateAdminUser(inputUser: UserInputModel): UserDocument {
-    const user = new this(inputUser);
+    const user = this.userSkeleton(inputUser);
     user.confirmationData = {
       confirmationCode: '',
       confirmationCodeExpDate: new Date(),

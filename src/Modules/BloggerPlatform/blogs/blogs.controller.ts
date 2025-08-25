@@ -94,7 +94,11 @@ export class BlogsController {
 
   @Post(':id/posts')
   @HttpCode(201)
-  async postPostIntoBlog(@Body() post: PostInputModel): Promise<void> {
+  async postPostIntoBlog(
+    @Param('id') id: string,
+    @Body() post: PostInputModel,
+  ): Promise<void> {
+    post.blogId = id;
     const result: PostViewModel | null =
       await this.postsService.postOnePost(post);
     if (!result) {

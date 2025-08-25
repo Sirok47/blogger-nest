@@ -1,20 +1,44 @@
 import { Query } from 'mongoose';
 import { Type } from 'class-transformer';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+
+export enum SortDirections {
+  asc = 'asc',
+  desc = 'desc',
+}
 
 export class Paginator {
-  constructor(
-    public searchLoginTerm: string = '',
-    public searchEmailTerm: string = '',
-    public searchNameTerm: string = '',
-    public sortBy: string = 'createdAt',
-    public sortDirection: SortDirections = SortDirections.desc,
-    //@ts-expect-error tf you mean 3 parameters
-    @Type(() => Number)
-    public pageNumber: number = 1,
-    //@ts-expect-error tf you mean 3 parameters
-    @Type(() => Number)
-    public pageSize: number = 10,
-  ) {}
+  @IsOptional()
+  @IsString()
+  public searchLoginTerm = '';
+
+  @IsOptional()
+  @IsString()
+  public searchEmailTerm = '';
+
+  @IsOptional()
+  @IsString()
+  public searchNameTerm = '';
+
+  @IsOptional()
+  @IsString()
+  public sortBy = 'createdAt';
+
+  @IsOptional()
+  @IsEnum(SortDirections)
+  public sortDirection: SortDirections = SortDirections.desc;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  public pageNumber = 1;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  public pageSize = 10;
 
   Paginate<ViewModelType>(
     totalCount: number,
@@ -45,8 +69,3 @@ export type Paginated<ViewModelType> = {
   totalCount: number;
   items: ViewModelType[] | null;
 };
-
-export enum SortDirections {
-  asc = 'asc',
-  desc = 'desc',
-}

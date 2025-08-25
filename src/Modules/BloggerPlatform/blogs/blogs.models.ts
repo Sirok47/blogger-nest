@@ -31,7 +31,7 @@ export class Blog {
   @Prop({ type: Boolean, required: true })
   isMembership: boolean;
 
-  createdAt: Date;
+  readonly createdAt: Date;
 
   static CreateDocument(inputBlog: BlogInputModel): BlogDocument {
     const blog = new this();

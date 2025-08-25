@@ -50,7 +50,7 @@ export class Post {
   @Prop({ type: String, required: true })
   blogName: string;
 
-  createdAt: Date;
+  readonly createdAt: Date;
 
   static async CreateDocument(
     inputPost: PostInputModel,
