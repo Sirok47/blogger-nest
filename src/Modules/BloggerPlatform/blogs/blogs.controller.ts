@@ -41,7 +41,7 @@ export class BlogsController {
 
   @Get(':id')
   @HttpCode(200)
-  async getBlogById(@Param('id') id: string): Promise<BlogViewModel | null> {
+  async getBlogById(@Param('id') id: string): Promise<BlogViewModel> {
     const result: BlogDocument | null = await this.queryRepo.findById(id);
     if (!result) {
       throw new NotFoundException();
@@ -97,12 +97,13 @@ export class BlogsController {
   async postPostIntoBlog(
     @Param('id') id: string,
     @Body() post: PostInputModel,
-  ): Promise<void> {
+  ): Promise<PostViewModel> {
     post.blogId = id;
     const result: PostViewModel | null =
       await this.postsService.postOnePost(post);
     if (!result) {
       throw new NotFoundException();
     }
+    return result;
   }
 }
