@@ -22,7 +22,7 @@ import { CommentViewModel } from '../comments/comments.models';
 import { CommentsQueryRepo } from '../comments/comments.queryRepo';
 import { PostsRepository } from './posts.repository';
 
-@Controller()
+@Controller('posts')
 export class PostsController {
   constructor(
     private service: PostsService,

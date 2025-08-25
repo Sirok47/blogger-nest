@@ -1,4 +1,4 @@
-import { Controller, Delete, Get } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
 import { BlogsRepository } from './Modules/BloggerPlatform/blogs/blogs.repository';
 import { PostsRepository } from './Modules/BloggerPlatform/posts/posts.repository';
@@ -17,19 +17,20 @@ export class AppController {
   ) {}
 
   @Get()
+  @HttpCode(200)
   getHello(): string {
     return this.appService.getHello();
   }
 
   @Delete('testing/all-data')
-  async deleteAll() {
+  @HttpCode(204)
+  async deleteAll(): Promise<void> {
     await Promise.all([
       this.blogsRepository.deleteAll(),
       this.postsRepository.deleteAll(),
       this.usersRepository.deleteAll(),
       this.commentsRepository.deleteAll(),
       //this.likesRepository.deleteAll(),
-      //RequestModel.deleteMany({}).exec()
     ]);
   }
 }
