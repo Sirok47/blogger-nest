@@ -18,7 +18,8 @@ export class BlogsRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.BlogModel.findByIdAndDelete(id).exec();
+    const result: BlogDocument | null =
+      await this.BlogModel.findByIdAndDelete(id).exec();
     return !!result;
   }
 
