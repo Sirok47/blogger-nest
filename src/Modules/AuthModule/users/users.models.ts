@@ -2,12 +2,18 @@ import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { generateUuid } from '../../../Helpers/uuid';
 import { addOneDay } from '../../../Helpers/dateHelpers';
+import { IsEmail, Length } from 'class-validator';
 
-export type UserInputModel = {
+export class UserInputModel {
+  @Length(3, 10)
   login: string;
+
+  @Length(6, 20)
   password: string;
+
+  @IsEmail()
   email: string;
-};
+}
 
 export type UserViewModel = {
   id: string;
@@ -16,10 +22,13 @@ export type UserViewModel = {
   createdAt: Date;
 };
 
-export type LoginInputModel = {
+export class LoginInputModel {
+  @Length(3)
   loginOrEmail: string;
+
+  @Length(6, 20)
   password: string;
-};
+}
 
 export type MeViewModel = {
   userId: string;
@@ -62,7 +71,6 @@ export class User {
     const instance = new this();
     instance.login = inputUser.login;
     instance.email = inputUser.email;
-    //TODO: toHash()
     instance.password = inputUser.password;
     return instance;
   }

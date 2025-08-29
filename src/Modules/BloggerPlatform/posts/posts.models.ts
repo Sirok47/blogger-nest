@@ -5,13 +5,25 @@ import { BlogsRepository } from '../blogs/blogs.repository';
 import { NotFoundException } from '@nestjs/common';
 import { BlogDocument } from '../blogs/blogs.models';
 import { likeStatus } from '../likes/likes.models';
+import { IsMongoId, Length } from 'class-validator';
 
-export type PostInputModel = {
+export class PostUnderBlogInputModel {
+  @Length(1, 30)
   title: string;
+
+  @Length(1, 100)
   shortDescription: string;
+
+  @Length(1, 1000)
   content: string;
+
   blogId: string;
-};
+}
+
+export class PostInputModel extends PostUnderBlogInputModel {
+  @IsMongoId()
+  blogId: string = '';
+}
 
 export type PostViewModel = {
   id: string;

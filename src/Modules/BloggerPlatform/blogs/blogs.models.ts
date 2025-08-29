@@ -1,11 +1,18 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { IsUrl, Length } from 'class-validator';
 
-export type BlogInputModel = {
+export class BlogInputModel {
+  @Length(1, 15)
   name: string;
+
+  @Length(1, 500)
   description: string;
+
+  @IsUrl()
+  @Length(1, 100)
   websiteUrl: string;
-};
+}
 
 export type BlogViewModel = {
   id: string;

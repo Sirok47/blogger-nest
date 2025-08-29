@@ -1,8 +1,10 @@
 import { likeStatus } from '../likes/likes.models';
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Length } from 'class-validator';
 
 export class CommentInputModel {
+  @Length(1, 1000)
   content: string;
 }
 

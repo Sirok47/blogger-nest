@@ -21,6 +21,7 @@ import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { CommentViewModel } from '../comments/comments.models';
 import { CommentsQueryRepo } from '../comments/comments.queryRepo';
 import { PostsRepository } from './posts.repository';
+import { InputID } from '../../../Models/IDmodel';
 
 @Controller('posts')
 export class PostsController {
@@ -44,7 +45,7 @@ export class PostsController {
 
   @Get(':id')
   @HttpCode(200)
-  async getPostById(@Param('id') id: string): Promise<PostViewModel> {
+  async getPostById(@Param() { id }: InputID): Promise<PostViewModel> {
     const result: PostDocument | null = await this.queryRepo.findById(id);
     if (!result) {
       throw new NotFoundException();
@@ -55,7 +56,7 @@ export class PostsController {
   @Get(':id/comments')
   @HttpCode(200)
   async getCommentsUnderPost(
-    @Param('id') id: string,
+    @Param() { id }: InputID,
     @Query() query: Paginator,
   ): Promise<Paginated<CommentViewModel>> {
     if (!(await this.repository.findById(id))) {
@@ -77,7 +78,7 @@ export class PostsController {
   @Put(':id')
   @HttpCode(204)
   async putPost(
-    @Param('id') id: string,
+    @Param() { id }: InputID,
     @Body() post: PostInputModel,
   ): Promise<void> {
     const result = await this.service.putOnePost(id, post);
@@ -88,7 +89,7 @@ export class PostsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async deletePost(@Param('id') id: string): Promise<void> {
+  async deletePost(@Param() { id }: InputID): Promise<void> {
     const result = await this.service.deleteOnePost(id);
     if (!result) {
       throw new NotFoundException();

@@ -19,9 +19,10 @@ import {
 } from './blogs.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { BlogsRepository } from './blogs.repository';
-import { type PostInputModel, PostViewModel } from '../posts/posts.models';
+import { PostUnderBlogInputModel, PostViewModel } from '../posts/posts.models';
 import { PostsService } from '../posts/posts.service';
 import { PostsQueryRepo } from '../posts/posts.queryRepository';
+import { InputID } from '../../../Models/IDmodel';
 
 @Controller('blogs')
 export class BlogsController {
@@ -41,7 +42,7 @@ export class BlogsController {
 
   @Get(':id')
   @HttpCode(200)
-  async getBlogById(@Param('id') id: string): Promise<BlogViewModel> {
+  async getBlogById(@Param() { id }: InputID): Promise<BlogViewModel> {
     const result: BlogDocument | null = await this.queryRepo.findById(id);
     if (!result) {
       throw new NotFoundException();
@@ -58,7 +59,7 @@ export class BlogsController {
   @Put(':id')
   @HttpCode(204)
   async putBlog(
-    @Param('id') id: string,
+    @Param() { id }: InputID,
     @Body() blog: BlogInputModel,
   ): Promise<void> {
     const result = await this.service.putOneBlog(id, blog);
@@ -69,7 +70,7 @@ export class BlogsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async deleteBlog(@Param('id') id: string): Promise<void> {
+  async deleteBlog(@Param() { id }: InputID): Promise<void> {
     const result: boolean = await this.service.deleteOneBlog(id);
     if (!result) {
       throw new NotFoundException();
@@ -79,10 +80,10 @@ export class BlogsController {
   @Get(':id/posts')
   @HttpCode(200)
   async getPostsInBlog(
-    @Param('id') blogId: string,
+    @Param() { id }: InputID,
     @Query() query: Paginator,
   ): Promise<Paginated<PostViewModel>> {
-    const blog: BlogDocument | null = await this.repo.findById(blogId);
+    const blog: BlogDocument | null = await this.repo.findById(id);
     if (!blog) {
       throw new NotFoundException();
     }
@@ -95,8 +96,8 @@ export class BlogsController {
   @Post(':id/posts')
   @HttpCode(201)
   async postPostIntoBlog(
-    @Param('id') id: string,
-    @Body() post: PostInputModel,
+    @Param() { id }: InputID,
+    @Body() post: PostUnderBlogInputModel,
   ): Promise<PostViewModel> {
     post.blogId = id;
     const result: PostViewModel | null =

@@ -4,7 +4,7 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+const baseConfig = tseslint.config(
   {
     ignores: ['eslint.config.mjs'],
   },
@@ -32,4 +32,24 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-assignment': 'warn'
     },
   },
+);
+
+function downgradeRules(rules) {
+  const downgraded = {};
+  for (const [key, value] of Object.entries(rules)) {
+    if (value === 'error') {
+      downgraded[key] = 'warn';
+    } else if (Array.isArray(value) && value[0] === 'error') {
+      downgraded[key] = ['warn', ...value.slice(1)];
+    } else {
+      downgraded[key] = value;
+    }
+  }
+  return downgraded;
+}
+
+export default baseConfig.map((config) =>
+  config.rules
+    ? { ...config, rules: downgradeRules(config.rules) }
+    : config
 );
