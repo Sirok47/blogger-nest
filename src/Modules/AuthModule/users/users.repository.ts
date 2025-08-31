@@ -21,7 +21,9 @@ export class UsersRepository {
   }
 
   async findWithCode(code: string): Promise<UserDocument | null> {
-    return await this.UserModel.findOne({ confirmationCode: code }).exec();
+    return await this.UserModel.findOne({
+      confirmationData: { confirmationCode: code },
+    }).exec();
   }
 
   async changePassword(userId: string, newPass: string): Promise<boolean> {

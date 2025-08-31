@@ -36,7 +36,6 @@ export class UsersController {
   @Post()
   @HttpCode(201)
   async postUser(@Body() user: UserInputModel): Promise<UserViewModel> {
-    console.log(user);
     return (await this.service.postOneUser(user, true)).mapToViewModel();
   }
 
