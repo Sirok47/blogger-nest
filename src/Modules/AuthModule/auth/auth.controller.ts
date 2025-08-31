@@ -27,6 +27,7 @@ import {
 } from './auth.models';
 import { type Request, type Response } from 'express';
 import { APIErrorResult } from '../../../Models/Error.models';
+import { CustomBadRequestException } from '../../../Exception Filters/custom400';
 
 @Controller('auth')
 export class AuthController {
@@ -73,21 +74,7 @@ export class AuthController {
   @Post('registration')
   @HttpCode(204)
   async signIn(@Body() user: UserInputModel): Promise<void> {
-    let result: boolean;
-    try {
-      result = await this.service.registerWithEmailConf(user);
-    } catch (error) {
-      const errMsg: APIErrorResult = {
-        errorsMessages: [
-          {
-            field: (error as Error).message,
-            message: (error as string) + ' must be unique',
-          },
-        ],
-      };
-      throw new BadRequestException(errMsg);
-    }
-    if (!result) {
+    if (!(await this.service.registerWithEmailConf(user))) {
       throw new InternalServerErrorException();
     }
   }
@@ -107,7 +94,7 @@ export class AuthController {
           },
         ],
       };
-      throw new BadRequestException(errMsg);
+      throw new CustomBadRequestException(errMsg);
     }
     if (!result) {
       throw new InternalServerErrorException();
@@ -129,7 +116,7 @@ export class AuthController {
           },
         ],
       };
-      throw new BadRequestException(errMsg);
+      throw new CustomBadRequestException(errMsg);
     }
     if (!result) {
       throw new InternalServerErrorException();

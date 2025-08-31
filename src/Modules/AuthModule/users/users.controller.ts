@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UsersQueryRepo } from './users.queryRepo';
-import { type UserInputModel, UserViewModel } from './users.models';
+import { UserInputModel, UserViewModel } from './users.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { InputID } from '../../../Models/IDmodel';
 import { AdminAuthGuard } from '../../../Guards/BasicAuth.guard';
@@ -36,7 +36,8 @@ export class UsersController {
   @Post()
   @HttpCode(201)
   async postUser(@Body() user: UserInputModel): Promise<UserViewModel> {
-    return (await this.service.postOneUser(user)).mapToViewModel();
+    console.log(user);
+    return (await this.service.postOneUser(user, true)).mapToViewModel();
   }
 
   @Delete('/:id')

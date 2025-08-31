@@ -12,11 +12,7 @@ import {
 } from '@nestjs/common';
 import { PostsQueryRepo } from './posts.queryRepository';
 import { PostsService } from './posts.service';
-import {
-  PostDocument,
-  type PostInputModel,
-  PostViewModel,
-} from './posts.models';
+import { PostDocument, PostInputModel, PostViewModel } from './posts.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { CommentViewModel } from '../comments/comments.models';
 import { CommentsQueryRepo } from '../comments/comments.queryRepo';

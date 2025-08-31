@@ -12,9 +12,7 @@ import { config } from './Settings/config';
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     BloggerPlatformModule,
     AuthModule,
-    MongooseModule.forRoot(config.MONGODB_URI, {
-      dbName: 'blogger_nest',
-    }),
+    MongooseModule.forRoot(config.MONGODB_URI, { dbName: 'blogger_nest' }),
   ],
   controllers: [AppController],
   providers: [AppService],

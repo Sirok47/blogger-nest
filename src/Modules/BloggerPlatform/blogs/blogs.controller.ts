@@ -12,11 +12,7 @@ import {
 } from '@nestjs/common';
 import { BlogsService } from './blogs.service';
 import { BlogsQueryRepo } from './blogs.queryRepo';
-import {
-  BlogDocument,
-  type BlogInputModel,
-  BlogViewModel,
-} from './blogs.models';
+import { BlogDocument, BlogInputModel, BlogViewModel } from './blogs.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { BlogsRepository } from './blogs.repository';
 import { PostUnderBlogInputModel, PostViewModel } from '../posts/posts.models';

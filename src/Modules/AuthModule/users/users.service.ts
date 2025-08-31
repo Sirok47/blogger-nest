@@ -17,7 +17,10 @@ export class UsersService {
     @InjectModel(User.name) protected UserModel: UserModelType,
   ) {}
 
-  async postOneUser(user: UserInputModel): Promise<UserDocument> {
+  async postOneUser(
+    user: UserInputModel,
+    admin: boolean = false,
+  ): Promise<UserDocument> {
     if (await this.repository.findByLoginOrEmail(user.login)) {
       throw new BadRequestException('login must be unique');
     }
@@ -25,7 +28,9 @@ export class UsersService {
       throw new BadRequestException('email must be unique');
     }
     user.password = await this.crypto.toHash(user.password);
-    const newUser: UserDocument = this.UserModel.CreateAdminUser(user);
+    const newUser: UserDocument = admin
+      ? this.UserModel.CreateAdminUser(user)
+      : this.UserModel.CreateRegularUser(user);
     return await this.repository.save(newUser);
   }
 
