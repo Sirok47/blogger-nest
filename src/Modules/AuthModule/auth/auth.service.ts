@@ -20,6 +20,7 @@ import {
 } from './sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { MailerService } from '../../Mailer/mailer.service';
+import * as console from 'node:console';
 
 @Injectable()
 export class AuthService {
@@ -161,12 +162,11 @@ export class AuthService {
   async registerWithEmailConf(user: UserInputModel): Promise<boolean> {
     const uuid: string = (await this.usersService.postOneUser(user))
       .confirmationData.confirmationCode;
-    try {
-      await this.mailer.sendEmailWithConfirmationCode(user.email, uuid, 'code');
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
+
+    this.mailer
+      .sendEmailWithConfirmationCode(user.email, uuid, 'code')
+      .catch(console.error);
+
     return true;
   }
 
