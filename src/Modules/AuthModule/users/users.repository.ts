@@ -42,8 +42,12 @@ export class UsersRepository {
     const result: UserDocument | null = await this.UserModel.findByIdAndUpdate(
       userId,
       {
-        $set: { confirmationCode: code, confirmationCodeExpDate: expDate },
+        $set: {
+          'confirmationData.confirmationCode': code,
+          'confirmationData.confirmationCodeExpDate': expDate,
+        },
       },
+      { new: true },
     );
     return !!result;
   }
