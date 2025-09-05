@@ -20,7 +20,6 @@ import {
 } from './sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { MailerService } from '../../Mailer/mailer.service';
-import * as console from 'node:console';
 
 @Injectable()
 export class AuthService {
@@ -75,6 +74,7 @@ export class AuthService {
     const { userId, deviceId, iat } = this.jwt.extractJWTPayload(token);
     if (
       !(await this.sessionRepo.checkPresenceInTheList(
+        //TODO
         userId,
         deviceId,
         new Date(iat! * oneSecond).toISOString(),
@@ -163,9 +163,7 @@ export class AuthService {
     const uuid: string = (await this.usersService.postOneUser(user))
       .confirmationData.confirmationCode;
 
-    this.mailer
-      .sendEmailWithConfirmationCode(user.email, uuid, 'code')
-      .catch(console.error);
+    await this.mailer.sendEmailWithConfirmationCode(user.email, uuid, 'code');
 
     return true;
   }
