@@ -7,6 +7,7 @@ import {
 } from './users.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery } from 'mongoose';
 
 @Injectable()
 export class UsersQueryRepo {
@@ -15,18 +16,13 @@ export class UsersQueryRepo {
     paginationSettings: Paginator,
   ): Promise<Paginated<UserViewModel>> {
     const { searchLoginTerm, searchEmailTerm } = paginationSettings;
-    const filter = {
-      $or: [{}],
-    };
 
-    //TODO: Разобрать это безобразие
-    if (searchLoginTerm)
-      filter.$or.push({ login: { $regex: searchLoginTerm, $options: 'i' } });
-    if (searchEmailTerm)
-      filter.$or.push({ email: { $regex: searchEmailTerm, $options: 'i' } });
-    if (filter.$or.length > 1) {
-      filter.$or.shift();
-    }
+    const filter: FilterQuery<User> = {
+      $or: [
+        { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
+        { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
+      ],
+    };
 
     const query = this.UserModel.find(filter);
     const totalCount = await this.UserModel.countDocuments(filter);

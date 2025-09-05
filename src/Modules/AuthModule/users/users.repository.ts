@@ -22,7 +22,7 @@ export class UsersRepository {
 
   async findWithCode(code: string): Promise<UserDocument | null> {
     return await this.UserModel.findOne({
-      confirmationData: { confirmationCode: code },
+      'confirmationData.confirmationCode': code,
     }).exec();
   }
 
