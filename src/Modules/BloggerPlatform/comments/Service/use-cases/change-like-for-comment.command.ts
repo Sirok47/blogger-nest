@@ -50,13 +50,7 @@ export class ChangeLikeForCommentHandler
     if (like) {
       like.status = status;
     } else {
-      like = new this.LikeModel({
-        userId: user.id as string,
-        login: user.login,
-        targetId: commentId,
-        status: status,
-        createdAt: Date.now(),
-      });
+      like = this.LikeModel.CreateDoc(user, commentId, status);
     }
     return this.likesRepository.save(like);
   }

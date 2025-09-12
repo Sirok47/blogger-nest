@@ -1,6 +1,7 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, SchemaFactory } from '@nestjs/mongoose';
 import { IsEnum } from 'class-validator';
+import { UserDocument } from '../../AuthModule/users/users.models';
 
 export enum likeStatus {
   Like = 'Like',
@@ -28,8 +29,21 @@ export class Like {
 
   readonly createdAt: Date;
 
-  //TODO: DDD
-  constructor() {}
+  constructor(user: UserDocument, targetId: string, status: likeStatus) {
+    this.userId = user.id as string;
+    this.login = user.login;
+    this.targetId = targetId;
+    this.status = status;
+    this.createdAt = new Date();
+  }
+
+  static CreateDoc(
+    user: UserDocument,
+    targetId: string,
+    status: likeStatus,
+  ): LikeDocument {
+    return new this(user, targetId, status) as LikeDocument;
+  }
 }
 
 export const LikeSchema = SchemaFactory.createForClass(Like);

@@ -50,13 +50,7 @@ export class ChangeLikeForPostHandler
     if (like) {
       like.status = status;
     } else {
-      like = new this.LikeModel({
-        userId: user.id as string,
-        login: user.login,
-        targetId: postId,
-        status: status,
-        createdAt: Date.now(),
-      });
+      like = this.LikeModel.CreateDoc(user, postId, status);
     }
     return this.likesRepository.save(like);
   }
