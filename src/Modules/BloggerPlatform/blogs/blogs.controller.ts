@@ -93,6 +93,7 @@ export class BlogsController {
   async getPostsInBlog(
     @Param() { id }: InputID,
     @Query() query: Paginator,
+    @Param('token') token: string,
   ): Promise<Paginated<PostViewModel>> {
     const blog: BlogDocument | null = await this.repo.findById(id);
     if (!blog) {
@@ -101,6 +102,7 @@ export class BlogsController {
     return await this.postsQueryRepo.findWithSearchAndPagination(
       blog._id.toString(),
       query,
+      token ?? '',
     );
   }
 

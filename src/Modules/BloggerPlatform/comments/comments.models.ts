@@ -8,6 +8,7 @@ export class CommentInputModel {
   content: string;
 }
 
+@Schema()
 class CommentatorInfo {
   @Prop({ type: String, required: true })
   userId: string;
@@ -48,10 +49,7 @@ export class Comment {
     return {
       id: this._id.toString(),
       content: this.content,
-      commentatorInfo: {
-        userId: this.commentatorInfo.userId,
-        userLogin: this.commentatorInfo.userLogin,
-      },
+      commentatorInfo: this.commentatorInfo,
       createdAt: this.createdAt.toISOString(),
       likesInfo: lInfo,
     };

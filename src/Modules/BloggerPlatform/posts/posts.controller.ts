@@ -44,9 +44,12 @@ export class PostsController {
   @Get()
   @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
-  async getPosts(@Query() query: Paginator): Promise<Paginated<PostViewModel>> {
+  async getPosts(
+    @Query() query: Paginator,
+    @Param('token') token: string,
+  ): Promise<Paginated<PostViewModel>> {
     const result: Paginated<PostViewModel> =
-      await this.queryRepo.findWithSearchAndPagination('', query);
+      await this.queryRepo.findWithSearchAndPagination('', query, token ?? '');
     if (!result) {
       throw new Error();
     }
@@ -70,11 +73,16 @@ export class PostsController {
   async getCommentsUnderPost(
     @Param() { id }: InputID,
     @Query() query: Paginator,
+    @Param('token') token: string,
   ): Promise<Paginated<CommentViewModel>> {
     if (!(await this.repository.findById(id))) {
       throw new NotFoundException();
     }
-    return await this.commentsQueryRepo.findWithSearchAndPagination(id, query);
+    return await this.commentsQueryRepo.findWithSearchAndPagination(
+      id,
+      query,
+      token ?? '',
+    );
   }
 
   @Post()

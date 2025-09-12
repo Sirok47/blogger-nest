@@ -1,5 +1,5 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { Prop, SchemaFactory } from '@nestjs/mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsEnum } from 'class-validator';
 import { UserDocument } from '../../AuthModule/users/users.models';
 
@@ -14,6 +14,7 @@ export class LikeInputModel {
   likeStatus: likeStatus;
 }
 
+@Schema({ timestamps: true })
 export class Like {
   @Prop({ type: String, required: true, min: 1, max: 100 })
   userId: string;
