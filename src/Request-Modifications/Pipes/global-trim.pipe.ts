@@ -12,8 +12,6 @@ export class CustomTrimAndErrLimitPipe extends ValidationPipe {
   constructor() {
     super({
       transform: true,
-      whitelist: true,
-      forbidNonWhitelisted: true,
       exceptionFactory: (validationErrors: ValidationError[] = []) => {
         const errorsMap = new Map<string, string>();
 

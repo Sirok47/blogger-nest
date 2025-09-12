@@ -4,7 +4,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { BlogsRepository } from '../blogs/blogs.repository';
 import { NotFoundException } from '@nestjs/common';
 import { BlogDocument } from '../blogs/blogs.models';
-import { LikeDocument, likeStatus } from '../likes/likes.models';
+import { LikeDocument } from '../likes/likes.models';
 import { IsMongoId, Length } from 'class-validator';
 
 export class PostUnderBlogInputModel {
