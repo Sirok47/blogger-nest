@@ -3,13 +3,15 @@ import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { initMailer } from './Modules/Mailer/mailer.service';
 import 'reflect-metadata';
-import { GlobalHTTPExceptionFilter } from './Exception-Filters/globalHTTP';
-import { CustomBadRequestExceptionFilter } from './Exception-Filters/custom400';
+import { GlobalHTTPExceptionFilter } from './Request-Modifications/Exception-Filters/globalHTTP';
+import { CustomBadRequestExceptionFilter } from './Request-Modifications/Exception-Filters/custom400';
+import { CustomTrimAndErrLimitPipe } from './Request-Modifications/Pipes/global-trim.pipe';
 
 async function bootstrap(): Promise<void> {
   await initMailer();
   const app: INestApplication = await NestFactory.create(AppModule);
   app.useGlobalPipes(
+    new CustomTrimAndErrLimitPipe(),
     new ValidationPipe({
       transform: true,
     }),

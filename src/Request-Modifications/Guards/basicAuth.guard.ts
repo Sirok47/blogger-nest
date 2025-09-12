@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { config } from '../Settings/config';
+import { config } from '../../Settings/config';
 
 @Injectable()
 export class AdminAuthGuard implements CanActivate {
@@ -25,7 +25,6 @@ export class AdminAuthGuard implements CanActivate {
       );
     }
 
-    // декодируем base64
     const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
     const [username, password] = decoded.split(':');
 

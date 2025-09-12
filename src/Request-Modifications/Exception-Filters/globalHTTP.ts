@@ -5,7 +5,7 @@ import {
   ExceptionFilter,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { APIErrorResult, FieldError } from '../Models/Error.models';
+import { APIErrorResult, FieldError } from '../../Models/Error.models';
 
 @Catch(BadRequestException)
 export class GlobalHTTPExceptionFilter implements ExceptionFilter {

@@ -4,7 +4,7 @@ import {
   Catch,
   ExceptionFilter,
 } from '@nestjs/common';
-import { APIErrorResult } from '../Models/Error.models';
+import { APIErrorResult } from '../../Models/Error.models';
 import { Response } from 'express';
 
 export class CustomBadRequestException extends BadRequestException {

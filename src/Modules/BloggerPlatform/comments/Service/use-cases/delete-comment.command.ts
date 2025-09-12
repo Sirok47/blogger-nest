@@ -11,7 +11,7 @@ export class DeleteCommentCommand {
 }
 
 @CommandHandler(DeleteCommentCommand)
-export class ConfirmEmailHandler
+export class DeleteCommentHandler
   implements ICommandHandler<DeleteCommentCommand>
 {
   constructor(

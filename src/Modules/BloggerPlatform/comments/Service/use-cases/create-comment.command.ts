@@ -24,7 +24,7 @@ export class CreateCommentCommand {
 }
 
 @CommandHandler(CreateCommentCommand)
-export class ConfirmEmailHandler
+export class CreateCommentHandler
   implements ICommandHandler<CreateCommentCommand>
 {
   constructor(

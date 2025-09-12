@@ -13,7 +13,7 @@ export class UpdateCommentCommand {
 }
 
 @CommandHandler(UpdateCommentCommand)
-export class ConfirmEmailHandler
+export class UpdateCommentHandler
   implements ICommandHandler<UpdateCommentCommand>
 {
   constructor(

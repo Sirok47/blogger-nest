@@ -21,7 +21,7 @@ export class ChangeLikeForPostCommand {
 }
 
 @CommandHandler(ChangeLikeForPostCommand)
-export class ConfirmEmailHandler
+export class ChangeLikeForPostHandler
   implements ICommandHandler<ChangeLikeForPostCommand>
 {
   constructor(

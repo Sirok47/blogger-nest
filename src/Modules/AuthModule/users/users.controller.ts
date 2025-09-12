@@ -15,7 +15,7 @@ import { UsersQueryRepo } from './users.queryRepo';
 import { UserDocument, UserInputModel, UserViewModel } from './users.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { InputID } from '../../../Models/IDmodel';
-import { AdminAuthGuard } from '../../../Guards/BasicAuth.guard';
+import { AdminAuthGuard } from '../../../Request-Modifications/Guards/basicAuth.guard';
 import { CreateUserCommand } from './Service/use-cases/createUserCommand';
 import { DeleteUserCommand } from './Service/use-cases/deleteUserCommand';
 import { CommandBus } from '@nestjs/cqrs';

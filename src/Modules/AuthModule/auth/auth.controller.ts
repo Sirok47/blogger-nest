@@ -19,7 +19,7 @@ import {
 } from '../users/users.models';
 import { AuthService } from './Service/auth.service';
 import { config } from '../../../Settings/config';
-import { UserAuthGuard } from '../../../Guards/accessToken.guard';
+import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
 import {
   CodeInputModel,
   NewPasswordRecoveryInputModel,
@@ -27,7 +27,7 @@ import {
 } from './auth.models';
 import { type Request, type Response } from 'express';
 import { APIErrorResult } from '../../../Models/Error.models';
-import { CustomBadRequestException } from '../../../Exception-Filters/custom400';
+import { CustomBadRequestException } from '../../../Request-Modifications/Exception-Filters/custom400';
 import { LoginCommand } from './Service/use-cases/login.command';
 import { CommandBus } from '@nestjs/cqrs';
 import { ConfirmPasswordChangeCommand } from './Service/use-cases/new-password.command';

@@ -7,6 +7,7 @@ import {
   NotFoundException,
   Param,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CommentsQueryRepo } from './comments.queryRepo';
 import { CommentInputModel, CommentViewModel } from './comments.models';
@@ -16,6 +17,8 @@ import { UpdateCommentCommand } from './Service/use-cases/update-comment.command
 import { DeleteCommentCommand } from './Service/use-cases/delete-comment.command';
 import { LikeInputModel } from '../likes/likes.models';
 import { ChangeLikeForCommentCommand } from './Service/use-cases/change-like-for-comment.command';
+import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
+import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';
 
 @Controller('comments')
 export class CommentsController {
@@ -25,6 +28,7 @@ export class CommentsController {
   ) {}
 
   @Get('/:id')
+  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getComment(@Param() { id }: InputID): Promise<CommentViewModel> {
     const result: CommentViewModel | null = await this.queryRepo.findById(id);
@@ -35,6 +39,7 @@ export class CommentsController {
   }
 
   @Put('/:id')
+  @UseGuards(UserAuthGuard)
   @HttpCode(204)
   async updateComment(
     @Param() { id }: InputID,
@@ -50,6 +55,7 @@ export class CommentsController {
   }
 
   @Delete('/:id')
+  @UseGuards(UserAuthGuard)
   @HttpCode(204)
   async deleteComment(
     @Param() { id }: InputID,
@@ -64,6 +70,7 @@ export class CommentsController {
   }
 
   @Put(':id/like-status')
+  @UseGuards(UserAuthGuard)
   @HttpCode(204)
   async setLikeStatus(
     @Param() { id }: InputID,

@@ -9,6 +9,7 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BlogsService } from './Service/blogs.service';
 import { BlogsQueryRepo } from './blogs.queryRepo';
@@ -23,6 +24,8 @@ import { CreatePostCommand } from '../posts/Service/use-cases/create-post.comman
 import { DeleteBlogCommand } from './Service/use-cases/delete-blog.command';
 import { CreateBlogCommand } from './Service/use-cases/create-blog.command';
 import { UpdateBlogCommand } from './Service/use-cases/update-blog.command';
+import { AdminAuthGuard } from '../../../Request-Modifications/Guards/basicAuth.guard';
+import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';
 
 @Controller('blogs')
 export class BlogsController {
@@ -51,12 +54,14 @@ export class BlogsController {
   }
 
   @Post()
+  @UseGuards(AdminAuthGuard)
   @HttpCode(201)
   async postBlog(@Body() blog: BlogInputModel): Promise<BlogViewModel> {
     return await this.commandBus.execute(new CreateBlogCommand(blog));
   }
 
   @Put(':id')
+  @UseGuards(AdminAuthGuard)
   @HttpCode(204)
   async putBlog(
     @Param() { id }: InputID,
@@ -71,6 +76,7 @@ export class BlogsController {
   }
 
   @Delete(':id')
+  @UseGuards(AdminAuthGuard)
   @HttpCode(204)
   async deleteBlog(@Param() { id }: InputID): Promise<void> {
     const result: boolean = await this.commandBus.execute(
@@ -82,6 +88,7 @@ export class BlogsController {
   }
 
   @Get(':id/posts')
+  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getPostsInBlog(
     @Param() { id }: InputID,
@@ -98,6 +105,7 @@ export class BlogsController {
   }
 
   @Post(':id/posts')
+  @UseGuards(AdminAuthGuard)
   @HttpCode(201)
   async postPostIntoBlog(
     @Param() { id }: InputID,

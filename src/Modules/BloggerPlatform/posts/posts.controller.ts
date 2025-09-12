@@ -9,6 +9,7 @@ import {
   Delete,
   HttpCode,
   Controller,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsQueryRepo } from './posts.queryRepository';
 import { PostInputModel, PostViewModel } from './posts.models';
@@ -27,6 +28,9 @@ import { UpdatePostCommand } from './Service/use-cases/update-post.command';
 import { CreateCommentCommand } from '../comments/Service/use-cases/create-comment.command';
 import { ChangeLikeForPostCommand } from './Service/use-cases/change-like-for-post.command';
 import { LikeInputModel } from '../likes/likes.models';
+import { AdminAuthGuard } from '../../../Request-Modifications/Guards/basicAuth.guard';
+import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
+import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';
 
 @Controller('posts')
 export class PostsController {
@@ -38,6 +42,7 @@ export class PostsController {
   ) {}
 
   @Get()
+  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getPosts(@Query() query: Paginator): Promise<Paginated<PostViewModel>> {
     const result: Paginated<PostViewModel> =
@@ -49,6 +54,7 @@ export class PostsController {
   }
 
   @Get(':id')
+  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getPostById(@Param() { id }: InputID): Promise<PostViewModel> {
     const result: PostViewModel | null = await this.queryRepo.findById(id);
@@ -59,6 +65,7 @@ export class PostsController {
   }
 
   @Get(':id/comments')
+  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getCommentsUnderPost(
     @Param() { id }: InputID,
@@ -71,6 +78,7 @@ export class PostsController {
   }
 
   @Post()
+  @UseGuards(AdminAuthGuard)
   @HttpCode(201)
   async postPost(@Body() post: PostInputModel): Promise<PostViewModel> {
     const result: PostViewModel | null = await this.commandBus.execute(
@@ -83,6 +91,7 @@ export class PostsController {
   }
 
   @Post(':id/comments')
+  @UseGuards(AdminAuthGuard)
   @HttpCode(200)
   async postCommentUnderPost(
     @Param() { id }: InputID,
@@ -99,6 +108,7 @@ export class PostsController {
   }
 
   @Put(':id')
+  @UseGuards(AdminAuthGuard)
   @HttpCode(204)
   async putPost(
     @Param() { id }: InputID,
@@ -113,6 +123,7 @@ export class PostsController {
   }
 
   @Delete(':id')
+  @UseGuards(AdminAuthGuard)
   @HttpCode(204)
   async deletePost(@Param() { id }: InputID): Promise<void> {
     const result: boolean = await this.commandBus.execute(
@@ -124,6 +135,7 @@ export class PostsController {
   }
 
   @Put(':id/like-status')
+  @UseGuards(UserAuthGuard)
   @HttpCode(204)
   async setLikeStatus(
     @Param() { id }: InputID,
