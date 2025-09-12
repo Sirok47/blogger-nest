@@ -51,15 +51,14 @@ export class CreateCommentHandler
     if (!user) return null;
     const userLogin: string = user.login;
     if (!userLogin) return null;
-    const newComment: CommentDocument = new this.CommentModel({
-      ...comment,
-      commentatorInfo: {
+    const newComment: CommentDocument = this.CommentModel.CreateDocument(
+      postId,
+      comment,
+      {
         userId: userId,
         userLogin: userLogin,
       },
-      createdAt: new Date(),
-      postId: postId,
-    });
+    );
     const insertedComment: CommentDocument =
       await this.repository.save(newComment);
     if (!insertedComment) return null;

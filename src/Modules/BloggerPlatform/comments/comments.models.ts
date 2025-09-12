@@ -4,7 +4,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Length } from 'class-validator';
 
 export class CommentInputModel {
-  @Length(1, 1000)
+  @Length(20, 300)
   content: string;
 }
 
