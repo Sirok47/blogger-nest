@@ -41,7 +41,7 @@ export class CustomTrimAndErrLimitPipe extends ValidationPipe {
   }
 
   //Переопределение трансформа для авто-трима всех инпут строк
-  transform(value: any, _metadata: ArgumentMetadata) {
+  transform(value: any, metadata: ArgumentMetadata) {
     if (typeof value === 'object' && value !== null) {
       Object.keys(value as object).forEach((key: string) => {
         if (typeof value[key] === 'string') {
@@ -49,6 +49,6 @@ export class CustomTrimAndErrLimitPipe extends ValidationPipe {
         }
       });
     }
-    return value;
+    return super.transform(value, metadata);
   }
 }
