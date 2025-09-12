@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { initMailer } from './Modules/Mailer/mailer.service';
 import 'reflect-metadata';
 import { GlobalHTTPExceptionFilter } from './Request-Modifications/Exception-Filters/globalHTTP';
@@ -10,12 +10,7 @@ import { CustomTrimAndErrLimitPipe } from './Request-Modifications/Pipes/global-
 async function bootstrap(): Promise<void> {
   await initMailer();
   const app: INestApplication = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
-    new CustomTrimAndErrLimitPipe(),
-    new ValidationPipe({
-      transform: true,
-    }),
-  );
+  app.useGlobalPipes(new CustomTrimAndErrLimitPipe());
   app.useGlobalFilters(
     new GlobalHTTPExceptionFilter(),
     new CustomBadRequestExceptionFilter(),

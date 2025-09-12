@@ -25,6 +25,11 @@ import { Like, LikeSchema } from './likes/likes.models';
 import { LikesRepository } from './likes/likes.repository';
 import { TokenModule } from '../JWT/jwt.module';
 import { AuthModule } from '../AuthModule/auth.module';
+import { ChangeLikeForCommentHandler } from './comments/Service/use-cases/change-like-for-comment.command';
+import { DeleteCommentHandler } from './comments/Service/use-cases/delete-comment.command';
+import { CreateCommentHandler } from './comments/Service/use-cases/create-comment.command';
+import { UpdateCommentHandler } from './comments/Service/use-cases/update-comment.command';
+import { ChangeLikeForPostHandler } from './posts/Service/use-cases/change-like-for-post.command';
 
 const BlogCommandHandlers = [
   CreateBlogHandler,
@@ -36,6 +41,14 @@ const PostCommandHandlers = [
   CreatePostHandler,
   UpdatePostHandler,
   DeletePostHandler,
+  ChangeLikeForPostHandler,
+];
+
+const CommentCommandHandlers = [
+  CreateCommentHandler,
+  UpdateCommentHandler,
+  DeleteCommentHandler,
+  ChangeLikeForCommentHandler,
 ];
 
 @Module({
@@ -63,6 +76,7 @@ const PostCommandHandlers = [
     LikesRepository,
     ...BlogCommandHandlers,
     ...PostCommandHandlers,
+    ...CommentCommandHandlers,
   ],
   exports: [BlogsRepository, PostsRepository, CommentsRepository],
 })

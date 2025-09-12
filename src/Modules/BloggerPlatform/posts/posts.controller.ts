@@ -91,7 +91,7 @@ export class PostsController {
   }
 
   @Post(':id/comments')
-  @UseGuards(AdminAuthGuard)
+  @UseGuards(UserAuthGuard)
   @HttpCode(200)
   async postCommentUnderPost(
     @Param() { id }: InputID,
