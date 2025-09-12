@@ -31,7 +31,7 @@ export class UsersQueryRepo {
     if (!paginationSettings) {
       users = await query.exec();
     } else {
-      users = await paginationSettings.LimitQuery<UserDocument>(query).exec();
+      users = await paginationSettings.QueryForPage<UserDocument>(query).exec();
     }
 
     return paginationSettings.Paginate<UserViewModel>(

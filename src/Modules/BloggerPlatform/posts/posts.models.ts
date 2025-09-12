@@ -4,7 +4,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { BlogsRepository } from '../blogs/blogs.repository';
 import { NotFoundException } from '@nestjs/common';
 import { BlogDocument } from '../blogs/blogs.models';
-import { likeStatus } from '../likes/likes.models';
+import { LikeDocument, likeStatus } from '../likes/likes.models';
 import { IsMongoId, Length } from 'class-validator';
 
 export class PostUnderBlogInputModel {
@@ -36,30 +36,31 @@ export type PostViewModel = {
   extendedLikesInfo: ExtendedLikesInfo;
 };
 
+export type LatestLikesVM = {
+  addedAt: string;
+  userId: string;
+  login: string;
+};
+
 type ExtendedLikesInfo = likesInfo & {
-  newestLikes: {
-    addedAt: string;
-    userId: string;
-    login: string;
-  }[];
+  newestLikes: LatestLikesVM[];
 };
 
 @Schema({ timestamps: true })
 export class Post {
-  //TODO: Ограничения по длине?
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 100 })
   title: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 300 })
   shortDescription: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 2000 })
   content: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 20, max: 40 })
   blogId: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 50 })
   blogName: string;
 
   readonly createdAt: Date;
@@ -79,21 +80,20 @@ export class Post {
     return post as PostDocument;
   }
 
-  async Update(
-    newPost: PostInputModel,
-    blogRepo: BlogsRepository,
-  ): Promise<void> {
+  Update(newPost: PostInputModel, blog: BlogDocument | null): void {
     this.title = newPost.title;
     this.shortDescription = newPost.shortDescription;
     this.content = newPost.content;
-    //TODO: Вынести поход в БД из класса если это не по понятиям
-    const blog: BlogDocument | null = await blogRepo.findById(newPost.blogId);
     if (!blog) throw new NotFoundException();
     this.blogId = blog._id.toString();
     this.blogName = blog.name;
   }
 
-  mapToViewModel(this: PostDocument): PostViewModel {
+  mapToViewModel(
+    this: PostDocument,
+    lInfo: likesInfo,
+    latestLikes: LikeDocument[],
+  ): PostViewModel {
     return {
       id: this._id.toString(),
       title: this.title,
@@ -102,12 +102,19 @@ export class Post {
       blogId: this.blogId,
       blogName: this.blogName,
       createdAt: this.createdAt,
-      //TODO: Подтянуть лайки
       extendedLikesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: likeStatus.None,
-        newestLikes: [],
+        ...lInfo,
+        newestLikes: ((likes: LikeDocument[]): LatestLikesVM[] => {
+          const result: LatestLikesVM[] = [];
+          for (const like of likes) {
+            result.push({
+              addedAt: like.createdAt.toISOString(),
+              userId: like.userId,
+              login: like.login,
+            });
+          }
+          return result;
+        })(latestLikes),
       },
     };
   }

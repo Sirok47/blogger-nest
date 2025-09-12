@@ -11,21 +11,30 @@ import {
   Controller,
 } from '@nestjs/common';
 import { PostsQueryRepo } from './posts.queryRepository';
-import { PostsService } from './posts.service';
-import { PostDocument, PostInputModel, PostViewModel } from './posts.models';
+import { PostInputModel, PostViewModel } from './posts.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
-import { CommentViewModel } from '../comments/comments.models';
+import {
+  CommentInputModel,
+  CommentViewModel,
+} from '../comments/comments.models';
 import { CommentsQueryRepo } from '../comments/comments.queryRepo';
 import { PostsRepository } from './posts.repository';
 import { InputID } from '../../../Models/IDmodel';
+import { CreatePostCommand } from './Service/use-cases/create-post.command';
+import { CommandBus } from '@nestjs/cqrs';
+import { DeletePostCommand } from './Service/use-cases/delete-post.command';
+import { UpdatePostCommand } from './Service/use-cases/update-post.command';
+import { CreateCommentCommand } from '../comments/Service/use-cases/create-comment.command';
+import { ChangeLikeForPostCommand } from './Service/use-cases/change-like-for-post.command';
+import { LikeInputModel } from '../likes/likes.models';
 
 @Controller('posts')
 export class PostsController {
   constructor(
-    private service: PostsService,
     private repository: PostsRepository,
     private queryRepo: PostsQueryRepo,
     private commentsQueryRepo: CommentsQueryRepo,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -42,11 +51,11 @@ export class PostsController {
   @Get(':id')
   @HttpCode(200)
   async getPostById(@Param() { id }: InputID): Promise<PostViewModel> {
-    const result: PostDocument | null = await this.queryRepo.findById(id);
+    const result: PostViewModel | null = await this.queryRepo.findById(id);
     if (!result) {
       throw new NotFoundException();
     }
-    return result.mapToViewModel();
+    return result;
   }
 
   @Get(':id/comments')
@@ -64,9 +73,27 @@ export class PostsController {
   @Post()
   @HttpCode(201)
   async postPost(@Body() post: PostInputModel): Promise<PostViewModel> {
-    const result: PostViewModel | null = await this.service.postOnePost(post);
+    const result: PostViewModel | null = await this.commandBus.execute(
+      new CreatePostCommand(post),
+    );
     if (!result) {
       throw new Error();
+    }
+    return result;
+  }
+
+  @Post(':id/comments')
+  @HttpCode(200)
+  async postCommentUnderPost(
+    @Param() { id }: InputID,
+    @Body() newComment: CommentInputModel,
+    @Param('token') token: string,
+  ): Promise<CommentViewModel> {
+    const result: CommentViewModel | null = await this.commandBus.execute(
+      new CreateCommentCommand(id, newComment, token),
+    );
+    if (!result) {
+      throw new NotFoundException();
     }
     return result;
   }
@@ -77,7 +104,9 @@ export class PostsController {
     @Param() { id }: InputID,
     @Body() post: PostInputModel,
   ): Promise<void> {
-    const result = await this.service.putOnePost(id, post);
+    const result: boolean = await this.commandBus.execute(
+      new UpdatePostCommand(id, post),
+    );
     if (!result) {
       throw new NotFoundException();
     }
@@ -86,22 +115,26 @@ export class PostsController {
   @Delete(':id')
   @HttpCode(204)
   async deletePost(@Param() { id }: InputID): Promise<void> {
-    const result = await this.service.deleteOnePost(id);
+    const result: boolean = await this.commandBus.execute(
+      new DeletePostCommand(id),
+    );
     if (!result) {
       throw new NotFoundException();
     }
   }
 
-  /*async setLikeStatus(req: Request, res: Response) {
-    const result = await this.service.changeLikeStatus(
-      req.params.id,
-      req.params.token,
-      req.body.likeStatus,
+  @Put(':id/like-status')
+  @HttpCode(204)
+  async setLikeStatus(
+    @Param() { id }: InputID,
+    @Body() { likeStatus }: LikeInputModel,
+    @Param('token') token: string,
+  ): Promise<void> {
+    const result: boolean = await this.commandBus.execute(
+      new ChangeLikeForPostCommand(id, likeStatus, token),
     );
     if (!result) {
-      res.sendStatus(404);
-      return;
+      throw new NotFoundException();
     }
-    res.sendStatus(204);
-  }*/
+  }
 }

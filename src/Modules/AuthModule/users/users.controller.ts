@@ -10,19 +10,22 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UsersService } from './Service/users.service';
 import { UsersQueryRepo } from './users.queryRepo';
-import { UserInputModel, UserViewModel } from './users.models';
+import { UserDocument, UserInputModel, UserViewModel } from './users.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { InputID } from '../../../Models/IDmodel';
 import { AdminAuthGuard } from '../../../Guards/BasicAuth.guard';
+import { CreateUserCommand } from './Service/use-cases/createUserCommand';
+import { DeleteUserCommand } from './Service/use-cases/deleteUserCommand';
+import { CommandBus } from '@nestjs/cqrs';
 
 @Controller('users')
 @UseGuards(AdminAuthGuard)
 export class UsersController {
   constructor(
-    private service: UsersService,
     private queryRepo: UsersQueryRepo,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -36,13 +39,17 @@ export class UsersController {
   @Post()
   @HttpCode(201)
   async postUser(@Body() user: UserInputModel): Promise<UserViewModel> {
-    return (await this.service.postOneUser(user, true)).mapToViewModel();
+    return (
+      await this.commandBus.execute<CreateUserCommand, UserDocument>(
+        new CreateUserCommand(user, true),
+      )
+    ).mapToViewModel();
   }
 
   @Delete('/:id')
   @HttpCode(204)
   async deleteUser(@Param() { id }: InputID): Promise<void> {
-    if (!(await this.service.deleteOneUser(id))) {
+    if (!(await this.commandBus.execute(new DeleteUserCommand(id)))) {
       throw new NotFoundException();
     }
   }

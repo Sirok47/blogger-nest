@@ -1438,6 +1438,11 @@
     path-to-regexp "8.2.0"
     tslib "2.8.1"
 
+"@nestjs/cqrs@^11.0.3":
+  version "11.0.3"
+  resolved "https://registry.yarnpkg.com/@nestjs/cqrs/-/cqrs-11.0.3.tgz#aa6c482c12e883689955b07e3b8c4eb2b417d03d"
+  integrity sha512-2ezBftiXqVfNTzjCrmhazohYhIQzgm8rvM0aKndv73IOOBcVlNuNiQ3HHiHdd4c2w/3MOQDtsGbQHgZUuW6DPw==
+
 "@nestjs/mongoose@^11.0.3":
   version "11.0.3"
   resolved "https://registry.yarnpkg.com/@nestjs/mongoose/-/mongoose-11.0.3.tgz#8278f0c5b76a7a0b7ac780f0c85341e5ce69eb9c"

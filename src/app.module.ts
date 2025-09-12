@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './Modules/AuthModule/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { config } from './Settings/config';
+import { CqrsModule } from '@nestjs/cqrs';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { config } from './Settings/config';
     BloggerPlatformModule,
     AuthModule,
     MongooseModule.forRoot(config.MONGODB_URI, { dbName: 'blogger_nest' }),
+    CqrsModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

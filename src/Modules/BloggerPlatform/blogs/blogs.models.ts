@@ -25,14 +25,13 @@ export type BlogViewModel = {
 
 @Schema({ timestamps: true })
 export class Blog {
-  //TODO: Ограничения по длине?
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 50 })
   name: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 1000 })
   description: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: true, min: 1, max: 200 })
   websiteUrl: string;
 
   @Prop({ type: Boolean, required: true })

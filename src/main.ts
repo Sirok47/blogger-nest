@@ -3,8 +3,8 @@ import { AppModule } from './app.module';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { initMailer } from './Modules/Mailer/mailer.service';
 import 'reflect-metadata';
-import { GlobalHTTPExceptionFilter } from './Exception Filters/globalHTTP';
-import { CustomBadRequestExceptionFilter } from './Exception Filters/custom400';
+import { GlobalHTTPExceptionFilter } from './Exception-Filters/globalHTTP';
+import { CustomBadRequestExceptionFilter } from './Exception-Filters/custom400';
 
 async function bootstrap(): Promise<void> {
   await initMailer();

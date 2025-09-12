@@ -10,24 +10,28 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { BlogsService } from './blogs.service';
+import { BlogsService } from './Service/blogs.service';
 import { BlogsQueryRepo } from './blogs.queryRepo';
 import { BlogDocument, BlogInputModel, BlogViewModel } from './blogs.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { BlogsRepository } from './blogs.repository';
 import { PostUnderBlogInputModel, PostViewModel } from '../posts/posts.models';
-import { PostsService } from '../posts/posts.service';
 import { PostsQueryRepo } from '../posts/posts.queryRepository';
 import { InputID } from '../../../Models/IDmodel';
+import { CommandBus } from '@nestjs/cqrs';
+import { CreatePostCommand } from '../posts/Service/use-cases/create-post.command';
+import { DeleteBlogCommand } from './Service/use-cases/delete-blog.command';
+import { CreateBlogCommand } from './Service/use-cases/create-blog.command';
+import { UpdateBlogCommand } from './Service/use-cases/update-blog.command';
 
 @Controller('blogs')
 export class BlogsController {
   constructor(
     protected service: BlogsService,
-    protected postsService: PostsService,
     protected queryRepo: BlogsQueryRepo,
     protected postsQueryRepo: PostsQueryRepo,
     protected repo: BlogsRepository,
+    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -49,7 +53,7 @@ export class BlogsController {
   @Post()
   @HttpCode(201)
   async postBlog(@Body() blog: BlogInputModel): Promise<BlogViewModel> {
-    return await this.service.postOneBlog(blog);
+    return await this.commandBus.execute(new CreateBlogCommand(blog));
   }
 
   @Put(':id')
@@ -58,7 +62,9 @@ export class BlogsController {
     @Param() { id }: InputID,
     @Body() blog: BlogInputModel,
   ): Promise<void> {
-    const result = await this.service.putOneBlog(id, blog);
+    const result: boolean = await this.commandBus.execute(
+      new UpdateBlogCommand(id, blog),
+    );
     if (!result) {
       throw new NotFoundException();
     }
@@ -67,7 +73,9 @@ export class BlogsController {
   @Delete(':id')
   @HttpCode(204)
   async deleteBlog(@Param() { id }: InputID): Promise<void> {
-    const result: boolean = await this.service.deleteOneBlog(id);
+    const result: boolean = await this.commandBus.execute(
+      new DeleteBlogCommand(id),
+    );
     if (!result) {
       throw new NotFoundException();
     }
@@ -96,8 +104,9 @@ export class BlogsController {
     @Body() post: PostUnderBlogInputModel,
   ): Promise<PostViewModel> {
     post.blogId = id;
-    const result: PostViewModel | null =
-      await this.postsService.postOnePost(post);
+    const result: PostViewModel | null = await this.commandBus.execute(
+      new CreatePostCommand(post),
+    );
     if (!result) {
       throw new NotFoundException();
     }

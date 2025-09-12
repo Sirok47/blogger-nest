@@ -53,8 +53,7 @@ export class Paginator {
     };
   }
 
-  //TODO: Better name
-  LimitQuery<DocT>(query: Query<DocT[], DocT>): Query<DocT[], DocT> {
+  QueryForPage<DocT>(query: Query<DocT[], DocT>): Query<DocT[], DocT> {
     return query
       .sort({ [this.sortBy]: this.sortDirection })
       .skip((this.pageNumber - 1) * this.pageSize)

@@ -1,13 +1,7 @@
-import { PostsRepository } from './posts.repository';
-import { BlogsRepository } from '../blogs/blogs.repository';
+import { PostsRepository } from '../posts.repository';
+import { BlogsRepository } from '../../blogs/blogs.repository';
 import { Injectable } from '@nestjs/common';
-import {
-  Post,
-  PostDocument,
-  PostInputModel,
-  type PostModelType,
-  PostViewModel,
-} from './posts.models';
+import { Post, type PostModelType } from '../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -17,28 +11,6 @@ export class PostsService {
     @InjectModel(Post.name) protected PostModel: PostModelType,
     private blogsRepository: BlogsRepository,
   ) {}
-
-  async postOnePost(post: PostInputModel): Promise<PostViewModel | null> {
-    const newPost: PostDocument = await this.PostModel.CreateDocument(
-      post,
-      this.blogsRepository,
-    );
-    const insertedPost: PostDocument = await this.repository.save(newPost);
-    if (!insertedPost) return null;
-    return insertedPost.mapToViewModel();
-  }
-
-  async putOnePost(id: string, newPost: PostInputModel): Promise<boolean> {
-    const postToUpdate: PostDocument | null =
-      await this.repository.findById(id);
-    if (!postToUpdate) return false;
-    await postToUpdate.Update(newPost, this.blogsRepository);
-    return !!(await this.repository.save(postToUpdate));
-  }
-
-  async deleteOnePost(id: string): Promise<boolean> {
-    return await this.repository.delete(id);
-  }
 
   /*changeLikeStatus = async (
     postId: string,

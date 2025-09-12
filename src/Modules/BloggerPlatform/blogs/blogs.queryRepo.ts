@@ -25,7 +25,7 @@ export class BlogsQueryRepo {
     if (!paginationSettings) {
       blogs = await query.exec();
     } else {
-      blogs = await paginationSettings.LimitQuery<BlogDocument>(query).exec();
+      blogs = await paginationSettings.QueryForPage<BlogDocument>(query).exec();
     }
 
     return paginationSettings.Paginate<BlogViewModel>(

@@ -17,7 +17,7 @@ import {
   MeViewModel,
   UserInputModel,
 } from '../users/users.models';
-import { AuthService } from './auth.service';
+import { AuthService } from './Service/auth.service';
 import { config } from '../../../Settings/config';
 import { UserAuthGuard } from '../../../Guards/accessToken.guard';
 import {
@@ -27,11 +27,21 @@ import {
 } from './auth.models';
 import { type Request, type Response } from 'express';
 import { APIErrorResult } from '../../../Models/Error.models';
-import { CustomBadRequestException } from '../../../Exception Filters/custom400';
+import { CustomBadRequestException } from '../../../Exception-Filters/custom400';
+import { LoginCommand } from './Service/use-cases/login.command';
+import { CommandBus } from '@nestjs/cqrs';
+import { ConfirmPasswordChangeCommand } from './Service/use-cases/new-password.command';
+import { RecoverPasswordCommand } from './Service/use-cases/recover-password.command';
+import { RegisterUserCommand } from './Service/use-cases/registration.command';
+import { ConfirmEmailCommand } from './Service/use-cases/email-confirmation.command';
+import { ResendConfirmationEmailCommand } from './Service/use-cases/resend-email.command';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private service: AuthService) {}
+  constructor(
+    private service: AuthService,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Post('login')
   @HttpCode(200)
@@ -40,10 +50,14 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ accessToken: string }> {
-    const tokenPair = await this.service.logIn(
-      body.loginOrEmail,
-      body.password,
-      { IP: req.ip!, userAgent: req.header('user-agent')! },
+    const tokenPair = await this.commandBus.execute<
+      LoginCommand,
+      { accessToken: string; refreshToken: string }
+    >(
+      new LoginCommand(body.loginOrEmail, body.password, {
+        IP: req.ip!,
+        userAgent: req.header('user-agent')!,
+      }),
     );
     if (!tokenPair) {
       throw new UnauthorizedException();
@@ -74,7 +88,7 @@ export class AuthController {
   @Post('registration')
   @HttpCode(204)
   async signIn(@Body() user: UserInputModel): Promise<void> {
-    if (!(await this.service.registerWithEmailConf(user))) {
+    if (!(await this.commandBus.execute(new RegisterUserCommand(user)))) {
       throw new InternalServerErrorException();
     }
   }
@@ -84,7 +98,7 @@ export class AuthController {
   async confirmEmail(@Body() { code }: CodeInputModel): Promise<void> {
     let result: boolean;
     try {
-      result = await this.service.confirmEmail(code);
+      result = await this.commandBus.execute(new ConfirmEmailCommand(code));
     } catch (error) {
       const errMsg: APIErrorResult = {
         errorsMessages: [
@@ -106,7 +120,9 @@ export class AuthController {
   async resendCode(@Body() { email }: ProvideEmailInputModel): Promise<void> {
     let result: boolean;
     try {
-      result = await this.service.resendConfirmationMail(email);
+      result = await this.commandBus.execute(
+        new ResendConfirmationEmailCommand(email),
+      );
     } catch (error) {
       const errMsg: APIErrorResult = {
         errorsMessages: [
@@ -128,7 +144,7 @@ export class AuthController {
   async recoverPassword(
     @Body() { email }: ProvideEmailInputModel,
   ): Promise<void> {
-    if (!(await this.service.recoverPasswordWithEmail(email))) {
+    if (!(await this.commandBus.execute(new RecoverPasswordCommand(email)))) {
       throw new BadRequestException();
     }
   }
@@ -139,7 +155,9 @@ export class AuthController {
     @Body() { recoveryCode, newPassword }: NewPasswordRecoveryInputModel,
   ): Promise<void> {
     if (
-      !(await this.service.confirmPasswordChange(recoveryCode, newPassword))
+      !(await this.commandBus.execute(
+        new ConfirmPasswordChangeCommand(recoveryCode, newPassword),
+      ))
     ) {
       throw new BadRequestException();
     }

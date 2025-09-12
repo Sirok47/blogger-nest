@@ -1,4 +1,4 @@
-import { likeStatus } from '../likes/likes.models';
+import { LikeDocument, likeStatus } from '../likes/likes.models';
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Length } from 'class-validator';
@@ -50,18 +50,13 @@ export class Comment {
     return new this(postId, input, commentatorInfo) as CommentDocument;
   }
 
-  mapToViewModel(this: CommentDocument): CommentViewModel {
+  mapToViewModel(this: CommentDocument, lInfo: likesInfo): CommentViewModel {
     return {
       content: this.content,
       postId: this.postId,
       commentatorInfo: this.commentatorInfo,
       createdAt: this.createdAt.toISOString(),
-      //TODO: Подтянуть лайки
-      likesInfo: {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: likeStatus.None,
-      },
+      likesInfo: lInfo,
     };
   }
 }

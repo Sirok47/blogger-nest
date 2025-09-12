@@ -5,18 +5,22 @@ import {
   CommentDocument,
   type CommentModelType,
   CommentViewModel,
+  likesInfo,
 } from './comments.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
+import { LikesRepository } from '../likes/likes.repository';
 
 @Injectable()
 export class CommentsQueryRepo {
   constructor(
-    @InjectModel(Comment.name) private CommentModel: CommentModelType,
+    @InjectModel(Comment.name) private readonly CommentModel: CommentModelType,
+    private readonly likesRepo: LikesRepository,
   ) {}
 
   async findWithSearchAndPagination(
     postId: string,
     paginationSettings: Paginator,
+    userId: string = '',
   ): Promise<Paginated<CommentViewModel>> {
     const filter = { postId: postId };
 
@@ -24,25 +28,36 @@ export class CommentsQueryRepo {
     const totalCount: number =
       await this.CommentModel.countDocuments(filter).exec();
 
-    let comments: CommentDocument[];
-    if (!paginationSettings) {
-      comments = await query.exec();
-    } else {
-      comments = await paginationSettings
-        .LimitQuery<CommentDocument>(query)
-        .exec();
+    const comments: CommentDocument[] = await paginationSettings
+      .QueryForPage<CommentDocument>(query)
+      .exec();
+
+    const commentsVM: CommentViewModel[] = [];
+    for (const comment of comments) {
+      const likeInfo: likesInfo = await this.likesRepo.gatherLikesInfoOf(
+        comment._id.toString(),
+        userId,
+      );
+      commentsVM.push(comment.mapToViewModel(likeInfo));
     }
 
     return paginationSettings.Paginate<CommentViewModel>(
       totalCount,
-      comments.map(
-        (comment: CommentDocument): CommentViewModel =>
-          comment.mapToViewModel(),
-      ),
+      commentsVM,
     );
   }
 
-  async findById(id: string): Promise<CommentDocument | null> {
-    return this.CommentModel.findById(id).exec();
+  async findById(
+    id: string,
+    userId: string = '',
+  ): Promise<CommentViewModel | null> {
+    const comment: CommentDocument | null =
+      await this.CommentModel.findById(id).exec();
+    if (!comment) return null;
+    const likeInfo: likesInfo = await this.likesRepo.gatherLikesInfoOf(
+      comment._id.toString(),
+      userId,
+    );
+    return comment.mapToViewModel(likeInfo);
   }
 }
