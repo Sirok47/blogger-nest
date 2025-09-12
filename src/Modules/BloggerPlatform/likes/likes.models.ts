@@ -29,20 +29,17 @@ export class Like {
 
   readonly createdAt: Date;
 
-  constructor(user: UserDocument, targetId: string, status: likeStatus) {
-    this.userId = user.id as string;
-    this.login = user.login;
-    this.targetId = targetId;
-    this.status = status;
-    this.createdAt = new Date();
-  }
-
   static CreateDoc(
     user: UserDocument,
     targetId: string,
     status: likeStatus,
   ): LikeDocument {
-    return new this(user, targetId, status) as LikeDocument;
+    const like = new this();
+    like.userId = user.id as string;
+    like.login = user.login;
+    like.targetId = targetId;
+    like.status = status;
+    return like as LikeDocument;
   }
 }
 

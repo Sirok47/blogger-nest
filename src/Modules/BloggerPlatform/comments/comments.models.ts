@@ -1,4 +1,4 @@
-import { LikeDocument, likeStatus } from '../likes/likes.models';
+import { likeStatus } from '../likes/likes.models';
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Length } from 'class-validator';
@@ -27,34 +27,31 @@ export class Comment {
   @Prop({ type: String, required: true })
   postId: string;
 
-  @Prop({ type: CommentatorInfoSchema, required: true })
+  @Prop({ type: CommentatorInfoSchema, required: true, _id: false })
   commentatorInfo: CommentatorInfo;
 
   readonly createdAt: Date;
-
-  constructor(
-    postId: string,
-    input: CommentInputModel,
-    commentatorInfo: CommentatorInfo,
-  ) {
-    this.content = input.content;
-    this.postId = postId;
-    this.commentatorInfo = commentatorInfo;
-  }
 
   static CreateDocument(
     postId: string,
     input: CommentInputModel,
     commentatorInfo: CommentatorInfo,
   ): CommentDocument {
-    return new this(postId, input, commentatorInfo) as CommentDocument;
+    const comment = new this();
+    comment.content = input.content;
+    comment.postId = postId;
+    comment.commentatorInfo = commentatorInfo;
+    return comment as CommentDocument;
   }
 
   mapToViewModel(this: CommentDocument, lInfo: likesInfo): CommentViewModel {
     return {
+      id: this._id.toString(),
       content: this.content,
-      postId: this.postId,
-      commentatorInfo: this.commentatorInfo,
+      commentatorInfo: {
+        userId: this.commentatorInfo.userId,
+        userLogin: this.commentatorInfo.userLogin,
+      },
       createdAt: this.createdAt.toISOString(),
       likesInfo: lInfo,
     };
@@ -68,8 +65,8 @@ export type CommentDocument = HydratedDocument<Comment>;
 export type CommentModelType = Model<CommentDocument> & typeof Comment;
 
 export type CommentViewModel = {
+  id: string;
   content: string;
-  postId: string;
   commentatorInfo: CommentatorInfo;
   createdAt: string;
   likesInfo: likesInfo;

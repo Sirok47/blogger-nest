@@ -25,11 +25,10 @@ export class UserAuthGuard implements CanActivate {
       );
     }
 
-    try {
-      request.params.token = token;
-      return this.jwt.verifyToken(token);
-    } catch (_) {
-      throw new UnauthorizedException('Invalid or expired token');
+    if (!this.jwt.verifyToken(token)) {
+      throw new UnauthorizedException();
     }
+    request.params.token = token;
+    return true;
   }
 }
