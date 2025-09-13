@@ -5,12 +5,12 @@ import {
   likeStatus,
 } from '../../../likes/likes.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../../../comments/comments.repository';
 import { UsersRepository } from '../../../../AuthModule/users/users.repository';
 import { LikesRepository } from '../../../likes/likes.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from '../../../../AuthModule/users/users.models';
+import { PostsRepository } from '../../posts.repository';
 
 export class ChangeLikeForPostCommand {
   constructor(
@@ -25,7 +25,7 @@ export class ChangeLikeForPostHandler
   implements ICommandHandler<ChangeLikeForPostCommand>
 {
   constructor(
-    private readonly repository: CommentsRepository,
+    private readonly repository: PostsRepository,
     private readonly usersRepository: UsersRepository,
     private readonly likesRepository: LikesRepository,
     private readonly authToken: TokenService,

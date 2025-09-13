@@ -100,7 +100,7 @@ export class PostsController {
 
   @Post(':id/comments')
   @UseGuards(UserAuthGuard)
-  @HttpCode(200)
+  @HttpCode(201)
   async postCommentUnderPost(
     @Param() { id }: InputID,
     @Body() newComment: CommentInputModel,
