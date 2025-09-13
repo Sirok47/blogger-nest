@@ -45,10 +45,7 @@ export class PostsQueryRepo {
     return paginationSettings.Paginate(totalCount, postsVM);
   }
 
-  async findById(
-    id: string,
-    userId: string = '',
-  ): Promise<PostViewModel | null> {
+  async findById(id: string, userId: string): Promise<PostViewModel | null> {
     const post: PostDocument | null = await this.PostModel.findById(id).exec();
     if (!post) return null;
     const postId: string = post._id.toString();

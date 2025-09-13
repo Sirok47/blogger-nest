@@ -30,8 +30,14 @@ export class CommentsController {
   @Get('/:id')
   @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
-  async getComment(@Param() { id }: InputID): Promise<CommentViewModel> {
-    const result: CommentViewModel | null = await this.queryRepo.findById(id);
+  async getComment(
+    @Param() { id }: InputID,
+    @Param('userId') userId: string,
+  ): Promise<CommentViewModel> {
+    const result: CommentViewModel | null = await this.queryRepo.findById(
+      id,
+      userId,
+    );
     if (!result) {
       throw new NotFoundException();
     }

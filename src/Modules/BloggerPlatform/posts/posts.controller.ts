@@ -59,8 +59,14 @@ export class PostsController {
   @Get(':id')
   @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
-  async getPostById(@Param() { id }: InputID): Promise<PostViewModel> {
-    const result: PostViewModel | null = await this.queryRepo.findById(id);
+  async getPostById(
+    @Param() { id }: InputID,
+    @Param('userId') userId: string,
+  ): Promise<PostViewModel> {
+    const result: PostViewModel | null = await this.queryRepo.findById(
+      id,
+      userId,
+    );
     if (!result) {
       throw new NotFoundException();
     }

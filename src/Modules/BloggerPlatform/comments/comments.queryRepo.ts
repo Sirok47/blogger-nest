@@ -47,10 +47,7 @@ export class CommentsQueryRepo {
     );
   }
 
-  async findById(
-    id: string,
-    userId: string = '',
-  ): Promise<CommentViewModel | null> {
+  async findById(id: string, userId: string): Promise<CommentViewModel | null> {
     const comment: CommentDocument | null =
       await this.CommentModel.findById(id).exec();
     if (!comment) return null;
