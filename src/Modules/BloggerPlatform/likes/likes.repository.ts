@@ -49,7 +49,7 @@ export class LikesRepository {
       likesCount: await this.countLikesOf(targetId),
       dislikesCount: await this.countDislikesOf(targetId),
       myStatus: userId
-        ? (await this.getLike(targetId, userId))!.status
+        ? ((await this.getLike(targetId, userId))?.status ?? likeStatus.None)
         : likeStatus.None,
     };
   }

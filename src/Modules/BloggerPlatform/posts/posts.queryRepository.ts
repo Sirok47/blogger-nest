@@ -20,7 +20,7 @@ export class PostsQueryRepo {
   async findWithSearchAndPagination(
     blogId: string,
     paginationSettings: Paginator,
-    userId: string = '',
+    userId: string,
   ): Promise<Paginated<PostViewModel>> {
     const filter = blogId ? { blogId: blogId } : {};
     const query = this.PostModel.find(filter);

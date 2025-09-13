@@ -20,7 +20,7 @@ export class CommentsQueryRepo {
   async findWithSearchAndPagination(
     postId: string,
     paginationSettings: Paginator,
-    userId: string = '',
+    userId: string,
   ): Promise<Paginated<CommentViewModel>> {
     const filter = { postId: postId };
 
