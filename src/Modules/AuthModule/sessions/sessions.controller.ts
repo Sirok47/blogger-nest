@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenGuard } from '../../../Request-Modifications/Guards/refreshToken.guard';
-import { InputID } from '../../../Models/IDmodel';
+import { InputID, InputUUID } from '../../../Models/IDmodel';
 import { SessionViewModel, UserFromRefToken } from './sessions.models';
 import { SessionQueryRepo } from './sessions.queryRepo';
 import { DeleteAllButOneSessionsCommand } from './Service/use-cases/terminate-all-but-one-session.command';
@@ -44,7 +44,7 @@ export class SessionsController {
   @Delete('/:id')
   @HttpCode(204)
   async terminateOne(
-    @Param() { id }: InputID,
+    @Param() { id }: InputUUID,
     @Param() { userId }: UserFromRefToken,
   ): Promise<void> {
     if (

@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SessionRepository } from '../../sessions.repository';
+import { ForbiddenException, NotFoundException } from '@nestjs/common';
 
 export class DeleteSessionCommand {
   constructor(
@@ -17,11 +18,11 @@ export class DeleteSessionHandler
   async execute({ userId, deviceId }: DeleteSessionCommand): Promise<boolean> {
     const session = await this.repository.getSessionByDeviceId(deviceId);
     if (!session) {
-      throw Error('Not found');
+      throw new NotFoundException();
     }
 
     if (session.userId !== userId) {
-      throw new Error('Forbidden');
+      throw new ForbiddenException();
     }
 
     return await this.repository.terminateSession(deviceId);
