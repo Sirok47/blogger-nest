@@ -114,11 +114,11 @@ export class AuthController {
   @UseGuards(RefreshTokenGuard)
   @HttpCode(204)
   async logOut(@Req() req: Request): Promise<void> {
-    try {
-      await this.commandBus.execute(
+    if (
+      !(await this.commandBus.execute(
         new LogoutCommand(req.cookies.refreshToken),
-      );
-    } catch (_) {
+      ))
+    ) {
       throw new UnauthorizedException();
     }
   }
