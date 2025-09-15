@@ -7,11 +7,11 @@ import { UsersService } from './users/Service/users.service';
 import { User, UserSchema } from './users/users.models';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/Service/auth.service';
-import { SessionRepository } from './auth/sessions.repository';
+import { SessionRepository } from './sessions/sessions.repository';
 import { TokenModule } from '../JWT/jwt.module';
 import { MailerModule } from '../Mailer/mailer.module';
 import { HashModule } from '../Crypto/crypto.module';
-import { Session, SessionSchema } from './auth/sessions.models';
+import { Session, SessionSchema } from './sessions/sessions.models';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DeleteUserHandler } from './users/Service/use-cases/deleteUserCommand';
 import { LoginHandler } from './auth/Service/use-cases/login.command';
@@ -23,6 +23,10 @@ import { ResendConfirmationEmailHandler } from './auth/Service/use-cases/resend-
 import { ConfirmEmailHandler } from './auth/Service/use-cases/email-confirmation.command';
 import { RecoverPasswordHandler } from './auth/Service/use-cases/recover-password.command';
 import { ConfirmPasswordChangeHandler } from './auth/Service/use-cases/new-password.command';
+import { DeleteAllButOneSessionsHandler } from './sessions/Service/use-cases/terminate-all-but-one-session.command';
+import { DeleteSessionHandler } from './sessions/Service/use-cases/terminate-one-session.command';
+import { SessionsController } from './sessions/sessions.controller';
+import { SessionQueryRepo } from './sessions/sessions.queryRepo';
 
 const UserCommandHandlers = [CreateUserHandler, DeleteUserHandler];
 const AuthCommandHandlers = [
@@ -34,6 +38,10 @@ const AuthCommandHandlers = [
   ResendConfirmationEmailHandler,
   RecoverPasswordHandler,
   ConfirmPasswordChangeHandler,
+];
+const SessionCommandHandlers = [
+  DeleteAllButOneSessionsHandler,
+  DeleteSessionHandler,
 ];
 
 @Module({
@@ -47,15 +55,17 @@ const AuthCommandHandlers = [
     MailerModule,
     HashModule,
   ],
-  controllers: [UsersController, AuthController],
+  controllers: [UsersController, AuthController, SessionsController],
   providers: [
     UsersService,
     UsersQueryRepo,
     UsersRepository,
     AuthService,
     SessionRepository,
+    SessionQueryRepo,
     ...UserCommandHandlers,
     ...AuthCommandHandlers,
+    ...SessionCommandHandlers,
   ],
   exports: [UsersRepository, SessionRepository],
 })

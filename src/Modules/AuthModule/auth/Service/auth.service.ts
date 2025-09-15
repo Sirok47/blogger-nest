@@ -8,7 +8,7 @@ import {
   Session,
   SessionDocument,
   type SessionModelType,
-} from '../sessions.models';
+} from '../../sessions/sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()

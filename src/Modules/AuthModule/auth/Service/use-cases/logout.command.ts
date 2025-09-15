@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SessionRepository } from '../../sessions.repository';
+import { SessionRepository } from '../../../sessions/sessions.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { oneSecond } from '../../../../../Helpers/dateHelpers';
 

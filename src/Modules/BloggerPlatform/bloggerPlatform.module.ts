@@ -78,6 +78,11 @@ const CommentCommandHandlers = [
     ...PostCommandHandlers,
     ...CommentCommandHandlers,
   ],
-  exports: [BlogsRepository, PostsRepository, CommentsRepository],
+  exports: [
+    BlogsRepository,
+    PostsRepository,
+    CommentsRepository,
+    LikesRepository,
+  ],
 })
 export class BloggerPlatformModule {}

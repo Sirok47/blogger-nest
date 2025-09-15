@@ -35,6 +35,10 @@ import { RecoverPasswordCommand } from './Service/use-cases/recover-password.com
 import { RegisterUserCommand } from './Service/use-cases/registration.command';
 import { ConfirmEmailCommand } from './Service/use-cases/email-confirmation.command';
 import { ResendConfirmationEmailCommand } from './Service/use-cases/resend-email.command';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { RefreshTokenGuard } from '../../../Request-Modifications/Guards/refreshToken.guard';
+import { LogoutCommand } from './Service/use-cases/logout.command';
+import { RefreshTokenCommand } from './Service/use-cases/refresh-token.command';
 
 @Controller('auth')
 export class AuthController {
@@ -44,6 +48,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(200)
   async login(
     @Body() body: LoginInputModel,
@@ -74,6 +79,50 @@ export class AuthController {
     return result;
   }
 
+  @Post('refresh-token')
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(200)
+  async refreshToken(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ accessToken: string }> {
+    const tokenPair = await this.commandBus.execute<
+      RefreshTokenCommand,
+      { accessToken: string; refreshToken: string }
+    >(
+      new RefreshTokenCommand(req.cookies.refreshToken, {
+        IP: req.ip!,
+        userAgent: req.header('user-agent')!,
+      }),
+    );
+    if (!tokenPair) {
+      throw new UnauthorizedException();
+    }
+    const result = {
+      accessToken: tokenPair.accessToken,
+    };
+    res.cookie('refreshToken', tokenPair.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      domain: config.CURRENT_URL,
+      path: config.COOKIE_PATH,
+    });
+    return result;
+  }
+
+  @Post('logout')
+  @UseGuards(RefreshTokenGuard)
+  @HttpCode(204)
+  async logOut(@Req() req: Request): Promise<void> {
+    try {
+      await this.commandBus.execute(
+        new LogoutCommand(req.cookies.refreshToken),
+      );
+    } catch (_) {
+      throw new UnauthorizedException();
+    }
+  }
+
   @Get('me')
   @UseGuards(UserAuthGuard)
   @HttpCode(200)
@@ -86,6 +135,7 @@ export class AuthController {
   }
 
   @Post('registration')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async signIn(@Body() user: UserInputModel): Promise<void> {
     if (!(await this.commandBus.execute(new RegisterUserCommand(user)))) {
@@ -94,6 +144,7 @@ export class AuthController {
   }
 
   @Post('registration-confirmation')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async confirmEmail(@Body() { code }: CodeInputModel): Promise<void> {
     let result: boolean;
@@ -116,6 +167,7 @@ export class AuthController {
   }
 
   @Post('registration-email-resending')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async resendCode(@Body() { email }: ProvideEmailInputModel): Promise<void> {
     let result: boolean;
@@ -140,6 +192,7 @@ export class AuthController {
   }
 
   @Post('password-recovery')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async recoverPassword(
     @Body() { email }: ProvideEmailInputModel,
@@ -150,6 +203,7 @@ export class AuthController {
   }
 
   @Post('new-password')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async changePassword(
     @Body() { recoveryCode, newPassword }: NewPasswordRecoveryInputModel,

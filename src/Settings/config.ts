@@ -12,7 +12,7 @@ export const config = {
   SECRET_KEY: process.env.SECRET_KEY as string,
   MAILER_ADDRESS: process.env.MAILER_ADDR as string,
   MAILER_PASSWORD: process.env.MAILER_PASS as string,
-  accessTokenLifeSpan: 1000,
-  refreshTokenLifeSpan: 3600 * 24 * 30,
+  accessTokenLifeSpan: 10000,
+  refreshTokenLifeSpan: 20000,
   COOKIE_PATH: '/',
 };

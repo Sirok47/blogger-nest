@@ -1,8 +1,11 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersRepository } from '../../../users/users.repository';
-import { SessionRepository } from '../../sessions.repository';
+import { SessionRepository } from '../../../sessions/sessions.repository';
 import { HashService } from 'src/Modules/Crypto/bcrypt';
-import { Session, type SessionModelType } from '../../sessions.models';
+import {
+  Session,
+  type SessionModelType,
+} from '../../../sessions/sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { UserDocument } from '../../../users/users.models';

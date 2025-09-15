@@ -19,13 +19,17 @@ export class SessionRepository {
     return !!(await session.save());
   }
 
-  async refreshSession(newSession: Session): Promise<boolean> {
-    return (
-      await this.SessionModel.updateOne(
-        { userId: newSession.userId, deviceId: newSession.deviceId },
-        { $set: { ...newSession } },
-      )
-    ).acknowledged;
+  async refreshSession(newSession: SessionDocument): Promise<boolean> {
+    const session: SessionDocument | null = await this.SessionModel.findOne({
+      userId: newSession.userId,
+      deviceId: newSession.deviceId,
+    });
+    if (!session) {
+      return false;
+    }
+    session.lastActiveDate = newSession.lastActiveDate;
+    session.expDate = newSession.expDate;
+    return !!(await session.save());
   }
 
   async checkPresenceInTheList(

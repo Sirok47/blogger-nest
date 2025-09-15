@@ -2,11 +2,11 @@ import {
   Session,
   SessionDocument,
   type SessionModelType,
-} from '../../sessions.models';
+} from '../../../sessions/sessions.models';
 import { oneSecond } from '../../../../../Helpers/dateHelpers';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { UsersRepository } from '../../../users/users.repository';
-import { SessionRepository } from '../../sessions.repository';
+import { SessionRepository } from '../../../sessions/sessions.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from '../../../users/users.models';

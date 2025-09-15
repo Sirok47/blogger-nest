@@ -3,6 +3,11 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 
 export type SessionViewModel = Omit<Session, 'expDate' | 'userId'>;
 
+export class UserFromRefToken {
+  userId: string;
+  deviceId: string;
+}
+
 @Schema()
 export class Session {
   @Prop({ type: String, required: true, maxlength: 20 })
@@ -14,7 +19,7 @@ export class Session {
   @Prop({ type: String, required: true })
   lastActiveDate: string;
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: true, index: { expires: 0 } })
   expDate: Date;
 
   @Prop({ type: String, required: true })

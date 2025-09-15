@@ -4,7 +4,8 @@ import { BlogsRepository } from './Modules/BloggerPlatform/blogs/blogs.repositor
 import { PostsRepository } from './Modules/BloggerPlatform/posts/posts.repository';
 import { UsersRepository } from './Modules/AuthModule/users/users.repository';
 import { CommentsRepository } from './Modules/BloggerPlatform/comments/comments.repository';
-import { SessionRepository } from './Modules/AuthModule/auth/sessions.repository';
+import { SessionRepository } from './Modules/AuthModule/sessions/sessions.repository';
+import { LikesRepository } from './Modules/BloggerPlatform/likes/likes.repository';
 
 @Controller()
 export class AppController {
@@ -14,7 +15,7 @@ export class AppController {
     private postsRepository: PostsRepository,
     private usersRepository: UsersRepository,
     private commentsRepository: CommentsRepository,
-    //private likesRepository: LikesRepository,
+    private likesRepository: LikesRepository,
     private sessionsRepository: SessionRepository,
   ) {}
 
@@ -32,7 +33,7 @@ export class AppController {
       this.postsRepository.deleteAll(),
       this.usersRepository.deleteAll(),
       this.commentsRepository.deleteAll(),
-      //this.likesRepository.deleteAll(),
+      this.likesRepository.deleteAll(),
       this.sessionsRepository.deleteAll(),
     ]);
   }
