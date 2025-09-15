@@ -1,6 +1,5 @@
 import {
   Session,
-  SessionDocument,
   type SessionModelType,
 } from '../../../sessions/sessions.models';
 import { oneSecond } from '../../../../../Helpers/dateHelpers';

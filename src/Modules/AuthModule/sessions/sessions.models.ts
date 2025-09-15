@@ -13,7 +13,7 @@ export class Session {
   @Prop({ type: String, required: true, maxlength: 20 })
   ip: string;
 
-  @Prop({ type: String, required: true, maxlength: 50 })
+  @Prop({ type: String, required: true, maxlength: 150 })
   title: string;
 
   @Prop({ type: String, required: true })
