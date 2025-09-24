@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserDocument, UserViewModel } from '../../users.models';
+import {
+  MeViewModel,
+  User,
+  UserDocument,
+  UserViewModel,
+} from '../../users.models';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
@@ -52,14 +57,25 @@ export class UsersQueryRepoPSQL implements IUsersQueryRepo {
     );
   }
 
-  async findOneById(id: string): Promise<UserDocument | null> {
-    const result: any[] = await this.dataSource.query(
+  async findOneById(id: string): Promise<UserViewModel | null> {
+    const result: UserDocument[] = await this.dataSource.query(
       `SELECT * FROM "Users" WHERE id=$1`,
       [id],
     );
     if (result.length !== 1) {
       return null;
     }
-    return result[0];
+    return User.mapSQLToViewModel(result[0]);
+  }
+
+  async meView(id: string): Promise<MeViewModel | null> {
+    const result: UserDocument[] = await this.dataSource.query(
+      `SELECT * FROM "Users" WHERE id=$1`,
+      [id],
+    );
+    if (result.length !== 1) {
+      return null;
+    }
+    return User.mapSQLToMeViewModel(result[0]);
   }
 }

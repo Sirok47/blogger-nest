@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
+  MeViewModel,
   User,
   UserDocument,
   type UserModelType,
@@ -42,7 +43,9 @@ export interface IUsersQueryRepo {
     paginationSettings: Paginator,
   ): Promise<Paginated<UserViewModel>>;
 
-  findOneById(id: string): Promise<UserDocument | null>;
+  findOneById(id: string): Promise<UserViewModel | null>;
+
+  meView(id: string): Promise<MeViewModel | null>;
 }
 
 export const USERS_QUERY_REPO = Symbol('IUsersQueryRepo');

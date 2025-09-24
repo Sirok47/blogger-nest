@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import {
+  MeViewModel,
   User,
   UserDocument,
   type UserModelType,
@@ -41,7 +42,21 @@ export class UsersQueryRepo implements IUsersQueryRepo {
     );
   }
 
-  async findOneById(id: string): Promise<UserDocument | null> {
-    return await this.UserModel.findById(id).exec();
+  async findOneById(id: string): Promise<UserViewModel | null> {
+    const result: UserDocument | null =
+      await this.UserModel.findById(id).exec();
+    if (!result) {
+      return null;
+    }
+    return result.mapToViewModel();
+  }
+
+  async meView(id: string): Promise<MeViewModel | null> {
+    const result: UserDocument | null =
+      await this.UserModel.findById(id).exec();
+    if (!result) {
+      return null;
+    }
+    return result.mapToMeViewModel();
   }
 }

@@ -122,6 +122,14 @@ export class User {
       createdAt: user.createdAt,
     };
   }
+
+  static mapSQLToMeViewModel(user: UserDocument): MeViewModel {
+    return {
+      userId: user.id,
+      login: user.login,
+      email: user.email,
+    };
+  }
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

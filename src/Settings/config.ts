@@ -21,4 +21,5 @@ export const config = {
   PSQL_USERNAME: process.env.PSQL_USERNAME,
   PSQL_PASSWORD: process.env.PSQL_PASSWORD,
   PSQL_DB: 'postgres',
+  PSQL_CONNECTION_STRING: process.env.PSQL_CONNECTION_STRING,
 };

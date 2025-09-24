@@ -1,5 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { MeViewModel, UserDocument } from '../../users/users.models';
+import {
+  MeViewModel,
+  UserDocument,
+  UserViewModel,
+} from '../../users/users.models';
 import { TokenService } from '../../../JWT/jwt.service';
 import { oneSecond } from '../../../../Helpers/dateHelpers';
 import { config } from '../../../../Settings/config';
@@ -60,9 +64,9 @@ export class AuthService {
   async aboutMe(token: string): Promise<MeViewModel | null> {
     const id = this.jwt.extractJWTPayload(token).userId as string;
     if (!id) return null;
-    const user: UserDocument | null = await this.usersQueryRepo.findOneById(id);
+    const user: MeViewModel | null = await this.usersQueryRepo.meView(id);
     if (!user) return null;
-    return user.mapToMeViewModel();
+    return user;
   }
 }
 

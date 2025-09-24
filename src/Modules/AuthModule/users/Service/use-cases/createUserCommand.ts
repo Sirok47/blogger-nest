@@ -27,7 +27,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     @InjectModel(User.name) private readonly UserModel: UserModelType,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<UserViewModel> {
+  async execute(command: CreateUserCommand): Promise<UserDocument> {
     const { user, admin } = command;
 
     if (await this.usersRepository.findByLoginOrEmail(user.login)) {
@@ -42,6 +42,6 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const newUser: UserDocument = admin
       ? this.UserModel.CreateAdminUser(user)
       : this.UserModel.CreateRegularUser(user);
-    return User.mapSQLToViewModel(await this.usersRepository.save(newUser));
+    return await this.usersRepository.save(newUser);
   }
 }

@@ -25,6 +25,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       database: config.PSQL_DB,
       autoLoadEntities: false,
       synchronize: false,
+      url: config.PSQL_CONNECTION_STRING,
     }),
     CqrsModule.forRoot(),
     ThrottlerModule.forRoot({

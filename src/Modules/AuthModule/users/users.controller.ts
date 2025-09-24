@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   Inject,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   Post,
@@ -43,9 +44,15 @@ export class UsersController {
   @Post()
   @HttpCode(201)
   async postUser(@Body() user: UserInputModel): Promise<UserViewModel> {
-    return await this.commandBus.execute<CreateUserCommand, UserViewModel>(
-      new CreateUserCommand(user, true),
-    );
+    const createdUser = await this.commandBus.execute<
+      CreateUserCommand,
+      UserDocument
+    >(new CreateUserCommand(user, true));
+    const result = await this.queryRepo.findOneById(createdUser.id);
+    if (!result) {
+      throw new InternalServerErrorException();
+    }
+    return result;
   }
 
   @Delete('/:id')
