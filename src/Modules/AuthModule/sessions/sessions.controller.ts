@@ -3,6 +3,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   NotFoundException,
   Param,
   UseGuards,
@@ -10,15 +11,17 @@ import {
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenGuard } from '../../../Request-Modifications/Guards/refreshToken.guard';
 import { SessionViewModel, UserFromRefToken } from './sessions.models';
-import { SessionQueryRepo } from './sessions.queryRepo';
+import { SessionsQueryRepo } from './Repository/MongoDB/sessions.queryRepo';
 import { DeleteAllButOneSessionsCommand } from './Service/use-cases/terminate-all-but-one-session.command';
 import { DeleteSessionCommand } from './Service/use-cases/terminate-one-session.command';
+import { SESSIONS_QUERY_REPO } from '../auth/Service/auth.service';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenGuard)
 export class SessionsController {
   constructor(
-    private readonly queryRepo: SessionQueryRepo,
+    @Inject(SESSIONS_QUERY_REPO)
+    private readonly queryRepo: SessionsQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
 

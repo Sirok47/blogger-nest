@@ -16,8 +16,8 @@ export class Session {
   @Prop({ type: String, required: true, maxlength: 150 })
   title: string;
 
-  @Prop({ type: String, required: true })
-  lastActiveDate: string;
+  @Prop({ type: Date, required: true })
+  lastActiveDate: Date;
 
   @Prop({ type: Date, required: true, index: { expires: 0 } })
   expDate: Date;

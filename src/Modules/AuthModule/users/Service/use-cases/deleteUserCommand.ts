@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../users.repository';
+import { type IUsersRepository, USERS_REPOSITORY } from '../users.service';
+import { Inject } from '@nestjs/common';
 
 export class DeleteUserCommand {
   constructor(public readonly id: string) {}
@@ -7,7 +8,10 @@ export class DeleteUserCommand {
 
 @CommandHandler(DeleteUserCommand)
 export class DeleteUserHandler implements ICommandHandler<DeleteUserCommand> {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepository: IUsersRepository,
+  ) {}
 
   async execute(command: DeleteUserCommand): Promise<boolean> {
     return this.usersRepository.delete(command.id);

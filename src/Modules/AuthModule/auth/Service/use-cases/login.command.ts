@@ -1,6 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../users/users.repository';
-import { SessionRepository } from '../../../sessions/sessions.repository';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../users/Service/users.service';
 import { HashService } from 'src/Modules/Crypto/bcrypt';
 import {
   Session,
@@ -9,7 +11,12 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { UserDocument } from '../../../users/users.models';
-import { AuthService } from '../auth.service';
+import {
+  AuthService,
+  type ISessionsRepository,
+  SESSIONS_REPOSITORY,
+} from '../auth.service';
+import { Inject } from '@nestjs/common';
 
 export class LoginCommand {
   constructor(
@@ -22,8 +29,10 @@ export class LoginCommand {
 @CommandHandler(LoginCommand)
 export class LoginHandler implements ICommandHandler<LoginCommand> {
   constructor(
-    private readonly usersRepo: UsersRepository,
-    private readonly sessionRepo: SessionRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
+    @Inject(SESSIONS_REPOSITORY)
+    private readonly sessionRepo: ISessionsRepository,
     private readonly crypto: HashService,
     private readonly authService: AuthService,
     @InjectModel(Session.name) private readonly SessionModel: SessionModelType,
@@ -39,7 +48,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
       return null;
     }
     const passHash: string | undefined = await this.usersRepo.retrievePassword(
-      user._id.toString(),
+      user.id,
     );
     if (!passHash) {
       return null;
@@ -50,7 +59,7 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
 
     const deviceId = generateUuid().toString();
     const { session, accessToken, refreshToken } =
-      this.authService.createNewSession(user._id.toString(), deviceId, reqMeta);
+      this.authService.createNewSession(user.id, deviceId, reqMeta);
 
     if (!(await this.sessionRepo.save(session))) {
       return null;

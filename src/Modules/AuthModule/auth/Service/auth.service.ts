@@ -1,20 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { MeViewModel, UserDocument } from '../../users/users.models';
 import { TokenService } from '../../../JWT/jwt.service';
 import { oneSecond } from '../../../../Helpers/dateHelpers';
 import { config } from '../../../../Settings/config';
-import { UsersQueryRepo } from '../../users/users.queryRepo';
 import {
   Session,
   SessionDocument,
   type SessionModelType,
+  SessionViewModel,
 } from '../../sessions/sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
+import {
+  type IUsersQueryRepo,
+  USERS_QUERY_REPO,
+} from '../../users/Service/users.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersQueryRepo: UsersQueryRepo,
+    @Inject(USERS_QUERY_REPO)
+    private usersQueryRepo: IUsersQueryRepo,
     @InjectModel(Session.name) private SessionModel: SessionModelType,
     private jwt: TokenService,
   ) {}
@@ -60,3 +65,31 @@ export class AuthService {
     return user.mapToMeViewModel();
   }
 }
+
+export interface ISessionsRepository {
+  getSessionByDeviceId(deviceId: string): Promise<Session | null>;
+
+  save(session: SessionDocument);
+
+  refreshSession(newSession: SessionDocument): Promise<boolean>;
+
+  checkPresenceInTheList(
+    userId: string,
+    deviceId: string,
+    issuedAt: string,
+  ): Promise<boolean>;
+
+  terminateAllButOne(userId: string, deviceId: string): Promise<boolean>;
+
+  terminateSession(deviceId: string): Promise<boolean>;
+
+  deleteAll(): Promise<void>;
+}
+
+export const SESSIONS_REPOSITORY = Symbol('ISessionsRepository');
+
+export interface ISessionsQueryRepo {
+  getSessions(userId: string): Promise<SessionViewModel[]>;
+}
+
+export const SESSIONS_QUERY_REPO = Symbol('ISessionsQueryRepo');

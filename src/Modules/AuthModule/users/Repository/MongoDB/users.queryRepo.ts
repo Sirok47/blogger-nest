@@ -4,13 +4,14 @@ import {
   UserDocument,
   type UserModelType,
   UserViewModel,
-} from './users.models';
-import { Paginated, Paginator } from '../../../Models/paginator.models';
+} from '../../users.models';
+import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery } from 'mongoose';
+import { IUsersQueryRepo } from '../../Service/users.service';
 
 @Injectable()
-export class UsersQueryRepo {
+export class UsersQueryRepo implements IUsersQueryRepo {
   constructor(@InjectModel(User.name) protected UserModel: UserModelType) {}
   async findWithSearchAndPagination(
     paginationSettings: Paginator,

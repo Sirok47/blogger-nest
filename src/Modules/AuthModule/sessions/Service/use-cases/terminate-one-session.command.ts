@@ -1,6 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SessionRepository } from '../../sessions.repository';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Inject, NotFoundException } from '@nestjs/common';
+import {
+  type ISessionsRepository,
+  SESSIONS_REPOSITORY,
+} from '../../../auth/Service/auth.service';
 
 export class DeleteSessionCommand {
   constructor(
@@ -13,7 +16,10 @@ export class DeleteSessionCommand {
 export class DeleteSessionHandler
   implements ICommandHandler<DeleteSessionCommand>
 {
-  constructor(private readonly repository: SessionRepository) {}
+  constructor(
+    @Inject(SESSIONS_REPOSITORY)
+    private readonly repository: ISessionsRepository,
+  ) {}
 
   async execute({ userId, deviceId }: DeleteSessionCommand): Promise<boolean> {
     const session = await this.repository.getSessionByDeviceId(deviceId);

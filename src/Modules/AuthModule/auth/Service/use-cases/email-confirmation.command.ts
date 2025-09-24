@@ -1,6 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../users/users.repository';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../users/Service/users.service';
 import { UserDocument } from '../../../users/users.models';
+import { Inject } from '@nestjs/common';
 
 export class ConfirmEmailCommand {
   constructor(public readonly code: string) {}
@@ -10,7 +14,10 @@ export class ConfirmEmailCommand {
 export class ConfirmEmailHandler
   implements ICommandHandler<ConfirmEmailCommand>
 {
-  constructor(private readonly usersRepo: UsersRepository) {}
+  constructor(
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
+  ) {}
 
   async execute({ code }: ConfirmEmailCommand): Promise<boolean> {
     const userToConfirm: UserDocument | null =
@@ -27,7 +34,6 @@ export class ConfirmEmailHandler
     ) {
       throw new Error('Code expired');
     }
-    userToConfirm.confirmationData.isConfirmed = true;
-    return !!(await this.usersRepo.save(userToConfirm));
+    return await this.usersRepo.setToConfirmed(code);
   }
 }

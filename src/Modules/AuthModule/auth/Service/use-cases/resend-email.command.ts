@@ -1,9 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../users/users.repository';
 import { MailerService } from '../../../../Mailer/mailer.service';
 import { UserDocument } from '../../../users/users.models';
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { addOneDay } from '../../../../../Helpers/dateHelpers';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../users/Service/users.service';
+import { Inject } from '@nestjs/common';
 
 export class ResendConfirmationEmailCommand {
   constructor(public readonly email: string) {}
@@ -14,7 +18,8 @@ export class ResendConfirmationEmailHandler
   implements ICommandHandler<ResendConfirmationEmailCommand>
 {
   constructor(
-    private readonly usersRepo: UsersRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
     private readonly mailer: MailerService,
   ) {}
 

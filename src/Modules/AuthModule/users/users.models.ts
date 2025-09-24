@@ -88,7 +88,7 @@ export class User {
   static CreateAdminUser(inputUser: UserInputModel): UserDocument {
     const user = this.userSkeleton(inputUser);
     user.confirmationData = {
-      confirmationCode: '',
+      confirmationCode: generateUuid(),
       confirmationCodeExpDate: new Date(),
       isConfirmed: true,
     };
@@ -109,6 +109,17 @@ export class User {
       userId: this._id.toString(),
       login: this.login,
       email: this.email,
+    };
+  }
+
+  //PSQL
+
+  static mapSQLToViewModel(user: UserDocument): UserViewModel {
+    return {
+      id: user.id,
+      login: user.login,
+      email: user.email,
+      createdAt: user.createdAt,
     };
   }
 }

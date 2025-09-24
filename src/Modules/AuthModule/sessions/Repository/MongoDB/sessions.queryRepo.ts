@@ -4,11 +4,11 @@ import {
   SessionDocument,
   type SessionModelType,
   SessionViewModel,
-} from './sessions.models';
+} from '../../sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
-export class SessionQueryRepo {
+export class SessionsQueryRepo {
   constructor(
     @InjectModel(Session.name) private SessionModel: SessionModelType,
   ) {}

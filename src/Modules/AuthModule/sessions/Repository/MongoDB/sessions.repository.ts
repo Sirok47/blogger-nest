@@ -4,10 +4,11 @@ import {
   Session,
   SessionDocument,
   type SessionModelType,
-} from './sessions.models';
+} from '../../sessions.models';
+import { ISessionsRepository } from '../../../auth/Service/auth.service';
 
 @Injectable()
-export class SessionRepository {
+export class SessionsRepository implements ISessionsRepository {
   constructor(
     @InjectModel(Session.name) private SessionModel: SessionModelType,
   ) {}

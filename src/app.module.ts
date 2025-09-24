@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { config } from './Settings/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -15,6 +16,16 @@ import { ThrottlerModule } from '@nestjs/throttler';
     BloggerPlatformModule,
     AuthModule,
     MongooseModule.forRoot(config.MONGODB_URI, { dbName: 'blogger_nest' }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: config.PSQL_HOST,
+      port: config.PSQL_PORT,
+      username: config.PSQL_USERNAME,
+      password: config.PSQL_PASSWORD,
+      database: config.PSQL_DB,
+      autoLoadEntities: false,
+      synchronize: false,
+    }),
     CqrsModule.forRoot(),
     ThrottlerModule.forRoot({
       throttlers: [

@@ -1,5 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SessionRepository } from '../../sessions.repository';
+import {
+  type ISessionsRepository,
+  SESSIONS_REPOSITORY,
+} from '../../../auth/Service/auth.service';
+import { Inject } from '@nestjs/common';
 
 export class DeleteAllButOneSessionsCommand {
   constructor(
@@ -12,7 +16,10 @@ export class DeleteAllButOneSessionsCommand {
 export class DeleteAllButOneSessionsHandler
   implements ICommandHandler<DeleteAllButOneSessionsCommand>
 {
-  constructor(private readonly repository: SessionRepository) {}
+  constructor(
+    @Inject(SESSIONS_REPOSITORY)
+    private readonly repository: ISessionsRepository,
+  ) {}
 
   async execute({
     userId,

@@ -1,7 +1,11 @@
-import { UsersRepository } from '../../../users/users.repository';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../users/Service/users.service';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HashService } from '../../../../Crypto/bcrypt';
 import { UserDocument } from '../../../users/users.models';
+import { Inject } from '@nestjs/common';
 
 export class ConfirmPasswordChangeCommand {
   constructor(
@@ -15,7 +19,8 @@ export class ConfirmPasswordChangeHandler
   implements ICommandHandler<ConfirmPasswordChangeCommand>
 {
   constructor(
-    private readonly usersRepo: UsersRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
     private readonly crypto: HashService,
   ) {}
 
@@ -35,7 +40,7 @@ export class ConfirmPasswordChangeHandler
       return false;
     }
     return await this.usersRepo.changePassword(
-      userToConfirm._id.toString(),
+      userToConfirm.id,
       await this.crypto.toHash(newPass),
     );
   }

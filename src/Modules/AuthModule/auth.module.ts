@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UsersController } from './users/users.controller';
-import { UsersRepository } from './users/users.repository';
-import { UsersQueryRepo } from './users/users.queryRepo';
-import { UsersService } from './users/Service/users.service';
+import {
+  USERS_QUERY_REPO,
+  USERS_REPOSITORY,
+  UsersService,
+} from './users/Service/users.service';
 import { User, UserSchema } from './users/users.models';
 import { AuthController } from './auth/auth.controller';
-import { AuthService } from './auth/Service/auth.service';
-import { SessionRepository } from './sessions/sessions.repository';
+import {
+  AuthService,
+  SESSIONS_QUERY_REPO,
+  SESSIONS_REPOSITORY,
+} from './auth/Service/auth.service';
 import { TokenModule } from '../JWT/jwt.module';
 import { MailerModule } from '../Mailer/mailer.module';
 import { HashModule } from '../Crypto/crypto.module';
@@ -26,7 +31,10 @@ import { ConfirmPasswordChangeHandler } from './auth/Service/use-cases/new-passw
 import { DeleteAllButOneSessionsHandler } from './sessions/Service/use-cases/terminate-all-but-one-session.command';
 import { DeleteSessionHandler } from './sessions/Service/use-cases/terminate-one-session.command';
 import { SessionsController } from './sessions/sessions.controller';
-import { SessionQueryRepo } from './sessions/sessions.queryRepo';
+import { SessionsRepositoryPSQL } from './sessions/Repository/PostgreSQL/sessions.repository.psql';
+import { SessionsQueryRepoPSQL } from './sessions/Repository/PostgreSQL/sessions.queryRepo.psql';
+import { UsersQueryRepoPSQL } from './users/Repository/PostgreSQL/users.queryRepo.psql';
+import { UsersRepositoryPSQL } from './users/Repository/PostgreSQL/users.repository.psql';
 
 const UserCommandHandlers = [CreateUserHandler, DeleteUserHandler];
 const AuthCommandHandlers = [
@@ -58,15 +66,27 @@ const SessionCommandHandlers = [
   controllers: [UsersController, AuthController, SessionsController],
   providers: [
     UsersService,
-    UsersQueryRepo,
-    UsersRepository,
+    {
+      provide: USERS_REPOSITORY,
+      useClass: UsersRepositoryPSQL,
+    },
+    {
+      provide: USERS_QUERY_REPO,
+      useClass: UsersQueryRepoPSQL,
+    },
     AuthService,
-    SessionRepository,
-    SessionQueryRepo,
+    {
+      provide: SESSIONS_REPOSITORY,
+      useClass: SessionsRepositoryPSQL,
+    },
+    {
+      provide: SESSIONS_QUERY_REPO,
+      useClass: SessionsQueryRepoPSQL,
+    },
     ...UserCommandHandlers,
     ...AuthCommandHandlers,
     ...SessionCommandHandlers,
   ],
-  exports: [UsersRepository, SessionRepository],
+  exports: [USERS_REPOSITORY, SESSIONS_REPOSITORY],
 })
 export class AuthModule {}

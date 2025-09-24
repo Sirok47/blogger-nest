@@ -1,9 +1,10 @@
-import { User, UserDocument, type UserModelType } from './users.models';
+import { User, UserDocument, type UserModelType } from '../../users.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
+import { IUsersRepository } from '../../Service/users.service';
 
 @Injectable()
-export class UsersRepository {
+export class UsersRepository implements IUsersRepository {
   constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
 
   async save(user: UserDocument): Promise<UserDocument> {
@@ -45,6 +46,19 @@ export class UsersRepository {
         $set: {
           'confirmationData.confirmationCode': code,
           'confirmationData.confirmationCodeExpDate': expDate,
+        },
+      },
+      { new: true },
+    );
+    return !!result;
+  }
+
+  async setToConfirmed(code: string): Promise<boolean> {
+    const result: UserDocument | null = await this.UserModel.findOneAndUpdate(
+      { 'confirmationData.confirmationCode': code },
+      {
+        $set: {
+          'confirmationData.isConfirmed': true,
         },
       },
       { new: true },

@@ -1,7 +1,6 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CommentsRepository } from './comments.repository';
 import { TokenService } from '../../JWT/jwt.service';
-import { UsersRepository } from '../../AuthModule/users/users.repository';
 import {
   Like,
   LikeDocument,
@@ -11,6 +10,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from '../../AuthModule/users/users.models';
 import { LikesRepository } from '../likes/likes.repository';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../AuthModule/users/Service/users.service';
 
 @Injectable()
 export class CommentsService {
@@ -18,7 +21,8 @@ export class CommentsService {
     private readonly repository: CommentsRepository,
     private readonly likesRepository: LikesRepository,
     private readonly authToken: TokenService,
-    private readonly usersRepository: UsersRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepository: IUsersRepository,
     @InjectModel(Like.name) private readonly LikeModel: LikeModelType,
   ) {}
 

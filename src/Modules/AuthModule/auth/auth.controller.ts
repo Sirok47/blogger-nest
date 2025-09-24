@@ -48,7 +48,7 @@ export class AuthController {
   ) {}
 
   @Post('login')
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(200)
   async login(
     @Body() body: LoginInputModel,
@@ -135,7 +135,7 @@ export class AuthController {
   }
 
   @Post('registration')
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async signIn(@Body() user: UserInputModel): Promise<void> {
     if (!(await this.commandBus.execute(new RegisterUserCommand(user)))) {
@@ -144,7 +144,7 @@ export class AuthController {
   }
 
   @Post('registration-confirmation')
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async confirmEmail(@Body() { code }: CodeInputModel): Promise<void> {
     let result: boolean;
@@ -167,7 +167,7 @@ export class AuthController {
   }
 
   @Post('registration-email-resending')
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async resendCode(@Body() { email }: ProvideEmailInputModel): Promise<void> {
     let result: boolean;
@@ -192,7 +192,7 @@ export class AuthController {
   }
 
   @Post('password-recovery')
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async recoverPassword(
     @Body() { email }: ProvideEmailInputModel,
@@ -203,7 +203,7 @@ export class AuthController {
   }
 
   @Post('new-password')
-  @UseGuards(ThrottlerGuard)
+  //@UseGuards(ThrottlerGuard)
   @HttpCode(204)
   async changePassword(
     @Body() { recoveryCode, newPassword }: NewPasswordRecoveryInputModel,

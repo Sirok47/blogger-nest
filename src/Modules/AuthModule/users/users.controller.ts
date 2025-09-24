@@ -4,14 +4,17 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Post,
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { UsersService } from './Service/users.service';
-import { UsersQueryRepo } from './users.queryRepo';
+import {
+  type IUsersQueryRepo,
+  USERS_QUERY_REPO,
+} from './Service/users.service';
 import { UserDocument, UserInputModel, UserViewModel } from './users.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { InputID } from '../../../Models/IDmodel';
@@ -24,7 +27,8 @@ import { CommandBus } from '@nestjs/cqrs';
 @UseGuards(AdminAuthGuard)
 export class UsersController {
   constructor(
-    private queryRepo: UsersQueryRepo,
+    @Inject(USERS_QUERY_REPO)
+    private queryRepo: IUsersQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
 
@@ -39,11 +43,9 @@ export class UsersController {
   @Post()
   @HttpCode(201)
   async postUser(@Body() user: UserInputModel): Promise<UserViewModel> {
-    return (
-      await this.commandBus.execute<CreateUserCommand, UserDocument>(
-        new CreateUserCommand(user, true),
-      )
-    ).mapToViewModel();
+    return await this.commandBus.execute<CreateUserCommand, UserViewModel>(
+      new CreateUserCommand(user, true),
+    );
   }
 
   @Delete('/:id')

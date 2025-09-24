@@ -4,11 +4,12 @@ import {
   UserDocument,
   UserInputModel,
   type UserModelType,
+  UserViewModel,
 } from '../../users.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BadRequestException } from '@nestjs/common';
-import { UsersRepository } from '../../users.repository';
+import { BadRequestException, Inject } from '@nestjs/common';
 import { HashService } from '../../../../Crypto/bcrypt';
+import { type IUsersRepository, USERS_REPOSITORY } from '../users.service';
 
 export class CreateUserCommand {
   constructor(
@@ -20,12 +21,13 @@ export class CreateUserCommand {
 @CommandHandler(CreateUserCommand)
 export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
   constructor(
-    private readonly usersRepository: UsersRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepository: IUsersRepository,
     private readonly crypto: HashService,
     @InjectModel(User.name) private readonly UserModel: UserModelType,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<UserDocument> {
+  async execute(command: CreateUserCommand): Promise<UserViewModel> {
     const { user, admin } = command;
 
     if (await this.usersRepository.findByLoginOrEmail(user.login)) {
@@ -40,7 +42,6 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     const newUser: UserDocument = admin
       ? this.UserModel.CreateAdminUser(user)
       : this.UserModel.CreateRegularUser(user);
-
-    return this.usersRepository.save(newUser);
+    return User.mapSQLToViewModel(await this.usersRepository.save(newUser));
   }
 }

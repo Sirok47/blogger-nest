@@ -1,7 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
 import { CommentsRepository } from '../../comments.repository';
-import { UsersRepository } from '../../../../AuthModule/users/users.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import {
   Like,
@@ -11,6 +10,11 @@ import {
 } from '../../../likes/likes.models';
 import { LikesRepository } from '../../../likes/likes.repository';
 import { UserDocument } from '../../../../AuthModule/users/users.models';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../../AuthModule/users/Service/users.service';
+import { Inject } from '@nestjs/common';
 
 export class ChangeLikeForCommentCommand {
   constructor(
@@ -26,7 +30,8 @@ export class ChangeLikeForCommentHandler
 {
   constructor(
     private readonly repository: CommentsRepository,
-    private readonly usersRepository: UsersRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepository: IUsersRepository,
     private readonly likesRepository: LikesRepository,
     private readonly authToken: TokenService,
     @InjectModel(Like.name) private readonly LikeModel: LikeModelType,

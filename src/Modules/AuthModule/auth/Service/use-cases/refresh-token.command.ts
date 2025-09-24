@@ -4,12 +4,19 @@ import {
 } from '../../../sessions/sessions.models';
 import { oneSecond } from '../../../../../Helpers/dateHelpers';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { UsersRepository } from '../../../users/users.repository';
-import { SessionRepository } from '../../../sessions/sessions.repository';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../users/Service/users.service';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from '../../../users/users.models';
-import { AuthService } from '../auth.service';
+import {
+  AuthService,
+  type ISessionsRepository,
+  SESSIONS_REPOSITORY,
+} from '../auth.service';
+import { Inject } from '@nestjs/common';
 
 export class RefreshTokenCommand {
   constructor(
@@ -24,8 +31,10 @@ export class RefreshTokenHandler
 {
   constructor(
     private readonly authService: AuthService,
-    private readonly usersRepo: UsersRepository,
-    private readonly sessionRepo: SessionRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
+    @Inject(SESSIONS_REPOSITORY)
+    private readonly sessionRepo: ISessionsRepository,
     private readonly jwt: TokenService,
     @InjectModel(Session.name) private readonly SessionModel: SessionModelType,
   ) {}
@@ -52,7 +61,7 @@ export class RefreshTokenHandler
     }
 
     const { session, accessToken, refreshToken } =
-      this.authService.createNewSession(user._id.toString(), deviceId, reqMeta);
+      this.authService.createNewSession(user.id, deviceId, reqMeta);
     await this.sessionRepo.refreshSession(session);
 
     return {

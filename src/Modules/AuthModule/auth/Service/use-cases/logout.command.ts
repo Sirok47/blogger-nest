@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { SessionRepository } from '../../../sessions/sessions.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { oneSecond } from '../../../../../Helpers/dateHelpers';
+import { type ISessionsRepository, SESSIONS_REPOSITORY } from '../auth.service';
+import { Inject } from '@nestjs/common';
 
 export class LogoutCommand {
   constructor(public readonly token: string) {}
@@ -10,7 +11,8 @@ export class LogoutCommand {
 @CommandHandler(LogoutCommand)
 export class LogoutHandler implements ICommandHandler<LogoutCommand> {
   constructor(
-    private readonly sessionRepo: SessionRepository,
+    @Inject(SESSIONS_REPOSITORY)
+    private readonly sessionRepo: ISessionsRepository,
     private readonly jwt: TokenService,
   ) {}
 
