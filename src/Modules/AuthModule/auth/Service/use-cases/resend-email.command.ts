@@ -34,7 +34,7 @@ export class ResendConfirmationEmailHandler
     }
     const newCode = generateUuid();
     const result = await this.usersRepo.updateConfirmationCode(
-      userToSendTo._id.toString(),
+      userToSendTo.id,
       newCode,
       addOneDay(new Date()),
     );

@@ -55,7 +55,7 @@ export class UsersQueryRepoPSQL implements IUsersQueryRepo {
       )
     )[0].count;
     return paginationSettings.Paginate<UserViewModel>(
-      totalCount,
+      +totalCount,
       users.map((user: any): UserViewModel => User.mapSQLToViewModel(user)),
     );
   }
