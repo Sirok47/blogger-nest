@@ -5,7 +5,11 @@ import {
   UserDocument,
   UserViewModel,
 } from '../../users.models';
-import { Paginated, Paginator } from '../../../../../Models/paginator.models';
+import {
+  Paginated,
+  Paginator,
+  SortDirections,
+} from '../../../../../Models/paginator.models';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUsersQueryRepo } from '../../Service/users.service';
@@ -30,14 +34,13 @@ export class UsersQueryRepoPSQL implements IUsersQueryRepo {
     SELECT * FROM "Users"
         WHERE login LIKE $1
           AND email LIKE $2
-        ORDER BY $3 ${sortDirection}
-        LIMIT $4
-        OFFSET $5
+        ORDER BY "${sortBy}" ${sortDirection}
+        LIMIT $3
+        OFFSET $4
     `,
       [
         `%${searchLoginTerm}%`,
         `%${searchEmailTerm}%`,
-        sortBy,
         pageSize,
         (pageNumber - 1) * pageSize,
       ],

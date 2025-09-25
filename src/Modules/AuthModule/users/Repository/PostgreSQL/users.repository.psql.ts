@@ -128,13 +128,11 @@ export class UsersRepositoryPSQL implements IUsersRepository {
   }
 
   async delete(id: string): Promise<boolean> {
-    const result: UserDocument | null = (
-      await this.dataSource.query<UserDocument[]>(
-        `DELETE FROM "Users" WHERE id=$1`,
-        [id],
-      )
-    )[0];
-    return !!result;
+    const result = await this.dataSource.query(
+      `DELETE FROM "Users" WHERE id=$1`,
+      [id],
+    );
+    return !!result[1];
   }
 
   async retrievePassword(id: string): Promise<string | undefined> {
