@@ -68,7 +68,7 @@ export class SessionsRepositoryPSQL implements ISessionsRepository {
   async checkPresenceInTheList(
     userId: string,
     deviceId: string,
-    issuedAt: string,
+    issuedAt: Date,
   ): Promise<boolean> {
     return !!(await this.dataSource.query(
       `

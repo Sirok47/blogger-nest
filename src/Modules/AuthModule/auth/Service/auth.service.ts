@@ -80,7 +80,7 @@ export interface ISessionsRepository {
   checkPresenceInTheList(
     userId: string,
     deviceId: string,
-    issuedAt: string,
+    issuedAt: Date,
   ): Promise<boolean>;
 
   terminateAllButOne(userId: string, deviceId: string): Promise<boolean>;

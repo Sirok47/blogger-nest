@@ -49,7 +49,7 @@ export class RefreshTokenHandler
         //TODO
         userId,
         deviceId,
-        new Date(iat! * oneSecond).toISOString(),
+        new Date(iat! * oneSecond),
       ))
     ) {
       return null;

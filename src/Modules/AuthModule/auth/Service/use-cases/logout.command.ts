@@ -23,7 +23,7 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
         //TODO
         userId,
         deviceId,
-        new Date(iat! * oneSecond).toISOString(),
+        new Date(iat! * oneSecond),
       ))
     ) {
       return false;
