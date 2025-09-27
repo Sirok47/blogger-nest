@@ -32,8 +32,8 @@ export class UsersQueryRepoPSQL implements IUsersQueryRepo {
     const users = await this.dataSource.query<User[]>(
       `
     SELECT * FROM "Users"
-        WHERE login LIKE $1
-          AND email LIKE $2
+        WHERE login ILIKE $1
+          OR email ILIKE $2
         ORDER BY "${sortBy}" ${sortDirection}
         LIMIT $3
         OFFSET $4
@@ -46,11 +46,11 @@ export class UsersQueryRepoPSQL implements IUsersQueryRepo {
       ],
     );
     const totalCount = (
-      await this.dataSource.query<{ count: number }[]>(
+      await this.dataSource.query<{ count: string }[]>(
         `
         SELECT COUNT(*) FROM "Users"
-        WHERE login LIKE $1
-          AND email LIKE $2`,
+        WHERE login ILIKE $1
+           OR email ILIKE $2`,
         [`%${searchLoginTerm}%`, `%${searchEmailTerm}%`],
       )
     )[0].count;
