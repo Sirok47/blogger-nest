@@ -55,7 +55,7 @@ export class SessionsController {
   ): Promise<void> {
     const uuid = new InputUUID();
     uuid.id = id;
-    validateOrReject(uuid).catch((err) => {
+    await validateOrReject(uuid).catch((err) => {
       throw new NotFoundException(err);
     });
     if (
