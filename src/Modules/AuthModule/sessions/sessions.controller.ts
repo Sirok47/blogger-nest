@@ -17,6 +17,8 @@ import {
   type ISessionsQueryRepo,
   SESSIONS_QUERY_REPO,
 } from '../auth/Service/auth.service';
+import { InputUUID } from '../../../Models/IDmodel';
+import { validateOrReject } from 'class-validator';
 
 @Controller('security/devices')
 @UseGuards(RefreshTokenGuard)
@@ -51,6 +53,11 @@ export class SessionsController {
     @Param('id') id: string,
     @Param() { userId }: UserFromRefToken,
   ): Promise<void> {
+    const uuid = new InputUUID();
+    uuid.id = id;
+    validateOrReject(uuid).catch((err) => {
+      throw new NotFoundException(err);
+    });
     if (
       !(await this.commandBus.execute(new DeleteSessionCommand(userId, id)))
     ) {
