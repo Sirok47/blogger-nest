@@ -2,16 +2,18 @@ import { Injectable } from '@nestjs/common';
 import { SessionDocument, SessionViewModel } from '../../sessions.models';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { ISessionsQueryRepo } from '../../../auth/Service/auth.service';
 
 @Injectable()
-export class SessionsQueryRepoPSQL {
+export class SessionsQueryRepoPSQL implements ISessionsQueryRepo {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
   async getSessions(userId: string): Promise<SessionViewModel[]> {
     const sessions: SessionDocument[] = await this.dataSource.query(
       `
       SELECT * FROM "Sessions"
-      WHERE "userId" = $1`,
-      [userId],
+      WHERE "userId" = $1
+      AND "expDate" > $2`,
+      [userId, new Date()],
     );
     const result: SessionViewModel[] = [];
     for (const session of sessions) {

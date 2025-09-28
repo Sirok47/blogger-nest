@@ -6,9 +6,10 @@ import {
   SessionViewModel,
 } from '../../sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
+import { ISessionsQueryRepo } from '../../../auth/Service/auth.service';
 
 @Injectable()
-export class SessionsQueryRepo {
+export class SessionsQueryRepo implements ISessionsQueryRepo {
   constructor(
     @InjectModel(Session.name) private SessionModel: SessionModelType,
   ) {}
