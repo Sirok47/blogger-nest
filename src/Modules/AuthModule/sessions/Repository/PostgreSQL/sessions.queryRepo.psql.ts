@@ -10,7 +10,7 @@ export class SessionsQueryRepoPSQL implements ISessionsQueryRepo {
   async getSessions(userId: string): Promise<SessionViewModel[]> {
     const sessions: SessionDocument[] = await this.dataSource.query(
       `
-      SELECT * FROM "Sessions"
+      SELECT id, "IP" as ip, title, "lastActiveDate", "expDate", "deviceId", "userId" FROM "Sessions"
       WHERE "userId" = $1
       AND "expDate" > $2`,
       [userId, new Date()],
