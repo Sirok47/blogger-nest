@@ -43,17 +43,7 @@ export class RefreshTokenHandler
     accessToken: string;
     refreshToken: string;
   } | null> {
-    const { userId, deviceId, iat } = this.jwt.extractJWTPayload(token);
-    if (
-      !(await this.sessionRepo.checkPresenceInTheList(
-        //TODO
-        userId,
-        deviceId,
-        new Date(iat! * oneSecond),
-      ))
-    ) {
-      return null;
-    }
+    const { userId, deviceId } = this.jwt.extractJWTPayload(token);
 
     const user: UserDocument | null = await this.usersRepo.findById(userId);
     if (!user) {

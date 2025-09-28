@@ -70,14 +70,16 @@ export class SessionsRepositoryPSQL implements ISessionsRepository {
     deviceId: string,
     issuedAt: Date,
   ): Promise<boolean> {
-    return !!(await this.dataSource.query(
-      `
-        DELETE FROM "Sessions"
+    return !!(
+      await this.dataSource.query<SessionDocument[]>(
+        `
+        SELECT * FROM "Sessions"
         WHERE "userId" = $1
         AND "deviceId" = $2
         AND "lastActiveDate" = $3`,
-      [userId, deviceId, issuedAt],
-    ));
+        [userId, deviceId, issuedAt],
+      )
+    ).length;
   }
 
   async terminateAllButOne(userId: string, deviceId: string): Promise<boolean> {
