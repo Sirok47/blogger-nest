@@ -6,7 +6,7 @@ dotenv.config();
 export const config = {
   ADMIN_USERNAME: 'admin',
   ADMIN_PASSWORD: 'qwerty',
-  CURRENT_URL: 'localhost', //'blogger-nest-pi.vercel.app',
+  CURRENT_URL: process.env.CURRENT_URL,
   MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017',
   PORT: process.env.PORT || 3000,
   SECRET_KEY: process.env.SECRET_KEY as string,
