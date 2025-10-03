@@ -204,7 +204,13 @@ export class SAPostsController {
 
   @Delete(':id')
   @HttpCode(204)
-  async deletePost(@Param() { id }: InputID): Promise<void> {
+  async deletePost(
+    @Param() { id }: InputID,
+    @Param() { blogId }: InputBlogID,
+  ): Promise<void> {
+    if (!(await this.blogsRepo.findById(blogId))) {
+      throw new NotFoundException();
+    }
     const result: boolean = await this.commandBus.execute(
       new DeletePostCommand(id),
     );
