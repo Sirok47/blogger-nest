@@ -40,6 +40,10 @@ import { LikeInputModel } from '../likes/likes.models';
 import { AdminAuthGuard } from '../../../Request-Modifications/Guards/basicAuth.guard';
 import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
 import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';
+import {
+  BLOGS_REPOSITORY,
+  type IBlogsRepository,
+} from '../blogs/Service/blogs.service';
 
 @Controller('posts')
 export class PostsController {
@@ -140,6 +144,8 @@ export class PostsController {
 @UseGuards(AdminAuthGuard)
 export class SAPostsController {
   constructor(
+    @Inject(BLOGS_REPOSITORY)
+    private blogsRepo: IBlogsRepository,
     @Inject(POSTS_QUERY_REPO)
     private queryRepo: IPostsQueryRepo,
     private readonly commandBus: CommandBus,
@@ -165,6 +171,9 @@ export class SAPostsController {
     @Param() { blogId }: InputBlogID,
     @Body() post: PostUnderBlogInputModel,
   ): Promise<PostViewModel> {
+    if (!(await this.blogsRepo.findById(blogId))) {
+      throw new NotFoundException();
+    }
     post.blogId = blogId;
     const result: PostViewModel | null = await this.commandBus.execute(
       new CreatePostCommand(post),
@@ -175,24 +184,16 @@ export class SAPostsController {
     return result;
   }
 
-  /*@Post()
-  @HttpCode(201)
-  async postPost(@Body() post: PostInputModel): Promise<PostViewModel> {
-    const result: PostViewModel | null = await this.commandBus.execute(
-      new CreatePostCommand(post),
-    );
-    if (!result) {
-      throw new Error();
-    }
-    return result;
-  }*/
-
   @Put(':id')
   @HttpCode(204)
   async putPost(
     @Param() { id }: InputID,
+    @Param() { blogId }: InputBlogID,
     @Body() post: PostUnderBlogInputModel,
   ): Promise<void> {
+    if (!(await this.blogsRepo.findById(blogId))) {
+      throw new NotFoundException();
+    }
     const result: boolean = await this.commandBus.execute(
       new UpdatePostCommand(id, post),
     );
