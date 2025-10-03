@@ -1,7 +1,16 @@
 import { PostDocument, PostInputModel } from '../../posts.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { PostsRepository } from '../../posts.repository';
-import { BlogsRepository } from '../../../blogs/blogs.repository';
+import { Inject, NotFoundException } from '@nestjs/common';
+import {
+  type IPostsQueryRepo,
+  type IPostsRepository,
+  POSTS_QUERY_REPO,
+  POSTS_REPOSITORY,
+} from '../posts.service';
+import {
+  BLOGS_REPOSITORY,
+  type IBlogsRepository,
+} from '../../../blogs/Service/blogs.service';
 
 export class UpdatePostCommand {
   constructor(
@@ -13,8 +22,12 @@ export class UpdatePostCommand {
 @CommandHandler(UpdatePostCommand)
 export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
   constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly blogsRepository: BlogsRepository,
+    @Inject(POSTS_REPOSITORY)
+    private readonly postsRepository: IPostsRepository,
+    @Inject(BLOGS_REPOSITORY)
+    private readonly blogsRepository: IBlogsRepository,
+    @Inject(POSTS_QUERY_REPO)
+    private readonly postsQueryRepo: IPostsQueryRepo,
   ) {}
 
   async execute(command: UpdatePostCommand): Promise<boolean> {
@@ -22,10 +35,12 @@ export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
     const postToUpdate: PostDocument | null =
       await this.postsRepository.findById(id);
     if (!postToUpdate) return false;
-    postToUpdate.Update(
-      newPost,
-      await this.blogsRepository.findById(newPost.blogId),
-    );
-    return !!(await this.postsRepository.save(postToUpdate));
+
+    postToUpdate.title = newPost.title;
+    postToUpdate.shortDescription = newPost.shortDescription;
+    postToUpdate.content = newPost.content;
+
+    const updatedPost = await this.postsRepository.save(postToUpdate);
+    return !(await this.postsQueryRepo.findById(updatedPost.id, ''));
   }
 }

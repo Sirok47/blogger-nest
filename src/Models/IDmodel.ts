@@ -9,3 +9,8 @@ export class InputUUID {
   @IsUUID()
   id: string;
 }
+
+export class InputBlogID {
+  @IsMongoId()
+  blogId: string;
+}

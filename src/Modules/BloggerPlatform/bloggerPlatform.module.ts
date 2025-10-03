@@ -1,13 +1,19 @@
 import { Module } from '@nestjs/common';
 import { BlogsController } from './blogs/blogs.controller';
-import { BlogsService } from './blogs/Service/blogs.service';
-import { BlogsRepository } from './blogs/blogs.repository';
+import {
+  BLOGS_QUERY_REPO,
+  BLOGS_REPOSITORY,
+  BlogsService,
+} from './blogs/Service/blogs.service';
+import { BlogsRepository } from './blogs/Repository/MongoDB/blogs.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/blogs.models';
-import { BlogsQueryRepo } from './blogs/blogs.queryRepo';
-import { PostsService } from './posts/Service/posts.service';
-import { PostsRepository } from './posts/posts.repository';
-import { PostsQueryRepo } from './posts/posts.queryRepository';
+import {
+  POSTS_QUERY_REPO,
+  POSTS_REPOSITORY,
+  PostsService,
+} from './posts/Service/posts.service';
+import { PostsRepository } from './posts/Repository/MongoDB/posts.repository';
 import { PostsController } from './posts/posts.controller';
 import { Post, PostSchema } from './posts/posts.models';
 import { CommentsRepository } from './comments/comments.repository';
@@ -30,6 +36,10 @@ import { DeleteCommentHandler } from './comments/Service/use-cases/delete-commen
 import { CreateCommentHandler } from './comments/Service/use-cases/create-comment.command';
 import { UpdateCommentHandler } from './comments/Service/use-cases/update-comment.command';
 import { ChangeLikeForPostHandler } from './posts/Service/use-cases/change-like-for-post.command';
+import { BlogsRepositoryPSQL } from './blogs/Repository/PostgreSQL/blogs.repository.psql';
+import { BlogsQueryRepoPSQL } from './blogs/Repository/PostgreSQL/blogs.queryRepo.psql';
+import { PostsRepositoryPSQL } from './posts/Repository/PostgreSQL/posts.repository.psql';
+import { PostsQueryRepoPSQL } from './posts/Repository/PostgreSQL/posts.queryRepo.psql';
 
 const BlogCommandHandlers = [
   CreateBlogHandler,
@@ -65,11 +75,23 @@ const CommentCommandHandlers = [
   controllers: [BlogsController, PostsController, CommentsController],
   providers: [
     BlogsService,
-    BlogsRepository,
-    BlogsQueryRepo,
+    {
+      provide: BLOGS_REPOSITORY,
+      useClass: BlogsRepositoryPSQL,
+    },
+    {
+      provide: BLOGS_QUERY_REPO,
+      useClass: BlogsQueryRepoPSQL,
+    },
     PostsService,
-    PostsRepository,
-    PostsQueryRepo,
+    {
+      provide: POSTS_REPOSITORY,
+      useClass: PostsRepositoryPSQL,
+    },
+    {
+      provide: POSTS_QUERY_REPO,
+      useClass: PostsQueryRepoPSQL,
+    },
     CommentsService,
     CommentsRepository,
     CommentsQueryRepo,
@@ -79,8 +101,8 @@ const CommentCommandHandlers = [
     ...CommentCommandHandlers,
   ],
   exports: [
-    BlogsRepository,
-    PostsRepository,
+    BLOGS_REPOSITORY,
+    POSTS_REPOSITORY,
     CommentsRepository,
     LikesRepository,
   ],

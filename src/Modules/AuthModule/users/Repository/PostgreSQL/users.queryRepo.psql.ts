@@ -5,11 +5,7 @@ import {
   UserDocument,
   UserViewModel,
 } from '../../users.models';
-import {
-  Paginated,
-  Paginator,
-  SortDirections,
-} from '../../../../../Models/paginator.models';
+import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUsersQueryRepo } from '../../Service/users.service';

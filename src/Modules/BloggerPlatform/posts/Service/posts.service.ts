@@ -1,18 +1,18 @@
-import { PostsRepository } from '../posts.repository';
-import { BlogsRepository } from '../../blogs/blogs.repository';
-import { Injectable } from '@nestjs/common';
-import { Post, type PostModelType } from '../posts.models';
+import { Inject, Injectable } from '@nestjs/common';
+import {
+  Post,
+  PostDocument,
+  type PostModelType,
+  PostViewModel,
+} from '../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
+import { Paginated, Paginator } from '../../../../Models/paginator.models';
+import {
+  BLOGS_REPOSITORY,
+  type IBlogsRepository,
+} from '../../blogs/Service/blogs.service';
 
-@Injectable()
-export class PostsService {
-  constructor(
-    private repository: PostsRepository,
-    @InjectModel(Post.name) protected PostModel: PostModelType,
-    private blogsRepository: BlogsRepository,
-  ) {}
-
-  /*changeLikeStatus = async (
+/*changeLikeStatus = async (
     postId: string,
     token: string,
     status: likeStatus,
@@ -39,4 +39,38 @@ export class PostsService {
     }
     return container.get(LikesRepository).save(like);
   };*/
+
+export interface IPostsRepository {
+  save(post: PostDocument): Promise<PostDocument>;
+
+  findById(id: string): Promise<PostDocument | null>;
+
+  delete(id: string): Promise<boolean>;
+
+  deleteAll(): Promise<void>;
+}
+
+export const POSTS_REPOSITORY = Symbol('IPostsRepository');
+
+export interface IPostsQueryRepo {
+  findWithSearchAndPagination(
+    blogId: string,
+    paginationSettings: Paginator,
+    userId: string,
+  ): Promise<Paginated<PostViewModel>>;
+
+  findById(id: string, userId: string): Promise<PostViewModel | null>;
+}
+
+export const POSTS_QUERY_REPO = Symbol('IPostsQueryRepo');
+
+@Injectable()
+export class PostsService {
+  constructor(
+    @Inject(POSTS_REPOSITORY)
+    private repository: IPostsRepository,
+    @InjectModel(Post.name) protected PostModel: PostModelType,
+    @Inject(BLOGS_REPOSITORY)
+    private blogsRepository: IBlogsRepository,
+  ) {}
 }

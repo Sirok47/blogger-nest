@@ -10,20 +10,29 @@ import {
   HttpCode,
   Controller,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
-import { PostsQueryRepo } from './posts.queryRepository';
-import { PostInputModel, PostViewModel } from './posts.models';
+import {
+  PostInputModel,
+  PostUnderBlogInputModel,
+  PostViewModel,
+} from './posts.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import {
   CommentInputModel,
   CommentViewModel,
 } from '../comments/comments.models';
 import { CommentsQueryRepo } from '../comments/comments.queryRepo';
-import { PostsRepository } from './posts.repository';
-import { InputID } from '../../../Models/IDmodel';
+import { InputBlogID, InputID } from '../../../Models/IDmodel';
 import { CreatePostCommand } from './Service/use-cases/create-post.command';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeletePostCommand } from './Service/use-cases/delete-post.command';
+import {
+  type IPostsQueryRepo,
+  type IPostsRepository,
+  POSTS_QUERY_REPO,
+  POSTS_REPOSITORY,
+} from './Service/posts.service';
 import { UpdatePostCommand } from './Service/use-cases/update-post.command';
 import { CreateCommentCommand } from '../comments/Service/use-cases/create-comment.command';
 import { ChangeLikeForPostCommand } from './Service/use-cases/change-like-for-post.command';
@@ -35,8 +44,10 @@ import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Gu
 @Controller('posts')
 export class PostsController {
   constructor(
-    private repository: PostsRepository,
-    private queryRepo: PostsQueryRepo,
+    @Inject(POSTS_REPOSITORY)
+    private repository: IPostsRepository,
+    @Inject(POSTS_QUERY_REPO)
+    private queryRepo: IPostsQueryRepo,
     private commentsQueryRepo: CommentsQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
@@ -73,7 +84,7 @@ export class PostsController {
     return result;
   }
 
-  @Get(':id/comments')
+  /*  @Get(':id/comments')
   @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getCommentsUnderPost(
@@ -89,19 +100,6 @@ export class PostsController {
       query,
       userId ?? '',
     );
-  }
-
-  @Post()
-  @UseGuards(AdminAuthGuard)
-  @HttpCode(201)
-  async postPost(@Body() post: PostInputModel): Promise<PostViewModel> {
-    const result: PostViewModel | null = await this.commandBus.execute(
-      new CreatePostCommand(post),
-    );
-    if (!result) {
-      throw new Error();
-    }
-    return result;
   }
 
   @Post(':id/comments')
@@ -121,33 +119,6 @@ export class PostsController {
     return result;
   }
 
-  @Put(':id')
-  @UseGuards(AdminAuthGuard)
-  @HttpCode(204)
-  async putPost(
-    @Param() { id }: InputID,
-    @Body() post: PostInputModel,
-  ): Promise<void> {
-    const result: boolean = await this.commandBus.execute(
-      new UpdatePostCommand(id, post),
-    );
-    if (!result) {
-      throw new NotFoundException();
-    }
-  }
-
-  @Delete(':id')
-  @UseGuards(AdminAuthGuard)
-  @HttpCode(204)
-  async deletePost(@Param() { id }: InputID): Promise<void> {
-    const result: boolean = await this.commandBus.execute(
-      new DeletePostCommand(id),
-    );
-    if (!result) {
-      throw new NotFoundException();
-    }
-  }
-
   @Put(':id/like-status')
   @UseGuards(UserAuthGuard)
   @HttpCode(204)
@@ -158,6 +129,83 @@ export class PostsController {
   ): Promise<void> {
     const result: boolean = await this.commandBus.execute(
       new ChangeLikeForPostCommand(id, likeStatus, token),
+    );
+    if (!result) {
+      throw new NotFoundException();
+    }
+  }*/
+}
+
+@Controller('sa/blogs/:blogId/posts')
+@UseGuards(AdminAuthGuard)
+export class SAPostsController {
+  constructor(
+    @Inject(POSTS_QUERY_REPO)
+    private queryRepo: IPostsQueryRepo,
+    private readonly commandBus: CommandBus,
+  ) {}
+
+  @Get()
+  @HttpCode(200)
+  async getPosts(
+    @Query() query: Paginator,
+    @Param('blogId') blogId: string,
+  ): Promise<Paginated<PostViewModel>> {
+    const result: Paginated<PostViewModel> =
+      await this.queryRepo.findWithSearchAndPagination(blogId, query, '');
+    if (!result) {
+      throw new Error();
+    }
+    return result;
+  }
+
+  @Post()
+  @HttpCode(201)
+  async postPostIntoBlog(
+    @Param() { blogId }: InputBlogID,
+    @Body() post: PostUnderBlogInputModel,
+  ): Promise<PostViewModel> {
+    post.blogId = blogId;
+    const result: PostViewModel | null = await this.commandBus.execute(
+      new CreatePostCommand(post),
+    );
+    if (!result) {
+      throw new NotFoundException();
+    }
+    return result;
+  }
+
+  /*@Post()
+  @HttpCode(201)
+  async postPost(@Body() post: PostInputModel): Promise<PostViewModel> {
+    const result: PostViewModel | null = await this.commandBus.execute(
+      new CreatePostCommand(post),
+    );
+    if (!result) {
+      throw new Error();
+    }
+    return result;
+  }*/
+
+  @Put(':id')
+  @HttpCode(204)
+  async putPost(
+    @Param() { id }: InputID,
+    @Body() post: PostUnderBlogInputModel,
+  ): Promise<void> {
+    const result: boolean = await this.commandBus.execute(
+      new UpdatePostCommand(id, post),
+    );
+    if (!result) {
+      throw new NotFoundException();
+    }
+  }
+
+  @Delete(':id')
+  @HttpCode(204)
+  async deletePost(@Param() { id }: InputID): Promise<void> {
+    const result: boolean = await this.commandBus.execute(
+      new DeletePostCommand(id),
     );
     if (!result) {
       throw new NotFoundException();

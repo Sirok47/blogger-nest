@@ -1,11 +1,11 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { likesInfo } from '../comments/comments.models';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { BlogsRepository } from '../blogs/blogs.repository';
 import { NotFoundException } from '@nestjs/common';
 import { BlogDocument } from '../blogs/blogs.models';
 import { LikeDocument } from '../likes/likes.models';
 import { IsMongoId, Length } from 'class-validator';
+import { IBlogsRepository } from '../blogs/Service/blogs.service';
 
 export class PostUnderBlogInputModel {
   @Length(1, 30)
@@ -67,7 +67,7 @@ export class Post {
 
   static async CreateDocument(
     inputPost: PostInputModel,
-    blogRepo: BlogsRepository,
+    blogRepo: IBlogsRepository,
   ): Promise<PostDocument> {
     const post = new this();
     post.title = inputPost.title;
@@ -75,7 +75,7 @@ export class Post {
     post.content = inputPost.content;
     const blog: BlogDocument | null = await blogRepo.findById(inputPost.blogId);
     if (!blog) throw new NotFoundException();
-    post.blogId = blog._id.toString();
+    post.blogId = blog.id;
     post.blogName = blog.name;
     return post as PostDocument;
   }
@@ -85,7 +85,7 @@ export class Post {
     this.shortDescription = newPost.shortDescription;
     this.content = newPost.content;
     if (!blog) throw new NotFoundException();
-    this.blogId = blog._id.toString();
+    this.blogId = blog.id;
     this.blogName = blog.name;
   }
 
@@ -95,13 +95,45 @@ export class Post {
     latestLikes: LikeDocument[],
   ): PostViewModel {
     return {
-      id: this._id.toString(),
+      id: this.id,
       title: this.title,
       shortDescription: this.shortDescription,
       content: this.content,
       blogId: this.blogId,
       blogName: this.blogName,
       createdAt: this.createdAt,
+      extendedLikesInfo: {
+        ...lInfo,
+        newestLikes: ((likes: LikeDocument[]): LatestLikesVM[] => {
+          const result: LatestLikesVM[] = [];
+          for (const like of likes) {
+            result.push({
+              addedAt: like.createdAt.toISOString(),
+              userId: like.userId,
+              login: like.login,
+            });
+          }
+          return result;
+        })(latestLikes),
+      },
+    };
+  }
+
+  //SQL
+
+  static mapSQLToViewModel(
+    post: PostDocument,
+    lInfo: likesInfo,
+    latestLikes: LikeDocument[],
+  ): PostViewModel {
+    return {
+      id: post.id,
+      title: post.title,
+      shortDescription: post.shortDescription,
+      content: post.content,
+      blogId: post.blogId,
+      blogName: post.blogName,
+      createdAt: post.createdAt,
       extendedLikesInfo: {
         ...lInfo,
         newestLikes: ((likes: LikeDocument[]): LatestLikesVM[] => {

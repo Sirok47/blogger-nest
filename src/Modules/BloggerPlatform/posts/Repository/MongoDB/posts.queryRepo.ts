@@ -4,15 +4,16 @@ import {
   PostDocument,
   type PostModelType,
   PostViewModel,
-} from './posts.models';
+} from '../../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { Paginated, Paginator } from '../../../Models/paginator.models';
-import { likesInfo } from '../comments/comments.models';
-import { LikeDocument } from '../likes/likes.models';
-import { LikesRepository } from '../likes/likes.repository';
+import { Paginated, Paginator } from '../../../../../Models/paginator.models';
+import { likesInfo } from '../../../comments/comments.models';
+import { LikeDocument } from '../../../likes/likes.models';
+import { LikesRepository } from '../../../likes/likes.repository';
+import { IPostsQueryRepo } from '../../Service/posts.service';
 
 @Injectable()
-export class PostsQueryRepo {
+export class PostsQueryRepo implements IPostsQueryRepo {
   constructor(
     @InjectModel(Post.name) private readonly PostModel: PostModelType,
     private readonly likesRepo: LikesRepository,

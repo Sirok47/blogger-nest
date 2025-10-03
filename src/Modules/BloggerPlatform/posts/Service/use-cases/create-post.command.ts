@@ -7,9 +7,17 @@ import {
   PostViewModel,
 } from '../../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { PostsRepository } from '../../posts.repository';
-import { BlogsRepository } from '../../../blogs/blogs.repository';
-import { likeStatus } from '../../../likes/likes.models';
+import { Inject } from '@nestjs/common';
+import {
+  type IPostsQueryRepo,
+  type IPostsRepository,
+  POSTS_QUERY_REPO,
+  POSTS_REPOSITORY,
+} from '../posts.service';
+import {
+  BLOGS_REPOSITORY,
+  type IBlogsRepository,
+} from '../../../blogs/Service/blogs.service';
 
 export class CreatePostCommand {
   constructor(public readonly post: PostInputModel) {}
@@ -18,8 +26,12 @@ export class CreatePostCommand {
 @CommandHandler(CreatePostCommand)
 export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
   constructor(
-    private readonly postsRepository: PostsRepository,
-    private readonly blogsRepository: BlogsRepository,
+    @Inject(POSTS_REPOSITORY)
+    private readonly postsRepository: IPostsRepository,
+    @Inject(BLOGS_REPOSITORY)
+    private readonly blogsRepository: IBlogsRepository,
+    @Inject(POSTS_QUERY_REPO)
+    private readonly postsQueryRepo: IPostsQueryRepo,
     @InjectModel(Post.name) private readonly PostModel: PostModelType,
   ) {}
 
@@ -30,14 +42,7 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
       this.blogsRepository,
     );
     const insertedPost: PostDocument = await this.postsRepository.save(newPost);
-    if (!insertedPost) return null;
-    return insertedPost.mapToViewModel(
-      {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: likeStatus.None,
-      },
-      [],
-    );
+    if (!insertedPost.id) return null;
+    return await this.postsQueryRepo.findById(insertedPost.id, '');
   }
 }

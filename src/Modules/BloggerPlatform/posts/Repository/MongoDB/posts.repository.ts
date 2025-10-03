@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Post, PostDocument, type PostModelType } from './posts.models';
+import { Post, PostDocument, type PostModelType } from '../../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
+import { IPostsRepository } from '../../Service/posts.service';
 
 @Injectable()
-export class PostsRepository {
+export class PostsRepository implements IPostsRepository {
   constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
 
   async save(post: PostDocument): Promise<PostDocument> {

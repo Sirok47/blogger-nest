@@ -9,12 +9,12 @@ import { LikesRepository } from '../../../likes/likes.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from '../../../../AuthModule/users/users.models';
-import { PostsRepository } from '../../posts.repository';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../../AuthModule/users/Service/users.service';
 import { Inject } from '@nestjs/common';
+import { type IPostsRepository, POSTS_REPOSITORY } from '../posts.service';
 
 export class ChangeLikeForPostCommand {
   constructor(
@@ -29,7 +29,8 @@ export class ChangeLikeForPostHandler
   implements ICommandHandler<ChangeLikeForPostCommand>
 {
   constructor(
-    private readonly repository: PostsRepository,
+    @Inject(POSTS_REPOSITORY)
+    private readonly repository: IPostsRepository,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
     private readonly likesRepository: LikesRepository,

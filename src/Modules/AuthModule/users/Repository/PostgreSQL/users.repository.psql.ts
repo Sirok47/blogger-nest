@@ -4,47 +4,42 @@ import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUsersRepository } from '../../Service/users.service';
 
+const SELECT_JSON_SERIALIZE_USER = `
+id,
+login,
+password,
+email,
+"createdAt",
+JSON_OBJECT('confirmationCode': "confirmationCode", 'confirmationCodeExpDate': "confirmationCodeExpDate", 'isConfirmed': "isConfirmed") as "confirmationData"
+`;
+
 @Injectable()
 export class UsersRepositoryPSQL implements IUsersRepository {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
   async save(user: UserDocument): Promise<UserDocument> {
-    return UsersRepositoryPSQL.mapSQLToUser(
-      (
-        await this.dataSource.query<
-          (UserDocument & {
-            confirmationCode: string;
-            confirmationCodeExpDate: string;
-            isConfirmed: boolean;
-          })[]
-        >(
-          `INSERT INTO "Users"
+    return (
+      await this.dataSource.query<UserDocument[]>(
+        `INSERT INTO "Users"
             (login, password, email, "createdAt", "confirmationCode", "confirmationCodeExpDate", "id")
             VALUES ($1,$2,$3,$4,$5,$6,$7)
-            RETURNING *`,
-          [
-            user.login,
-            user.password,
-            user.email,
-            new Date().toISOString(),
-            user.confirmationData.confirmationCode,
-            user.confirmationData.confirmationCodeExpDate,
-            user.id,
-          ],
-        )
-      )[0],
-    );
+            RETURNING ${SELECT_JSON_SERIALIZE_USER}`,
+        [
+          user.login,
+          user.password,
+          user.email,
+          new Date().toISOString(),
+          user.confirmationData.confirmationCode,
+          user.confirmationData.confirmationCodeExpDate,
+          user.id,
+        ],
+      )
+    )[0];
   }
 
   async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
-    const result = await this.dataSource.query<
-      (UserDocument & {
-        confirmationCode: string;
-        confirmationCodeExpDate: string;
-        isConfirmed: boolean;
-      })[]
-    >(
-      `SELECT * FROM "Users"
+    const result = await this.dataSource.query<UserDocument[]>(
+      `SELECT ${SELECT_JSON_SERIALIZE_USER} FROM "Users"
           WHERE login = $1
           OR email = $1`,
       [loginOrEmail],
@@ -52,43 +47,31 @@ export class UsersRepositoryPSQL implements IUsersRepository {
     if (result.length < 1) {
       return null;
     }
-    return UsersRepositoryPSQL.mapSQLToUser(result[0]);
+    return result[0];
   }
 
   async findById(id: string): Promise<UserDocument | null> {
-    const result = await this.dataSource.query<
-      (UserDocument & {
-        confirmationCode: string;
-        confirmationCodeExpDate: string;
-        isConfirmed: boolean;
-      })[]
-    >(
-      `SELECT * FROM "Users"
+    const result = await this.dataSource.query<UserDocument[]>(
+      `SELECT ${SELECT_JSON_SERIALIZE_USER} FROM "Users"
           WHERE "id" = $1`,
       [id],
     );
     if (result.length < 1) {
       return null;
     }
-    return UsersRepositoryPSQL.mapSQLToUser(result[0]);
+    return result[0];
   }
 
   async findWithCode(code: string): Promise<UserDocument | null> {
-    const result = await this.dataSource.query<
-      (UserDocument & {
-        confirmationCode: string;
-        confirmationCodeExpDate: string;
-        isConfirmed: boolean;
-      })[]
-    >(
-      `SELECT * FROM "Users"
+    const result = await this.dataSource.query<UserDocument[]>(
+      `SELECT ${SELECT_JSON_SERIALIZE_USER} FROM "Users"
           WHERE "confirmationCode" = $1`,
       [code],
     );
     if (result.length < 1) {
       return null;
     }
-    return UsersRepositoryPSQL.mapSQLToUser(result[0]);
+    return result[0];
   }
 
   async changePassword(userId: string, newPass: string): Promise<boolean> {
@@ -148,26 +131,5 @@ export class UsersRepositoryPSQL implements IUsersRepository {
 
   async deleteAll(): Promise<void> {
     await this.dataSource.query(`DELETE FROM "Users"`);
-  }
-
-  private static mapSQLToUser(
-    user: UserDocument & {
-      confirmationCode: string;
-      confirmationCodeExpDate: string;
-      isConfirmed: boolean;
-    },
-  ): any {
-    return {
-      id: user.id,
-      login: user.login,
-      password: user.password,
-      email: user.email,
-      createdAt: user.createdAt,
-      confirmationData: {
-        confirmationCode: user.confirmationCode,
-        confirmationCodeExpDate: user.confirmationCodeExpDate,
-        isConfirmed: user.isConfirmed,
-      },
-    };
   }
 }

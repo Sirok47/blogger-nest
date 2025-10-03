@@ -56,12 +56,23 @@ export class Blog {
 
   mapToViewModel(this: BlogDocument): BlogViewModel {
     return {
-      id: this._id.toString(),
+      id: this.id,
       name: this.name,
       description: this.description,
       websiteUrl: this.websiteUrl,
       isMembership: this.isMembership,
       createdAt: this.createdAt,
+    };
+  }
+
+  static mapSQLToViewModel(blog: BlogDocument): BlogViewModel {
+    return {
+      id: blog.id,
+      name: blog.name,
+      description: blog.description,
+      websiteUrl: blog.websiteUrl,
+      isMembership: blog.isMembership,
+      createdAt: blog.createdAt,
     };
   }
 }

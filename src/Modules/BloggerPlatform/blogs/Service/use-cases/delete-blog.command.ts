@@ -1,5 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { BlogsRepository } from '../../blogs.repository';
+import { BLOGS_REPOSITORY, type IBlogsRepository } from '../blogs.service';
+import { Inject } from '@nestjs/common';
 
 export class DeleteBlogCommand {
   constructor(public readonly id: string) {}
@@ -7,7 +8,10 @@ export class DeleteBlogCommand {
 
 @CommandHandler(DeleteBlogCommand)
 export class DeleteBlogHandler implements ICommandHandler<DeleteBlogCommand> {
-  constructor(private readonly blogsRepository: BlogsRepository) {}
+  constructor(
+    @Inject(BLOGS_REPOSITORY)
+    private readonly blogsRepository: IBlogsRepository,
+  ) {}
 
   async execute(command: DeleteBlogCommand): Promise<boolean> {
     return this.blogsRepository.delete(command.id);

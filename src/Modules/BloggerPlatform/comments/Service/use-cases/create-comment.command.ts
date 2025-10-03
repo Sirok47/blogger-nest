@@ -6,7 +6,6 @@ import {
   CommentViewModel,
 } from '../../comments.models';
 import { CommentsRepository } from '../../comments.repository';
-import { PostsRepository } from '../../../posts/posts.repository';
 import { PostDocument } from '../../../posts/posts.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { TokenService } from '../../../../JWT/jwt.service';
@@ -18,6 +17,10 @@ import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../../AuthModule/users/Service/users.service';
+import {
+  type IPostsRepository,
+  POSTS_REPOSITORY,
+} from '../../../posts/Service/posts.service';
 
 export class CreateCommentCommand {
   constructor(
@@ -36,7 +39,8 @@ export class CreateCommentHandler
     private readonly repository: CommentsRepository,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
-    private readonly postsRepository: PostsRepository,
+    @Inject(POSTS_REPOSITORY)
+    private readonly postsRepository: IPostsRepository,
     private readonly authToken: TokenService,
   ) {}
 

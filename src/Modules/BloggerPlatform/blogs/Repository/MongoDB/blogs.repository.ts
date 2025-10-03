@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument, type BlogModelType } from './blogs.models';
+import { Blog, BlogDocument, type BlogModelType } from '../../blogs.models';
+import { IBlogsRepository } from '../../Service/blogs.service';
 
 @Injectable()
-export class BlogsRepository {
+export class BlogsRepository implements IBlogsRepository {
   constructor(
     @InjectModel(Blog.name)
     private BlogModel: BlogModelType,
