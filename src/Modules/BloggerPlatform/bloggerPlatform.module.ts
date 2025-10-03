@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BlogsController } from './blogs/blogs.controller';
+import { BlogsController, SABlogsController } from './blogs/blogs.controller';
 import {
   BLOGS_QUERY_REPO,
   BLOGS_REPOSITORY,
@@ -14,7 +14,7 @@ import {
   PostsService,
 } from './posts/Service/posts.service';
 import { PostsRepository } from './posts/Repository/MongoDB/posts.repository';
-import { PostsController } from './posts/posts.controller';
+import { PostsController, SAPostsController } from './posts/posts.controller';
 import { Post, PostSchema } from './posts/posts.models';
 import { CommentsRepository } from './comments/comments.repository';
 import { CommentsQueryRepo } from './comments/comments.queryRepo';
@@ -72,7 +72,13 @@ const CommentCommandHandlers = [
       { name: Like.name, schema: LikeSchema },
     ]),
   ],
-  controllers: [BlogsController, PostsController, CommentsController],
+  controllers: [
+    BlogsController,
+    SABlogsController,
+    PostsController,
+    SAPostsController,
+    CommentsController,
+  ],
   providers: [
     BlogsService,
     {
