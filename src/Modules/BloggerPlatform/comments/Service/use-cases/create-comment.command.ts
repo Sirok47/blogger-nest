@@ -5,13 +5,12 @@ import {
   type CommentModelType,
   CommentViewModel,
 } from '../../comments.models';
-import { CommentsRepository } from '../../comments.repository';
 import { PostDocument } from '../../../posts/posts.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { UserDocument } from '../../../../AuthModule/users/users.models';
 import { Comment } from '../../comments.models';
-import { likeStatus } from '../../../likes/likes.models';
+import { LikeStatus } from '../../../likes/likes.models';
 import { Inject } from '@nestjs/common';
 import {
   type IUsersRepository,
@@ -21,6 +20,10 @@ import {
   type IPostsRepository,
   POSTS_REPOSITORY,
 } from '../../../posts/Service/posts.service';
+import {
+  COMMENTS_REPOSITORY,
+  type ICommentsRepository,
+} from '../comments.service';
 
 export class CreateCommentCommand {
   constructor(
@@ -36,7 +39,8 @@ export class CreateCommentHandler
 {
   constructor(
     @InjectModel(Comment.name) private readonly CommentModel: CommentModelType,
-    private readonly repository: CommentsRepository,
+    @Inject(COMMENTS_REPOSITORY)
+    private readonly repository: ICommentsRepository,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
     @Inject(POSTS_REPOSITORY)
@@ -71,10 +75,10 @@ export class CreateCommentHandler
     const insertedComment: CommentDocument =
       await this.repository.save(newComment);
     if (!insertedComment) return null;
-    return insertedComment.mapToViewModel({
+    return Comment.mapSQLToViewModel(insertedComment, {
       likesCount: 0,
       dislikesCount: 0,
-      myStatus: likeStatus.None,
+      myStatus: LikeStatus.None,
     });
   }
 }

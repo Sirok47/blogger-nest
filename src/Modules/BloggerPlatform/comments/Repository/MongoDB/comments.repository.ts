@@ -3,11 +3,12 @@ import {
   Comment,
   CommentDocument,
   type CommentModelType,
-} from './comments.models';
+} from '../../comments.models';
 import { Injectable } from '@nestjs/common';
+import { ICommentsRepository } from '../../Service/comments.service';
 
 @Injectable()
-export class CommentsRepository {
+export class CommentsRepository implements ICommentsRepository {
   constructor(
     @InjectModel(Comment.name) private CommentModel: CommentModelType,
   ) {}

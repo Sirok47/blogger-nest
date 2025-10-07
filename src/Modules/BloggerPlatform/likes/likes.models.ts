@@ -1,17 +1,19 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsEnum } from 'class-validator';
 import { UserDocument } from '../../AuthModule/users/users.models';
+import { LikesInfo } from '../comments/comments.models';
+import { SortDirections } from '../../../Models/paginator.models';
 
-export enum likeStatus {
+export enum LikeStatus {
   Like = 'Like',
   Dislike = 'Dislike',
   None = 'None',
 }
 
 export class LikeInputModel {
-  @IsEnum(likeStatus)
-  likeStatus: likeStatus;
+  @IsEnum(LikeStatus)
+  likeStatus: LikeStatus;
 }
 
 @Schema({ timestamps: true })
@@ -26,14 +28,14 @@ export class Like {
   targetId: string;
 
   @Prop({ type: String, required: true, min: 1, max: 10 })
-  status: likeStatus;
+  status: LikeStatus;
 
   readonly createdAt: Date;
 
   static CreateDoc(
     user: UserDocument,
     targetId: string,
-    status: likeStatus,
+    status: LikeStatus,
   ): LikeDocument {
     const like = new this();
     like.userId = user.id as string;
@@ -49,3 +51,21 @@ LikeSchema.loadClass(Like);
 
 export type LikeDocument = HydratedDocument<Like>;
 export type LikeModelType = Model<LikeDocument> & typeof Like;
+
+export interface ILikesRepository {
+  save(like: LikeDocument);
+
+  getLike(commentId: string, userId: string): Promise<LikeDocument | null>;
+
+  countLikesOf(targetId: string): Promise<number>;
+
+  countDislikesOf(targetId: string): Promise<number>;
+
+  gatherLikesInfoOf(targetId: string, userId: string): Promise<LikesInfo>;
+
+  getLatestLikes(postId: string): Promise<LikeDocument[]>;
+
+  deleteAll();
+}
+
+export const LIKES_REPOSITORY = Symbol('ILikesRepository');

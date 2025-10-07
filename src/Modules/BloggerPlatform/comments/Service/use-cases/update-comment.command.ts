@@ -1,8 +1,11 @@
 import { CommentDocument, CommentInputModel } from '../../comments.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { CommentsRepository } from '../../comments.repository';
-import { CommentsService } from '../../comments.service';
-import { ForbiddenException } from '@nestjs/common';
+import {
+  COMMENTS_REPOSITORY,
+  CommentsService,
+  type ICommentsRepository,
+} from '../comments.service';
+import { ForbiddenException, Inject } from '@nestjs/common';
 
 export class UpdateCommentCommand {
   constructor(
@@ -17,7 +20,8 @@ export class UpdateCommentHandler
   implements ICommandHandler<UpdateCommentCommand>
 {
   constructor(
-    private readonly repository: CommentsRepository,
+    @Inject(COMMENTS_REPOSITORY)
+    private readonly repository: ICommentsRepository,
     private readonly service: CommentsService,
   ) {}
 

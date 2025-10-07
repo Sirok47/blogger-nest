@@ -1,5 +1,5 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { likesInfo } from '../comments/comments.models';
+import { LikesInfo } from '../comments/comments.models';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { NotFoundException } from '@nestjs/common';
 import { BlogDocument } from '../blogs/blogs.models';
@@ -42,7 +42,7 @@ export type LatestLikesVM = {
   login: string;
 };
 
-type ExtendedLikesInfo = likesInfo & {
+type ExtendedLikesInfo = LikesInfo & {
   newestLikes: LatestLikesVM[];
 };
 
@@ -91,7 +91,7 @@ export class Post {
 
   mapToViewModel(
     this: PostDocument,
-    lInfo: likesInfo,
+    lInfo: LikesInfo,
     latestLikes: LikeDocument[],
   ): PostViewModel {
     return {
@@ -123,7 +123,7 @@ export class Post {
 
   static mapSQLToViewModel(
     post: PostDocument,
-    lInfo: likesInfo,
+    lInfo: LikesInfo,
     latestLikes: LikeDocument[],
   ): PostViewModel {
     return {

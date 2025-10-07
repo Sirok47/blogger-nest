@@ -1,7 +1,5 @@
 import { Controller, Delete, Get, HttpCode, Inject } from '@nestjs/common';
 import { AppService } from './app.service';
-import { CommentsRepository } from './Modules/BloggerPlatform/comments/comments.repository';
-import { LikesRepository } from './Modules/BloggerPlatform/likes/likes.repository';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
@@ -18,6 +16,14 @@ import {
   type IPostsRepository,
   POSTS_REPOSITORY,
 } from './Modules/BloggerPlatform/posts/Service/posts.service';
+import {
+  type ILikesRepository,
+  LIKES_REPOSITORY,
+} from './Modules/BloggerPlatform/likes/likes.models';
+import {
+  COMMENTS_REPOSITORY,
+  type ICommentsRepository,
+} from './Modules/BloggerPlatform/comments/Service/comments.service';
 
 @Controller()
 export class AppController {
@@ -29,8 +35,10 @@ export class AppController {
     private postsRepository: IPostsRepository,
     @Inject(USERS_REPOSITORY)
     private usersRepository: IUsersRepository,
-    private commentsRepository: CommentsRepository,
-    private likesRepository: LikesRepository,
+    @Inject(COMMENTS_REPOSITORY)
+    private commentsRepository: ICommentsRepository,
+    @Inject(LIKES_REPOSITORY)
+    private likesRepository: ILikesRepository,
     @Inject(SESSIONS_REPOSITORY)
     private sessionsRepository: ISessionsRepository,
   ) {}

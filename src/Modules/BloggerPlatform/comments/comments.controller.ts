@@ -4,12 +4,12 @@ import {
   Delete,
   Get,
   HttpCode,
+  Inject,
   NotFoundException,
   Param,
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CommentsQueryRepo } from './comments.queryRepo';
 import { CommentInputModel, CommentViewModel } from './comments.models';
 import { InputID } from '../../../Models/IDmodel';
 import { CommandBus } from '@nestjs/cqrs';
@@ -19,11 +19,16 @@ import { LikeInputModel } from '../likes/likes.models';
 import { ChangeLikeForCommentCommand } from './Service/use-cases/change-like-for-comment.command';
 import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
 import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';
+import {
+  COMMENTS_QUERY_REPO,
+  type ICommentsQueryRepo,
+} from './Service/comments.service';
 
 @Controller('comments')
 export class CommentsController {
   constructor(
-    private readonly queryRepo: CommentsQueryRepo,
+    @Inject(COMMENTS_QUERY_REPO)
+    private readonly queryRepo: ICommentsQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
 

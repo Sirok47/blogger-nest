@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import {
   Post,
   PostDocument,
@@ -7,16 +7,20 @@ import {
 } from '../../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
-import { likesInfo } from '../../../comments/comments.models';
-import { LikeDocument } from '../../../likes/likes.models';
-import { LikesRepository } from '../../../likes/likes.repository';
+import { LikesInfo } from '../../../comments/comments.models';
+import {
+  type ILikesRepository,
+  LikeDocument,
+  LIKES_REPOSITORY,
+} from '../../../likes/likes.models';
 import { IPostsQueryRepo } from '../../Service/posts.service';
 
 @Injectable()
 export class PostsQueryRepo implements IPostsQueryRepo {
   constructor(
     @InjectModel(Post.name) private readonly PostModel: PostModelType,
-    private readonly likesRepo: LikesRepository,
+    @Inject(LIKES_REPOSITORY)
+    private readonly likesRepo: ILikesRepository,
   ) {}
   async findWithSearchAndPagination(
     blogId: string,
@@ -34,7 +38,7 @@ export class PostsQueryRepo implements IPostsQueryRepo {
     const postsVM: PostViewModel[] = [];
     for (const post of posts) {
       const postId: string = post._id.toString();
-      const likeInfo: likesInfo = await this.likesRepo.gatherLikesInfoOf(
+      const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
         post._id.toString(),
         userId,
       );
@@ -50,7 +54,7 @@ export class PostsQueryRepo implements IPostsQueryRepo {
     const post: PostDocument | null = await this.PostModel.findById(id).exec();
     if (!post) return null;
     const postId: string = post._id.toString();
-    const likeInfo: likesInfo = await this.likesRepo.gatherLikesInfoOf(
+    const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       post._id.toString(),
       userId,
     );

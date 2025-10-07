@@ -1,16 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import {
+  ILikesRepository,
   Like,
   LikeDocument,
   type LikeModelType,
-  likeStatus,
+  LikeStatus,
 } from './likes.models';
 import { SortDirections } from '../../../Models/paginator.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { likesInfo } from '../comments/comments.models';
+import { LikesInfo } from '../comments/comments.models';
 
 @Injectable()
-export class LikesRepository {
+export class LikesRepository implements ILikesRepository {
   constructor(@InjectModel(Like.name) private LikeModel: LikeModelType) {}
 
   async save(like: LikeDocument) {
@@ -29,14 +30,14 @@ export class LikesRepository {
 
   async countLikesOf(targetId: string): Promise<number> {
     return this.LikeModel.countDocuments({
-      status: likeStatus.Like,
+      status: LikeStatus.Like,
       targetId: targetId,
     });
   }
 
   async countDislikesOf(targetId: string): Promise<number> {
     return this.LikeModel.countDocuments({
-      status: likeStatus.Dislike,
+      status: LikeStatus.Dislike,
       targetId: targetId,
     });
   }
@@ -44,13 +45,13 @@ export class LikesRepository {
   async gatherLikesInfoOf(
     targetId: string,
     userId: string,
-  ): Promise<likesInfo> {
+  ): Promise<LikesInfo> {
     return {
       likesCount: await this.countLikesOf(targetId),
       dislikesCount: await this.countDislikesOf(targetId),
       myStatus: userId
-        ? ((await this.getLike(targetId, userId))?.status ?? likeStatus.None)
-        : likeStatus.None,
+        ? ((await this.getLike(targetId, userId))?.status ?? LikeStatus.None)
+        : LikeStatus.None,
     };
   }
 

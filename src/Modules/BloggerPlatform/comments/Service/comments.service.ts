@@ -1,25 +1,53 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CommentsRepository } from './comments.repository';
-import { TokenService } from '../../JWT/jwt.service';
+import { TokenService } from '../../../JWT/jwt.service';
 import {
+  type ILikesRepository,
   Like,
   LikeDocument,
   type LikeModelType,
-  likeStatus,
-} from '../likes/likes.models';
+  LIKES_REPOSITORY,
+  LikeStatus,
+} from '../../likes/likes.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserDocument } from '../../AuthModule/users/users.models';
-import { LikesRepository } from '../likes/likes.repository';
+import { UserDocument } from '../../../AuthModule/users/users.models';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
-} from '../../AuthModule/users/Service/users.service';
+} from '../../../AuthModule/users/Service/users.service';
+import { CommentDocument, CommentViewModel } from '../comments.models';
+import { Paginated, Paginator } from '../../../../Models/paginator.models';
+
+export interface ICommentsQueryRepo {
+  findWithSearchAndPagination(
+    postId: string,
+    paginationSettings: Paginator,
+    userId: string,
+  ): Promise<Paginated<CommentViewModel>>;
+
+  findById(id: string, userId: string): Promise<CommentViewModel | null>;
+}
+
+export const COMMENTS_QUERY_REPO = Symbol('ICommentsQueryRepo');
+
+export interface ICommentsRepository {
+  save(comment: CommentDocument): Promise<CommentDocument>;
+
+  findById(id: string): Promise<CommentDocument | null>;
+
+  delete(id: string): Promise<boolean>;
+
+  deleteAll(): Promise<void>;
+}
+
+export const COMMENTS_REPOSITORY = Symbol('ICommentsRepository');
 
 @Injectable()
 export class CommentsService {
   constructor(
-    private readonly repository: CommentsRepository,
-    private readonly likesRepository: LikesRepository,
+    @Inject(COMMENTS_REPOSITORY)
+    private readonly repository: ICommentsRepository,
+    @Inject(LIKES_REPOSITORY)
+    private readonly likesRepository: ILikesRepository,
     private readonly authToken: TokenService,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
@@ -37,7 +65,7 @@ export class CommentsService {
   async changeLikeStatus(
     commentId: string,
     token: string,
-    status: likeStatus,
+    status: LikeStatus,
   ): Promise<boolean> {
     const userId = this.authToken.extractJWTPayload(token).userId as string;
     const user: UserDocument | null =

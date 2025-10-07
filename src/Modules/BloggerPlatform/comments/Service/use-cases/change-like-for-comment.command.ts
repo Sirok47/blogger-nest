@@ -1,25 +1,29 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/mongoose';
-import { CommentsRepository } from '../../comments.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import {
+  type ILikesRepository,
   Like,
   LikeDocument,
   type LikeModelType,
-  likeStatus,
+  LIKES_REPOSITORY,
+  LikeStatus,
 } from '../../../likes/likes.models';
-import { LikesRepository } from '../../../likes/likes.repository';
 import { UserDocument } from '../../../../AuthModule/users/users.models';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../../AuthModule/users/Service/users.service';
 import { Inject } from '@nestjs/common';
+import {
+  COMMENTS_REPOSITORY,
+  type ICommentsRepository,
+} from '../comments.service';
 
 export class ChangeLikeForCommentCommand {
   constructor(
     public readonly commentId: string,
-    public readonly status: likeStatus,
+    public readonly status: LikeStatus,
     public readonly userToken: string,
   ) {}
 }
@@ -29,10 +33,12 @@ export class ChangeLikeForCommentHandler
   implements ICommandHandler<ChangeLikeForCommentCommand>
 {
   constructor(
-    private readonly repository: CommentsRepository,
+    @Inject(COMMENTS_REPOSITORY)
+    private readonly repository: ICommentsRepository,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
-    private readonly likesRepository: LikesRepository,
+    @Inject(LIKES_REPOSITORY)
+    private readonly likesRepository: ILikesRepository,
     private readonly authToken: TokenService,
     @InjectModel(Like.name) private readonly LikeModel: LikeModelType,
   ) {}

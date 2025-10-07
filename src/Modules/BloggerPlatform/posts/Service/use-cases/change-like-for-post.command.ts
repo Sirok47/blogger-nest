@@ -1,11 +1,12 @@
 import {
+  type ILikesRepository,
   Like,
   LikeDocument,
   type LikeModelType,
-  likeStatus,
+  LIKES_REPOSITORY,
+  LikeStatus,
 } from '../../../likes/likes.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { LikesRepository } from '../../../likes/likes.repository';
 import { TokenService } from '../../../../JWT/jwt.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from '../../../../AuthModule/users/users.models';
@@ -19,7 +20,7 @@ import { type IPostsRepository, POSTS_REPOSITORY } from '../posts.service';
 export class ChangeLikeForPostCommand {
   constructor(
     public readonly postId: string,
-    public readonly status: likeStatus,
+    public readonly status: LikeStatus,
     public readonly userToken: string,
   ) {}
 }
@@ -33,7 +34,8 @@ export class ChangeLikeForPostHandler
     private readonly repository: IPostsRepository,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
-    private readonly likesRepository: LikesRepository,
+    @Inject(LIKES_REPOSITORY)
+    private readonly likesRepository: ILikesRepository,
     private readonly authToken: TokenService,
     @InjectModel(Like.name) private readonly LikeModel: LikeModelType,
   ) {}

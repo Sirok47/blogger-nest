@@ -5,7 +5,6 @@ import {
   BLOGS_REPOSITORY,
   BlogsService,
 } from './blogs/Service/blogs.service';
-import { BlogsRepository } from './blogs/Repository/MongoDB/blogs.repository';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Blog, BlogSchema } from './blogs/blogs.models';
 import {
@@ -13,13 +12,14 @@ import {
   POSTS_REPOSITORY,
   PostsService,
 } from './posts/Service/posts.service';
-import { PostsRepository } from './posts/Repository/MongoDB/posts.repository';
 import { PostsController, SAPostsController } from './posts/posts.controller';
 import { Post, PostSchema } from './posts/posts.models';
-import { CommentsRepository } from './comments/comments.repository';
-import { CommentsQueryRepo } from './comments/comments.queryRepo';
 import { CommentsController } from './comments/comments.controller';
-import { CommentsService } from './comments/comments.service';
+import {
+  COMMENTS_QUERY_REPO,
+  COMMENTS_REPOSITORY,
+  CommentsService,
+} from './comments/Service/comments.service';
 import { Comment, CommentSchema } from './comments/comments.models';
 import { CreateBlogHandler } from './blogs/Service/use-cases/create-blog.command';
 import { UpdateBlogHandler } from './blogs/Service/use-cases/update-blog.command';
@@ -27,8 +27,7 @@ import { DeleteBlogHandler } from './blogs/Service/use-cases/delete-blog.command
 import { CreatePostHandler } from './posts/Service/use-cases/create-post.command';
 import { UpdatePostHandler } from './posts/Service/use-cases/update-post.command';
 import { DeletePostHandler } from './posts/Service/use-cases/delete-post.command';
-import { Like, LikeSchema } from './likes/likes.models';
-import { LikesRepository } from './likes/likes.repository';
+import { Like, LIKES_REPOSITORY, LikeSchema } from './likes/likes.models';
 import { TokenModule } from '../JWT/jwt.module';
 import { AuthModule } from '../AuthModule/auth.module';
 import { ChangeLikeForCommentHandler } from './comments/Service/use-cases/change-like-for-comment.command';
@@ -40,6 +39,9 @@ import { BlogsRepositoryPSQL } from './blogs/Repository/PostgreSQL/blogs.reposit
 import { BlogsQueryRepoPSQL } from './blogs/Repository/PostgreSQL/blogs.queryRepo.psql';
 import { PostsRepositoryPSQL } from './posts/Repository/PostgreSQL/posts.repository.psql';
 import { PostsQueryRepoPSQL } from './posts/Repository/PostgreSQL/posts.queryRepo.psql';
+import { CommentsRepositoryPSQL } from './comments/Repository/PostgreSQL/comments.repository.psql';
+import { CommentsQueryRepoPSQL } from './comments/Repository/PostgreSQL/comments.queryRepo.psql';
+import { LikesRepositoryPSQL } from './likes/likes.repository.psql';
 
 const BlogCommandHandlers = [
   CreateBlogHandler,
@@ -99,9 +101,18 @@ const CommentCommandHandlers = [
       useClass: PostsQueryRepoPSQL,
     },
     CommentsService,
-    CommentsRepository,
-    CommentsQueryRepo,
-    LikesRepository,
+    {
+      provide: COMMENTS_REPOSITORY,
+      useClass: CommentsRepositoryPSQL,
+    },
+    {
+      provide: COMMENTS_QUERY_REPO,
+      useClass: CommentsQueryRepoPSQL,
+    },
+    {
+      provide: LIKES_REPOSITORY,
+      useClass: LikesRepositoryPSQL,
+    },
     ...BlogCommandHandlers,
     ...PostCommandHandlers,
     ...CommentCommandHandlers,
@@ -109,8 +120,8 @@ const CommentCommandHandlers = [
   exports: [
     BLOGS_REPOSITORY,
     POSTS_REPOSITORY,
-    CommentsRepository,
-    LikesRepository,
+    COMMENTS_REPOSITORY,
+    LIKES_REPOSITORY,
   ],
 })
 export class BloggerPlatformModule {}

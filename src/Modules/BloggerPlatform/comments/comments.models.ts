@@ -1,7 +1,11 @@
-import { likeStatus } from '../likes/likes.models';
+import { LikeStatus } from '../likes/likes.models';
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Length } from 'class-validator';
+import {
+  UserDocument,
+  UserViewModel,
+} from '../../AuthModule/users/users.models';
 
 export class CommentInputModel {
   @Length(20, 300)
@@ -45,12 +49,27 @@ export class Comment {
     return comment as CommentDocument;
   }
 
-  mapToViewModel(this: CommentDocument, lInfo: likesInfo): CommentViewModel {
+  mapToViewModel(this: CommentDocument, lInfo: LikesInfo): CommentViewModel {
     return {
       id: this._id.toString(),
       content: this.content,
       commentatorInfo: this.commentatorInfo,
       createdAt: this.createdAt.toISOString(),
+      likesInfo: lInfo,
+    };
+  }
+
+  //PSQL
+
+  static mapSQLToViewModel(
+    comment: CommentDocument,
+    lInfo: LikesInfo,
+  ): CommentViewModel {
+    return {
+      id: comment.id,
+      content: comment.content,
+      commentatorInfo: comment.commentatorInfo,
+      createdAt: comment.createdAt.toISOString(),
       likesInfo: lInfo,
     };
   }
@@ -67,11 +86,11 @@ export type CommentViewModel = {
   content: string;
   commentatorInfo: CommentatorInfo;
   createdAt: string;
-  likesInfo: likesInfo;
+  likesInfo: LikesInfo;
 };
 
-export type likesInfo = {
+export type LikesInfo = {
   likesCount: number;
   dislikesCount: number;
-  myStatus: likeStatus;
+  myStatus: LikeStatus;
 };

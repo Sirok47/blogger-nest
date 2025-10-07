@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { IPostsQueryRepo } from '../../Service/posts.service';
 import { Post, PostDocument, PostViewModel } from '../../posts.models';
-import { LikesRepository } from '../../../likes/likes.repository';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
-import { likesInfo } from '../../../comments/comments.models';
-import { LikeDocument, likeStatus } from '../../../likes/likes.models';
+import { LikesInfo } from '../../../comments/comments.models';
+import {
+  type ILikesRepository,
+  LikeDocument,
+  LIKES_REPOSITORY,
+} from '../../../likes/likes.models';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -12,7 +15,8 @@ import { DataSource } from 'typeorm';
 export class PostsQueryRepoPSQL implements IPostsQueryRepo {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
-    private readonly likesRepo: LikesRepository,
+    @Inject(LIKES_REPOSITORY)
+    private readonly likesRepo: ILikesRepository,
   ) {}
   async findWithSearchAndPagination(
     blogId: string,
@@ -41,19 +45,13 @@ export class PostsQueryRepoPSQL implements IPostsQueryRepo {
     )[0].count;
     const postsVM: PostViewModel[] = [];
     for (const post of posts) {
-      const likeInfo: likesInfo = {
-        likesCount: 0,
-        dislikesCount: 0,
-        myStatus: likeStatus.None,
-      };
-      /*await this.likesRepo.gatherLikesInfoOf(
+      const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
         post.id,
         userId,
-      );*/
-      const latestLikes: LikeDocument[] = [];
-      /*await this.likesRepo.getLatestLikes(
+      );
+      const latestLikes: LikeDocument[] = await this.likesRepo.getLatestLikes(
         post.id,
-      );*/
+      );
       postsVM.push(Post.mapSQLToViewModel(post, likeInfo, latestLikes));
     }
 
@@ -69,19 +67,13 @@ export class PostsQueryRepoPSQL implements IPostsQueryRepo {
       return null;
     }
     const post = result[0];
-    const likeInfo: likesInfo = {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: likeStatus.None,
-    };
-    /*await this.likesRepo.gatherLikesInfoOf(
+    const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       post.id,
       userId,
-    );*/
-    const latestLikes: LikeDocument[] = [];
-    /*await this.likesRepo.getLatestLikes(
+    );
+    const latestLikes: LikeDocument[] = await this.likesRepo.getLatestLikes(
       post.id,
-    );*/
+    );
     return Post.mapSQLToViewModel(post, likeInfo, latestLikes);
   }
 }

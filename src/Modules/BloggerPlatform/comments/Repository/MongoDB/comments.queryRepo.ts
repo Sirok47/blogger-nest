@@ -1,20 +1,25 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Comment,
   CommentDocument,
   type CommentModelType,
   CommentViewModel,
-  likesInfo,
-} from './comments.models';
-import { Paginated, Paginator } from '../../../Models/paginator.models';
-import { LikesRepository } from '../likes/likes.repository';
+  LikesInfo,
+} from '../../comments.models';
+import { Paginated, Paginator } from '../../../../../Models/paginator.models';
+import { ICommentsQueryRepo } from '../../Service/comments.service';
+import {
+  type ILikesRepository,
+  LIKES_REPOSITORY,
+} from '../../../likes/likes.models';
 
 @Injectable()
-export class CommentsQueryRepo {
+export class CommentsQueryRepo implements ICommentsQueryRepo {
   constructor(
     @InjectModel(Comment.name) private readonly CommentModel: CommentModelType,
-    private readonly likesRepo: LikesRepository,
+    @Inject(LIKES_REPOSITORY)
+    private readonly likesRepo: ILikesRepository,
   ) {}
 
   async findWithSearchAndPagination(
@@ -34,7 +39,7 @@ export class CommentsQueryRepo {
 
     const commentsVM: CommentViewModel[] = [];
     for (const comment of comments) {
-      const likeInfo: likesInfo = await this.likesRepo.gatherLikesInfoOf(
+      const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
         comment._id.toString(),
         userId,
       );
@@ -51,7 +56,7 @@ export class CommentsQueryRepo {
     const comment: CommentDocument | null =
       await this.CommentModel.findById(id).exec();
     if (!comment) return null;
-    const likeInfo: likesInfo = await this.likesRepo.gatherLikesInfoOf(
+    const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       comment._id.toString(),
       userId,
     );

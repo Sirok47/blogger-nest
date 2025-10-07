@@ -22,7 +22,7 @@ import {
   CommentInputModel,
   CommentViewModel,
 } from '../comments/comments.models';
-import { CommentsQueryRepo } from '../comments/comments.queryRepo';
+import { CommentsQueryRepo } from '../comments/Repository/MongoDB/comments.queryRepo';
 import { InputBlogID, InputID } from '../../../Models/IDmodel';
 import { CreatePostCommand } from './Service/use-cases/create-post.command';
 import { CommandBus } from '@nestjs/cqrs';
@@ -44,20 +44,25 @@ import {
   BLOGS_REPOSITORY,
   type IBlogsRepository,
 } from '../blogs/Service/blogs.service';
+import {
+  COMMENTS_QUERY_REPO,
+  type ICommentsQueryRepo,
+} from '../comments/Service/comments.service';
 
 @Controller('posts')
+@UseGuards(OptionalAccessTokenGuardGuard)
 export class PostsController {
   constructor(
     @Inject(POSTS_REPOSITORY)
     private repository: IPostsRepository,
     @Inject(POSTS_QUERY_REPO)
     private queryRepo: IPostsQueryRepo,
-    private commentsQueryRepo: CommentsQueryRepo,
+    @Inject(COMMENTS_QUERY_REPO)
+    private commentsQueryRepo: ICommentsQueryRepo,
     private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
-  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getPosts(
     @Query() query: Paginator,
@@ -72,7 +77,6 @@ export class PostsController {
   }
 
   @Get(':id')
-  @UseGuards(OptionalAccessTokenGuardGuard)
   @HttpCode(200)
   async getPostById(
     @Param() { id }: InputID,
@@ -88,8 +92,7 @@ export class PostsController {
     return result;
   }
 
-  /*  @Get(':id/comments')
-  @UseGuards(OptionalAccessTokenGuardGuard)
+  @Get(':id/comments')
   @HttpCode(200)
   async getCommentsUnderPost(
     @Param() { id }: InputID,
@@ -137,7 +140,7 @@ export class PostsController {
     if (!result) {
       throw new NotFoundException();
     }
-  }*/
+  }
 }
 
 @Controller('sa/blogs/:blogId/posts')

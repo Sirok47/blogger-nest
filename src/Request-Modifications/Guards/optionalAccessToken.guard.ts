@@ -19,3 +19,4 @@ export class OptionalAccessTokenGuardGuard implements CanActivate {
     return true;
   }
 }
+//TODO:Check if session is still active
