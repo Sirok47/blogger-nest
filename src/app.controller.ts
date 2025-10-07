@@ -53,12 +53,14 @@ export class AppController {
   @HttpCode(204)
   async deleteAll(): Promise<void> {
     await Promise.all([
-      this.blogsRepository.deleteAll(),
-      this.postsRepository.deleteAll(),
-      this.usersRepository.deleteAll(),
-      this.commentsRepository.deleteAll(),
       this.likesRepository.deleteAll(),
       this.sessionsRepository.deleteAll(),
     ]);
+    await Promise.all([
+      this.usersRepository.deleteAll(),
+      this.commentsRepository.deleteAll(),
+    ]);
+    await this.blogsRepository.deleteAll();
+    await this.postsRepository.deleteAll();
   }
 }
