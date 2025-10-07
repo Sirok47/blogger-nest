@@ -60,7 +60,7 @@ export class AppController {
       this.usersRepository.deleteAll(),
       this.commentsRepository.deleteAll(),
     ]);
-    await this.blogsRepository.deleteAll();
     await this.postsRepository.deleteAll();
+    await this.blogsRepository.deleteAll();
   }
 }
