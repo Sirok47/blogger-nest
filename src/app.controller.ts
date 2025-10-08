@@ -55,12 +55,12 @@ export class AppController {
     await Promise.all([
       this.likesRepository.deleteAll(),
       this.sessionsRepository.deleteAll(),
-    ]);
-    await Promise.all([
-      this.usersRepository.deleteAll(),
       this.commentsRepository.deleteAll(),
     ]);
     await this.postsRepository.deleteAll();
-    await this.blogsRepository.deleteAll();
+    await Promise.all([
+      this.usersRepository.deleteAll(),
+      this.blogsRepository.deleteAll(),
+    ]);
   }
 }
