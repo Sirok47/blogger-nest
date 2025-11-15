@@ -1,12 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import {
-  Post,
-  PostDocument,
-  PostInputModel,
-  type PostModelType,
-  PostViewModel,
-} from '../../posts.models';
-import { InjectModel } from '@nestjs/mongoose';
+import { Post, PostInputModel, PostViewModel } from '../../posts.models';
 import { Inject } from '@nestjs/common';
 import {
   type IPostsQueryRepo,
@@ -32,16 +25,15 @@ export class CreatePostHandler implements ICommandHandler<CreatePostCommand> {
     private readonly blogsRepository: IBlogsRepository,
     @Inject(POSTS_QUERY_REPO)
     private readonly postsQueryRepo: IPostsQueryRepo,
-    @InjectModel(Post.name) private readonly PostModel: PostModelType,
   ) {}
 
   async execute(command: CreatePostCommand): Promise<PostViewModel | null> {
     const { post } = command;
-    const newPost: PostDocument = await this.PostModel.CreateDocument(
+    const newPost: Post = await this.postsRepository.create(
       post,
       this.blogsRepository,
     );
-    const insertedPost: PostDocument = await this.postsRepository.save(newPost);
+    const insertedPost: Post = await this.postsRepository.save(newPost);
     if (!insertedPost.id) return null;
     return await this.postsQueryRepo.findById(insertedPost.id, '');
   }

@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MailerService } from '../../../../Mailer/mailer.service';
-import { UserDocument } from '../../../users/users.models';
+import { User } from '../../../users/users.models';
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { addOneDay } from '../../../../../Helpers/dateHelpers';
 import {
@@ -24,7 +24,7 @@ export class ResendConfirmationEmailHandler
   ) {}
 
   async execute({ email }: ResendConfirmationEmailCommand): Promise<boolean> {
-    const userToSendTo: UserDocument | null =
+    const userToSendTo: User | null =
       await this.usersRepo.findByLoginOrEmail(email);
     if (!userToSendTo) {
       throw new Error('No such email');

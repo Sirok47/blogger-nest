@@ -1,15 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { InjectModel } from '@nestjs/mongoose';
 import { TokenService } from '../../../../JWT/jwt.service';
 import {
   type ILikesRepository,
   Like,
-  LikeDocument,
-  type LikeModelType,
   LIKES_REPOSITORY,
   LikeStatus,
 } from '../../../likes/likes.models';
-import { UserDocument } from '../../../../AuthModule/users/users.models';
+import { User } from '../../../../AuthModule/users/users.models';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
@@ -40,7 +37,6 @@ export class ChangeLikeForCommentHandler
     @Inject(LIKES_REPOSITORY)
     private readonly likesRepository: ILikesRepository,
     private readonly authToken: TokenService,
-    @InjectModel(Like.name) private readonly LikeModel: LikeModelType,
   ) {}
 
   async execute({
@@ -50,19 +46,18 @@ export class ChangeLikeForCommentHandler
   }: ChangeLikeForCommentCommand): Promise<boolean> {
     const userId: string = this.authToken.extractJWTPayload(userToken)
       .userId as string;
-    const user: UserDocument | null =
-      await this.usersRepository.findById(userId);
+    const user: User | null = await this.usersRepository.findById(userId);
     if (commentId !== (await this.repository.findById(commentId))?.id || !user)
       return false;
-    let like: LikeDocument | null = await this.likesRepository.getLike(
+    let like: Like | null = await this.likesRepository.getLike(
       commentId,
       userId,
     );
     if (like) {
       like.status = status;
     } else {
-      like = this.LikeModel.CreateDoc(user, commentId, status);
+      like = this.likesRepository.create(user, commentId, status);
     }
-    return this.likesRepository.save(like);
+    return !!(await this.likesRepository.save(like));
   }
 }

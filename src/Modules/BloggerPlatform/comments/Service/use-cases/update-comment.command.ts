@@ -1,4 +1,4 @@
-import { CommentDocument, CommentInputModel } from '../../comments.models';
+import { Comment, CommentInputModel } from '../../comments.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   COMMENTS_REPOSITORY,
@@ -32,7 +32,7 @@ export class UpdateCommentHandler
   }: UpdateCommentCommand): Promise<boolean> {
     const isOwner = await this.service.checkOwnership(postId, userToken);
     if (!isOwner) throw new ForbiddenException();
-    const commentToUpdate: CommentDocument | null =
+    const commentToUpdate: Comment | null =
       await this.repository.findById(postId);
     if (!commentToUpdate) return false;
     commentToUpdate.content = comment.content;

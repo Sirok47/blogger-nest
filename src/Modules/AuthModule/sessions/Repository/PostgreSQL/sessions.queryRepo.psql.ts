@@ -1,20 +1,32 @@
 import { Injectable } from '@nestjs/common';
-import { SessionDocument, SessionViewModel } from '../../sessions.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { SessionPSQL, SessionViewModel } from '../../sessions.models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ISessionsQueryRepo } from '../../../auth/Service/auth.service';
 
 @Injectable()
 export class SessionsQueryRepoPSQL implements ISessionsQueryRepo {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(SessionPSQL)
+    private readonly repo: Repository<SessionPSQL>,
+  ) {}
+
   async getSessions(userId: string): Promise<SessionViewModel[]> {
-    const sessions: SessionDocument[] = await this.dataSource.query(
-      `
-      SELECT id, "IP" as ip, title, "lastActiveDate", "expDate", "deviceId", "userId" FROM "Sessions"
-      WHERE "userId" = $1
-      AND "expDate" > $2`,
-      [userId, new Date()],
-    );
+    const sessions: SessionPSQL[] = await this.repo
+      .createQueryBuilder('s')
+      .select([
+        's.id',
+        's.title',
+        's.lastActiveDate',
+        's.expDate',
+        's.deviceId',
+        's.userId',
+      ])
+      .addSelect('s.IP', 'ip')
+      .where('s.userId = :id', { id: userId })
+      .andWhere('s.expDate = :date', { date: new Date() })
+      .getMany();
+
     const result: SessionViewModel[] = [];
     for (const session of sessions) {
       result.push({

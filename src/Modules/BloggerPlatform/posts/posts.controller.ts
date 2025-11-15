@@ -12,17 +12,12 @@ import {
   UseGuards,
   Inject,
 } from '@nestjs/common';
-import {
-  PostInputModel,
-  PostUnderBlogInputModel,
-  PostViewModel,
-} from './posts.models';
+import { PostUnderBlogInputModel, PostViewModel } from './posts.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import {
   CommentInputModel,
   CommentViewModel,
 } from '../comments/comments.models';
-import { CommentsQueryRepo } from '../comments/Repository/MongoDB/comments.queryRepo';
 import { InputBlogID, InputID } from '../../../Models/IDmodel';
 import { CreatePostCommand } from './Service/use-cases/create-post.command';
 import { CommandBus } from '@nestjs/cqrs';

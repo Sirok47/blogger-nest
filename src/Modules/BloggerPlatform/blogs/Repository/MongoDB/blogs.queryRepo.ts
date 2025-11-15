@@ -1,7 +1,7 @@
 import {
-  Blog,
   BlogDocument,
   type BlogModelType,
+  BlogMongo,
   BlogViewModel,
 } from '../../blogs.models';
 import { Injectable } from '@nestjs/common';
@@ -11,7 +11,7 @@ import { IBlogsQueryRepo } from '../../Service/blogs.service';
 
 @Injectable()
 export class BlogsQueryRepo implements IBlogsQueryRepo {
-  constructor(@InjectModel(Blog.name) private BlogModel: BlogModelType) {}
+  constructor(@InjectModel(BlogMongo.name) private BlogModel: BlogModelType) {}
   async findWithSearchAndPagination(
     paginationSettings: Paginator,
   ): Promise<Paginated<BlogViewModel>> {
@@ -36,11 +36,8 @@ export class BlogsQueryRepo implements IBlogsQueryRepo {
   }
 
   async findById(id: string): Promise<BlogViewModel | null> {
-    const result: BlogDocument | null =
-      await this.BlogModel.findById(id).exec();
-    if (!result) {
-      return null;
-    }
-    return result.mapToViewModel();
+    const blog: BlogDocument | null = await this.BlogModel.findById(id).exec();
+
+    return blog ? blog.mapToViewModel() : null;
   }
 }

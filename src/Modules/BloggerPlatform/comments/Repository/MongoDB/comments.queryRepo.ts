@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import {
-  Comment,
   CommentDocument,
   type CommentModelType,
+  CommentMongo,
   CommentViewModel,
   LikesInfo,
 } from '../../comments.models';
@@ -13,13 +13,21 @@ import {
   type ILikesRepository,
   LIKES_REPOSITORY,
 } from '../../../likes/likes.models';
+import { User } from '../../../../AuthModule/users/users.models';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../../AuthModule/users/Service/users.service';
 
 @Injectable()
 export class CommentsQueryRepo implements ICommentsQueryRepo {
   constructor(
-    @InjectModel(Comment.name) private readonly CommentModel: CommentModelType,
+    @InjectModel(CommentMongo.name)
+    private readonly CommentModel: CommentModelType,
     @Inject(LIKES_REPOSITORY)
     private readonly likesRepo: ILikesRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
   ) {}
 
   async findWithSearchAndPagination(
@@ -43,7 +51,8 @@ export class CommentsQueryRepo implements ICommentsQueryRepo {
         comment._id.toString(),
         userId,
       );
-      commentsVM.push(comment.mapToViewModel(likeInfo));
+      const userInfo: User | null = await this.usersRepo.findById(userId);
+      commentsVM.push(comment.mapToViewModel(likeInfo, userInfo!));
     }
 
     return paginationSettings.Paginate<CommentViewModel>(
@@ -56,10 +65,11 @@ export class CommentsQueryRepo implements ICommentsQueryRepo {
     const comment: CommentDocument | null =
       await this.CommentModel.findById(id).exec();
     if (!comment) return null;
+    const userInfo: User | null = await this.usersRepo.findById(userId);
     const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       comment._id.toString(),
       userId,
     );
-    return comment.mapToViewModel(likeInfo);
+    return comment.mapToViewModel(likeInfo, userInfo!);
   }
 }

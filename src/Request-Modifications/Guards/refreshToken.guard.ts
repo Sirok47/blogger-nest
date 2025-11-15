@@ -46,7 +46,7 @@ export class RefreshTokenGuard implements CanActivate {
       req.params.userId = userId as string;
       req.params.deviceId = deviceId as string;
       return true;
-    } catch (_) {
+    } catch (e) {
       throw new UnauthorizedException();
     }
   }

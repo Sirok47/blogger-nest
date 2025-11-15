@@ -1,8 +1,11 @@
 import { InjectModel } from '@nestjs/mongoose';
 import {
   Comment,
+  CommentatorInfo,
   CommentDocument,
+  CommentInputModel,
   type CommentModelType,
+  CommentMongo,
 } from '../../comments.models';
 import { Injectable } from '@nestjs/common';
 import { ICommentsRepository } from '../../Service/comments.service';
@@ -10,8 +13,16 @@ import { ICommentsRepository } from '../../Service/comments.service';
 @Injectable()
 export class CommentsRepository implements ICommentsRepository {
   constructor(
-    @InjectModel(Comment.name) private CommentModel: CommentModelType,
+    @InjectModel(CommentMongo.name) private CommentModel: CommentModelType,
   ) {}
+
+  create(
+    postId: string,
+    input: CommentInputModel,
+    commentatorInfo: CommentatorInfo,
+  ): Comment {
+    return this.CommentModel.CreateDocument(postId, input, commentatorInfo);
+  }
 
   async save(comment: CommentDocument): Promise<CommentDocument> {
     return comment.save();

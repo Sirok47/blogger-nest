@@ -1,85 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserDocument } from '../../users.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { User, UserInputModel, UserPSQL } from '../../users.models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { IUsersRepository } from '../../Service/users.service';
-
-const SELECT_JSON_SERIALIZE_USER = `
-id,
-login,
-password,
-email,
-"createdAt",
-JSON_OBJECT('confirmationCode': "confirmationCode", 'confirmationCodeExpDate': "confirmationCodeExpDate", 'isConfirmed': "isConfirmed") as "confirmationData"
-`;
+import { ConfirmationDataPSQL } from '../../confData.models';
 
 @Injectable()
 export class UsersRepositoryPSQL implements IUsersRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(UserPSQL)
+    private readonly repo: Repository<UserPSQL>,
+    @InjectRepository(ConfirmationDataPSQL)
+    private readonly confDataRepo: Repository<ConfirmationDataPSQL>,
+  ) {}
 
-  async save(user: UserDocument): Promise<UserDocument> {
-    return (
-      await this.dataSource.query<UserDocument[]>(
-        `INSERT INTO "Users"
-            (login, password, email, "createdAt", "confirmationCode", "confirmationCodeExpDate", "id")
-            VALUES ($1,$2,$3,$4,$5,$6,$7)
-            RETURNING ${SELECT_JSON_SERIALIZE_USER}`,
-        [
-          user.login,
-          user.password,
-          user.email,
-          new Date().toISOString(),
-          user.confirmationData.confirmationCode,
-          user.confirmationData.confirmationCodeExpDate,
-          user.id,
-        ],
-      )
-    )[0];
+  createAdmin(user: UserInputModel): User {
+    return UserPSQL.CreateAdminUser(user);
   }
 
-  async findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null> {
-    const result = await this.dataSource.query<UserDocument[]>(
-      `SELECT ${SELECT_JSON_SERIALIZE_USER} FROM "Users"
-          WHERE login = $1
-          OR email = $1`,
-      [loginOrEmail],
-    );
-    if (result.length < 1) {
-      return null;
-    }
-    return result[0];
+  createUser(user: UserInputModel): User {
+    return UserPSQL.CreateRegularUser(user);
   }
 
-  async findById(id: string): Promise<UserDocument | null> {
-    const result = await this.dataSource.query<UserDocument[]>(
-      `SELECT ${SELECT_JSON_SERIALIZE_USER} FROM "Users"
-          WHERE "id" = $1`,
-      [id],
-    );
-    if (result.length < 1) {
-      return null;
-    }
-    return result[0];
+  async save(user: UserPSQL): Promise<UserPSQL> {
+    return this.repo.save(user);
   }
 
-  async findWithCode(code: string): Promise<UserDocument | null> {
-    const result = await this.dataSource.query<UserDocument[]>(
-      `SELECT ${SELECT_JSON_SERIALIZE_USER} FROM "Users"
-          WHERE "confirmationCode" = $1`,
-      [code],
-    );
-    if (result.length < 1) {
-      return null;
-    }
-    return result[0];
+  async findByLoginOrEmail(loginOrEmail: string): Promise<UserPSQL | null> {
+    return this.repo.findOneBy([
+      { login: loginOrEmail },
+      { email: loginOrEmail },
+    ]);
+  }
+
+  async findById(id: string): Promise<UserPSQL | null> {
+    return this.repo.findOneBy({ id: id });
+  }
+
+  async findWithCode(code: string): Promise<UserPSQL | null> {
+    return this.repo.findOneBy({
+      confirmationData: { confirmationCode: code },
+    });
   }
 
   async changePassword(userId: string, newPass: string): Promise<boolean> {
-    const result: UserDocument | null = await this.dataSource.query(
-      `UPDATE "Users" SET password=$2 WHERE id=$1`,
-      [userId, newPass],
+    const result = await this.repo.update(
+      { id: userId },
+      { password: newPass },
     );
-    return !!result![0];
+    return !!result.affected;
   }
 
   async updateConfirmationCode(
@@ -87,49 +56,45 @@ export class UsersRepositoryPSQL implements IUsersRepository {
     code: string,
     expDate: Date,
   ): Promise<boolean> {
-    const result: UserDocument | null = (
-      await this.dataSource.query<UserDocument[]>(
-        `UPDATE public."Users"
-            SET "confirmationCode"=$2, "confirmationCodeExpDate"=$3
-            WHERE id=$1;`,
-        [userId, code, expDate],
-      )
-    )[0];
-    return !!result;
+    const result = await this.repo.update(
+      { id: userId },
+      {
+        confirmationData: {
+          confirmationCode: code,
+          confirmationCodeExpDate: expDate,
+        },
+      },
+    );
+
+    return !!result.affected;
   }
 
   async setToConfirmed(code: string): Promise<boolean> {
-    const result: UserDocument | null = (
-      await this.dataSource.query<UserDocument[]>(
-        `UPDATE public."Users"
-            SET "isConfirmed"=TRUE
-            WHERE "confirmationCode"=$1;`,
-        [code],
-      )
-    )[0];
-    return !!result;
+    const result = await this.confDataRepo.update(
+      { confirmationCode: code },
+      { isConfirmed: true },
+    );
+
+    return !!result.affected;
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.dataSource.query(
-      `DELETE FROM "Users" WHERE id=$1`,
-      [id],
-    );
-    return !!result[1];
+    const result = await this.repo.delete(id);
+    return !!result.affected;
   }
 
   async retrievePassword(id: string): Promise<string | undefined> {
-    const result: User[] = await this.dataSource.query<User[]>(
-      `SELECT password FROM "Users" WHERE id=$1`,
-      [id],
-    );
-    if (result.length !== 1) {
+    const result: { password: string } | null = await this.repo.findOne({
+      where: { id: id },
+      select: { id: true, password: true },
+    });
+    if (!result?.password) {
       return undefined;
     }
-    return result[0].password;
+    return result.password;
   }
 
   async deleteAll(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "Users"`);
+    await this.repo.deleteAll();
   }
 }

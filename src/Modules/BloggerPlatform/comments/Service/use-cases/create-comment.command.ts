@@ -1,15 +1,12 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
-  CommentDocument,
+  Comment,
   CommentInputModel,
-  type CommentModelType,
   CommentViewModel,
 } from '../../comments.models';
-import { PostDocument } from '../../../posts/posts.models';
-import { InjectModel } from '@nestjs/mongoose';
+import { Post } from '../../../posts/posts.models';
 import { TokenService } from '../../../../JWT/jwt.service';
-import { UserDocument } from '../../../../AuthModule/users/users.models';
-import { Comment } from '../../comments.models';
+import { User } from '../../../../AuthModule/users/users.models';
 import { LikeStatus } from '../../../likes/likes.models';
 import { Inject } from '@nestjs/common';
 import {
@@ -38,7 +35,6 @@ export class CreateCommentHandler
   implements ICommandHandler<CreateCommentCommand>
 {
   constructor(
-    @InjectModel(Comment.name) private readonly CommentModel: CommentModelType,
     @Inject(COMMENTS_REPOSITORY)
     private readonly repository: ICommentsRepository,
     @Inject(USERS_REPOSITORY)
@@ -53,32 +49,28 @@ export class CreateCommentHandler
     comment,
     userToken,
   }: CreateCommentCommand): Promise<CommentViewModel | null> {
-    const post: PostDocument | null =
-      await this.postsRepository.findById(postId);
+    const post: Post | null = await this.postsRepository.findById(postId);
     if (!post) return null;
     const userId: string = this.authToken.extractJWTPayload(userToken)
       ?.userId as string;
     if (!userId) return null;
-    const user: UserDocument | null =
-      await this.usersRepository.findById(userId);
+    const user: User | null = await this.usersRepository.findById(userId);
     if (!user) return null;
     const userLogin: string = user.login;
     if (!userLogin) return null;
-    const newComment: CommentDocument = this.CommentModel.CreateDocument(
-      postId,
-      comment,
-      {
-        userId: userId,
-        userLogin: userLogin,
-      },
-    );
-    const insertedComment: CommentDocument =
-      await this.repository.save(newComment);
-    if (!insertedComment) return null;
-    return Comment.mapSQLToViewModel(insertedComment, {
-      likesCount: 0,
-      dislikesCount: 0,
-      myStatus: LikeStatus.None,
+    const newComment: Comment = this.repository.create(postId, comment, {
+      userId: userId,
+      userLogin: userLogin,
     });
+    const insertedComment: Comment = await this.repository.save(newComment);
+    if (!insertedComment) return null;
+    return insertedComment.mapToViewModel(
+      {
+        likesCount: 0,
+        dislikesCount: 0,
+        myStatus: LikeStatus.None,
+      },
+      user,
+    );
   }
 }

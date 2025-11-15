@@ -1,7 +1,9 @@
 import {
   Blog,
   BlogDocument,
+  BlogInputModel,
   type BlogModelType,
+  BlogMongo,
   BlogViewModel,
 } from '../blogs.models';
 import { Inject, Injectable } from '@nestjs/common';
@@ -19,9 +21,11 @@ export interface IBlogsQueryRepo {
 export const BLOGS_QUERY_REPO = Symbol('IBlogsQueryRepo');
 
 export interface IBlogsRepository {
-  save(blog: BlogDocument): Promise<BlogDocument>;
+  create(inputBlog: BlogInputModel): Blog;
 
-  findById(id: string): Promise<BlogDocument | null>;
+  save(blog: Blog): Promise<Blog>;
+
+  findById(id: string): Promise<Blog | null>;
 
   delete(id: string): Promise<boolean>;
 
@@ -35,6 +39,6 @@ export class BlogsService {
   constructor(
     @Inject(BLOGS_REPOSITORY)
     protected repository: IBlogsRepository,
-    @InjectModel(Blog.name) protected BlogModel: BlogModelType,
+    @InjectModel(BlogMongo.name) protected BlogModel: BlogModelType,
   ) {}
 }

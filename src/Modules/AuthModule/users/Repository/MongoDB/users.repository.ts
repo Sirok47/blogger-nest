@@ -1,11 +1,25 @@
-import { User, UserDocument, type UserModelType } from '../../users.models';
+import {
+  User,
+  UserDocument,
+  UserInputModel,
+  type UserModelType,
+  UserMongo,
+} from '../../users.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { IUsersRepository } from '../../Service/users.service';
 
 @Injectable()
 export class UsersRepository implements IUsersRepository {
-  constructor(@InjectModel(User.name) private UserModel: UserModelType) {}
+  constructor(@InjectModel(UserMongo.name) private UserModel: UserModelType) {}
+
+  createAdmin(user: UserInputModel): User {
+    return this.UserModel.CreateAdminUser(user);
+  }
+
+  createUser(user: UserInputModel): User {
+    return this.UserModel.CreateRegularUser(user);
+  }
 
   async save(user: UserDocument): Promise<UserDocument> {
     return user.save();

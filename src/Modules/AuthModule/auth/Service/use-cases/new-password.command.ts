@@ -4,8 +4,8 @@ import {
 } from '../../../users/Service/users.service';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HashService } from '../../../../Crypto/bcrypt';
-import { UserDocument } from '../../../users/users.models';
 import { Inject } from '@nestjs/common';
+import { User } from '../../../users/users.models';
 
 export class ConfirmPasswordChangeCommand {
   constructor(
@@ -28,8 +28,7 @@ export class ConfirmPasswordChangeHandler
     code,
     newPass,
   }: ConfirmPasswordChangeCommand): Promise<boolean> {
-    const userToConfirm: UserDocument | null =
-      await this.usersRepo.findWithCode(code);
+    const userToConfirm: User | null = await this.usersRepo.findWithCode(code);
     if (!userToConfirm || !userToConfirm.confirmationData.isConfirmed) {
       return false;
     }

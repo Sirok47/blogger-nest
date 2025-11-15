@@ -4,18 +4,24 @@ import {
   Like,
   LikeDocument,
   type LikeModelType,
+  LikeMongo,
   LikeStatus,
-} from './likes.models';
-import { SortDirections } from '../../../Models/paginator.models';
+} from '../likes.models';
+import { SortDirections } from '../../../../Models/paginator.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { LikesInfo } from '../comments/comments.models';
+import { LikesInfo } from '../../comments/comments.models';
+import { User } from '../../../AuthModule/users/users.models';
 
 @Injectable()
 export class LikesRepository implements ILikesRepository {
-  constructor(@InjectModel(Like.name) private LikeModel: LikeModelType) {}
+  constructor(@InjectModel(LikeMongo.name) private LikeModel: LikeModelType) {}
 
-  async save(like: LikeDocument) {
-    return !!(await like.save());
+  create(user: User, targetId: string, status: LikeStatus): Like {
+    return this.LikeModel.CreateDoc(user, targetId, status);
+  }
+
+  async save(like: LikeDocument): Promise<LikeDocument> {
+    return like.save();
   }
 
   async getLike(
@@ -59,6 +65,7 @@ export class LikesRepository implements ILikesRepository {
     return await this.LikeModel.find({ targetId: postId, status: 'Like' })
       .sort({ createdAt: SortDirections.desc })
       .limit(3)
+      .populate('user')
       .exec();
   }
 

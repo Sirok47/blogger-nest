@@ -1,9 +1,15 @@
-import { HydratedDocument, Model } from 'mongoose';
-import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import mongoose, { HydratedDocument, Model } from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsEnum } from 'class-validator';
-import { UserDocument } from '../../AuthModule/users/users.models';
+import { User, UserMongo, UserPSQL } from '../../AuthModule/users/users.models';
 import { LikesInfo } from '../comments/comments.models';
-import { SortDirections } from '../../../Models/paginator.models';
+import {
+  BaseEntity,
+  Column,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 export enum LikeStatus {
   Like = 'Like',
@@ -16,13 +22,23 @@ export class LikeInputModel {
   likeStatus: LikeStatus;
 }
 
+export interface Like {
+  id: string;
+  userId: string;
+  targetId: string;
+  status: LikeStatus;
+  readonly createdAt: Date;
+}
+
 @Schema({ timestamps: true })
-export class Like {
+export class LikeMongo implements Like {
+  readonly id: string;
+
   @Prop({ type: String, required: true, min: 1, max: 100 })
   userId: string;
 
-  @Prop({ type: String, required: true, min: 1, max: 100 })
-  login: string;
+  @Prop({ type: mongoose.Types.ObjectId, required: true, ref: 'User' })
+  user: mongoose.Types.ObjectId | UserMongo;
 
   @Prop({ type: String, required: true, min: 1, max: 100 })
   targetId: string;
@@ -33,29 +49,59 @@ export class Like {
   readonly createdAt: Date;
 
   static CreateDoc(
-    user: UserDocument,
+    user: User,
     targetId: string,
     status: LikeStatus,
   ): LikeDocument {
     const like = new this();
-    like.userId = user.id as string;
-    like.login = user.login;
+    like.userId = user.id;
+    like.user = new mongoose.Types.ObjectId(user.id);
     like.targetId = targetId;
     like.status = status;
     return like as LikeDocument;
   }
 }
 
-export const LikeSchema = SchemaFactory.createForClass(Like);
-LikeSchema.loadClass(Like);
+export const LikeSchema = SchemaFactory.createForClass(LikeMongo);
+LikeSchema.loadClass(LikeMongo);
 
-export type LikeDocument = HydratedDocument<Like>;
-export type LikeModelType = Model<LikeDocument> & typeof Like;
+export type LikeDocument = HydratedDocument<LikeMongo>;
+export type LikeModelType = Model<LikeDocument> & typeof LikeMongo;
+
+@Entity('Likes')
+export class LikePSQL extends BaseEntity implements Like {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ManyToOne(() => UserPSQL, (user) => user.likes)
+  user: UserPSQL;
+  @Column()
+  userId: string;
+
+  @Column('varchar', { length: 100 })
+  targetId: string;
+
+  @Column('enum', { enum: LikeStatus })
+  status: LikeStatus;
+
+  @Column('timestamp with time zone', { default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  static CreateDoc(user: User, targetId: string, status: LikeStatus): LikePSQL {
+    const like = new this();
+    like.userId = user.id;
+    like.targetId = targetId;
+    like.status = status;
+    return like;
+  }
+}
 
 export interface ILikesRepository {
-  save(like: LikeDocument);
+  create(user: User, targetId: string, status: LikeStatus): Like;
 
-  getLike(commentId: string, userId: string): Promise<LikeDocument | null>;
+  save(like: Like): Promise<Like>;
+
+  getLike(commentId: string, userId: string): Promise<Like | null>;
 
   countLikesOf(targetId: string): Promise<number>;
 
@@ -63,9 +109,7 @@ export interface ILikesRepository {
 
   gatherLikesInfoOf(targetId: string, userId: string): Promise<LikesInfo>;
 
-  getLatestLikes(postId: string): Promise<LikeDocument[]>;
-
-  deleteAll();
+  deleteAll(): Promise<void>;
 }
 
 export const LIKES_REPOSITORY = Symbol('ILikesRepository');

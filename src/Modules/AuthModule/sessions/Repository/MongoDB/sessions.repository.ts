@@ -4,20 +4,26 @@ import {
   Session,
   SessionDocument,
   type SessionModelType,
+  SessionMongo,
 } from '../../sessions.models';
 import { ISessionsRepository } from '../../../auth/Service/auth.service';
 
 @Injectable()
 export class SessionsRepository implements ISessionsRepository {
   constructor(
-    @InjectModel(Session.name) private SessionModel: SessionModelType,
+    @InjectModel(SessionMongo.name) private SessionModel: SessionModelType,
   ) {}
+
+  create(session: Session): Session {
+    return this.SessionModel.CreateDocument(session);
+  }
+
   async getSessionByDeviceId(deviceId: string): Promise<Session | null> {
     return this.SessionModel.findOne({ deviceId: deviceId });
   }
 
-  async save(session: SessionDocument) {
-    return !!(await session.save());
+  async save(session: SessionDocument): Promise<SessionDocument> {
+    return await session.save();
   }
 
   async refreshSession(newSession: SessionDocument): Promise<boolean> {

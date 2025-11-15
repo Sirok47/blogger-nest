@@ -1,11 +1,4 @@
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  User,
-  UserDocument,
-  UserInputModel,
-  type UserModelType,
-  UserViewModel,
-} from '../../users.models';
+import { User, UserInputModel } from '../../users.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException, Inject } from '@nestjs/common';
 import { HashService } from '../../../../Crypto/bcrypt';
@@ -24,10 +17,9 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
     private readonly crypto: HashService,
-    @InjectModel(User.name) private readonly UserModel: UserModelType,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<UserDocument> {
+  async execute(command: CreateUserCommand): Promise<User> {
     const { user, admin } = command;
 
     if (await this.usersRepository.findByLoginOrEmail(user.login)) {
@@ -39,9 +31,9 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
 
     user.password = await this.crypto.toHash(user.password);
 
-    const newUser: UserDocument = admin
-      ? this.UserModel.CreateAdminUser(user)
-      : this.UserModel.CreateRegularUser(user);
+    const newUser: User = admin
+      ? this.usersRepository.createAdmin(user)
+      : this.usersRepository.createUser(user);
     return await this.usersRepository.save(newUser);
   }
 }

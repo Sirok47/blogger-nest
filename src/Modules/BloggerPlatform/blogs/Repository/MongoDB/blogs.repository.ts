@@ -1,14 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Blog, BlogDocument, type BlogModelType } from '../../blogs.models';
+import {
+  Blog,
+  BlogDocument,
+  BlogInputModel,
+  type BlogModelType,
+  BlogMongo,
+} from '../../blogs.models';
 import { IBlogsRepository } from '../../Service/blogs.service';
 
 @Injectable()
 export class BlogsRepository implements IBlogsRepository {
   constructor(
-    @InjectModel(Blog.name)
+    @InjectModel(BlogMongo.name)
     private BlogModel: BlogModelType,
   ) {}
+
+  create(inputBlog: BlogInputModel): Blog {
+    return this.BlogModel.CreateDocument(inputBlog);
+  }
 
   async save(blog: BlogDocument): Promise<BlogDocument> {
     return await blog.save();

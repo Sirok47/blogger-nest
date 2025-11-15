@@ -4,13 +4,8 @@ import {
   USERS_REPOSITORY,
 } from '../../../users/Service/users.service';
 import { HashService } from 'src/Modules/Crypto/bcrypt';
-import {
-  Session,
-  type SessionModelType,
-} from '../../../sessions/sessions.models';
-import { InjectModel } from '@nestjs/mongoose';
 import { generateUuid } from '../../../../../Helpers/uuid';
-import { UserDocument } from '../../../users/users.models';
+import { User } from '../../../users/users.models';
 import {
   AuthService,
   type ISessionsRepository,
@@ -35,14 +30,13 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     private readonly sessionRepo: ISessionsRepository,
     private readonly crypto: HashService,
     private readonly authService: AuthService,
-    @InjectModel(Session.name) private readonly SessionModel: SessionModelType,
   ) {}
 
   async execute({ searchTerm, password, reqMeta }: LoginCommand): Promise<{
     accessToken: string;
     refreshToken: string;
   } | null> {
-    const user: UserDocument | null =
+    const user: User | null =
       await this.usersRepo.findByLoginOrEmail(searchTerm);
     if (!user) {
       return null;
@@ -60,7 +54,6 @@ export class LoginHandler implements ICommandHandler<LoginCommand> {
     const deviceId = generateUuid().toString();
     const { session, accessToken, refreshToken } =
       this.authService.createNewSession(user.id, deviceId, reqMeta);
-
     if (!(await this.sessionRepo.save(session))) {
       return null;
     }

@@ -1,26 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
-  Post,
   PostDocument,
   type PostModelType,
+  PostMongo,
   PostViewModel,
 } from '../../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { LikesInfo } from '../../../comments/comments.models';
-import {
-  type ILikesRepository,
-  LikeDocument,
-  LIKES_REPOSITORY,
-} from '../../../likes/likes.models';
+import { LikeDocument } from '../../../likes/likes.models';
 import { IPostsQueryRepo } from '../../Service/posts.service';
+import { LikesRepository } from '../../../likes/Repository/likes.repository';
 
 @Injectable()
 export class PostsQueryRepo implements IPostsQueryRepo {
   constructor(
-    @InjectModel(Post.name) private readonly PostModel: PostModelType,
-    @Inject(LIKES_REPOSITORY)
-    private readonly likesRepo: ILikesRepository,
+    @InjectModel(PostMongo.name) private readonly PostModel: PostModelType,
+    @Inject(LikesRepository)
+    private readonly likesRepo: LikesRepository,
   ) {}
   async findWithSearchAndPagination(
     blogId: string,
@@ -44,7 +41,7 @@ export class PostsQueryRepo implements IPostsQueryRepo {
       );
       const latestLikes: LikeDocument[] =
         await this.likesRepo.getLatestLikes(postId);
-      postsVM.push(post.mapToViewModel(likeInfo, latestLikes));
+      postsVM.push(await post.mapToViewModel(likeInfo, latestLikes));
     }
 
     return paginationSettings.Paginate(totalCount, postsVM);

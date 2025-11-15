@@ -1,22 +1,20 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IPostsQueryRepo } from '../../Service/posts.service';
-import { Post, PostDocument, PostViewModel } from '../../posts.models';
+import { PostPSQL, PostViewModel } from '../../posts.models';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { LikesInfo } from '../../../comments/comments.models';
-import {
-  type ILikesRepository,
-  LikeDocument,
-  LIKES_REPOSITORY,
-} from '../../../likes/likes.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { LikePSQL } from '../../../likes/likes.models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { LikesRepositoryPSQL } from '../../../likes/Repository/likes.repository.psql';
 
 @Injectable()
 export class PostsQueryRepoPSQL implements IPostsQueryRepo {
   constructor(
-    @InjectDataSource() private readonly dataSource: DataSource,
-    @Inject(LIKES_REPOSITORY)
-    private readonly likesRepo: ILikesRepository,
+    @InjectRepository(PostPSQL)
+    private readonly repo: Repository<PostPSQL>,
+    @Inject(LikesRepositoryPSQL)
+    private readonly likesRepo: LikesRepositoryPSQL,
   ) {}
   async findWithSearchAndPagination(
     blogId: string,
@@ -25,55 +23,54 @@ export class PostsQueryRepoPSQL implements IPostsQueryRepo {
   ): Promise<Paginated<PostViewModel>> {
     const { pageSize, pageNumber, sortBy, sortDirection } = paginationSettings;
 
-    const posts = await this.dataSource.query<PostDocument[]>(
-      `
-    SELECT * FROM "Posts"
-        WHERE "blogId" ILIKE $1
-        ORDER BY "${sortBy}" ${sortDirection}
-        LIMIT $2
-        OFFSET $3
-    `,
-      [`%${blogId}%`, pageSize, (pageNumber - 1) * pageSize],
-    );
-    const totalCount = (
-      await this.dataSource.query<{ count: string }[]>(
-        `
-        SELECT COUNT(*) FROM "Posts"
-        WHERE "blogId" ILIKE $1`,
-        [`%${blogId}%`],
-      )
-    )[0].count;
+    let baseQuery: SelectQueryBuilder<PostPSQL> = this.repo
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.blog', 'blog');
+
+    if (blogId) {
+      baseQuery = baseQuery.where('p.blogId = :id', { id: blogId });
+    }
+
+    const posts: PostPSQL[] = await baseQuery
+      .orderBy(`p.${sortBy}`, sortDirection.toUpperCase() as 'ASC' | 'DESC')
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
+      .getMany();
+
+    const totalCount: number = await baseQuery.getCount();
+
     const postsVM: PostViewModel[] = [];
     for (const post of posts) {
       const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
         post.id,
         userId,
       );
-      const latestLikes: LikeDocument[] = await this.likesRepo.getLatestLikes(
+      const latestLikes: LikePSQL[] = await this.likesRepo.getLatestLikes(
         post.id,
       );
-      postsVM.push(Post.mapSQLToViewModel(post, likeInfo, latestLikes));
+      postsVM.push(await post.mapToViewModel(likeInfo, latestLikes));
     }
 
     return paginationSettings.Paginate(+totalCount, postsVM);
   }
 
   async findById(id: string, userId: string): Promise<PostViewModel | null> {
-    const result: PostDocument[] = await this.dataSource.query(
-      `SELECT * FROM "Posts" WHERE id=$1`,
-      [id],
-    );
-    if (result.length !== 1) {
+    const post: PostPSQL | null = await this.repo
+      .createQueryBuilder('p')
+      .leftJoinAndSelect('p.blog', 'blog')
+      .where('p.id = :id', { id: id })
+      .getOne();
+
+    if (!post) {
       return null;
     }
-    const post = result[0];
     const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       post.id,
       userId,
     );
-    const latestLikes: LikeDocument[] = await this.likesRepo.getLatestLikes(
+    const latestLikes: LikePSQL[] = await this.likesRepo.getLatestLikes(
       post.id,
     );
-    return Post.mapSQLToViewModel(post, likeInfo, latestLikes);
+    return post.mapToViewModel(likeInfo, latestLikes);
   }
 }

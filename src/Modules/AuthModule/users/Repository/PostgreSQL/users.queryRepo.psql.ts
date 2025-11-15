@@ -1,80 +1,74 @@
 import { Injectable } from '@nestjs/common';
-import {
-  MeViewModel,
-  User,
-  UserDocument,
-  UserViewModel,
-} from '../../users.models';
+import { MeViewModel, UserPSQL, UserViewModel } from '../../users.models';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { IUsersQueryRepo } from '../../Service/users.service';
 
 @Injectable()
 export class UsersQueryRepoPSQL implements IUsersQueryRepo {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(UserPSQL)
+    private readonly repo: Repository<UserPSQL>,
+  ) {}
+
   async findWithSearchAndPagination(
     paginationSettings: Paginator,
   ): Promise<Paginated<UserViewModel>> {
     const {
       searchLoginTerm,
       searchEmailTerm,
+      sortBy,
       pageSize,
       pageNumber,
-      sortBy,
       sortDirection,
     } = paginationSettings;
 
-    const users = await this.dataSource.query<User[]>(
-      `
-    SELECT * FROM "Users"
-        WHERE login ILIKE $1
-          OR email ILIKE $2
-        ORDER BY "${sortBy}" ${sortDirection}
-        LIMIT $3
-        OFFSET $4
-    `,
-      [
-        `%${searchLoginTerm}%`,
-        `%${searchEmailTerm}%`,
-        pageSize,
-        (pageNumber - 1) * pageSize,
-      ],
-    );
-    const totalCount = (
-      await this.dataSource.query<{ count: string }[]>(
-        `
-        SELECT COUNT(*) FROM "Users"
-        WHERE login ILIKE $1
-           OR email ILIKE $2`,
-        [`%${searchLoginTerm}%`, `%${searchEmailTerm}%`],
-      )
-    )[0].count;
+    let baseQuery: SelectQueryBuilder<UserPSQL> =
+      this.repo.createQueryBuilder('u');
+    if (searchLoginTerm) {
+      baseQuery = baseQuery.orWhere('u.login ILIKE :login', {
+        login: `%${searchLoginTerm}%`,
+      });
+    }
+    if (searchEmailTerm) {
+      baseQuery = baseQuery.orWhere('u.email ILIKE :email', {
+        email: `%${searchEmailTerm}%`,
+      });
+    }
+
+    const users: Omit<UserPSQL, 'confirmationData'>[] = await baseQuery
+      .orderBy(`u.${sortBy}`, sortDirection.toUpperCase() as 'ASC' | 'DESC')
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
+      .getMany();
+
+    const totalCount: number = await baseQuery.getCount();
+
     return paginationSettings.Paginate<UserViewModel>(
       +totalCount,
-      users.map((user: any): UserViewModel => User.mapSQLToViewModel(user)),
+      users.map(
+        (user: Omit<UserPSQL, 'confirmationData'>): UserViewModel =>
+          user.mapToViewModel(),
+      ),
     );
   }
 
   async findOneById(id: string): Promise<UserViewModel | null> {
-    const result: UserDocument[] = await this.dataSource.query(
-      `SELECT * FROM "Users" WHERE id=$1`,
-      [id],
-    );
-    if (result.length !== 1) {
-      return null;
-    }
-    return User.mapSQLToViewModel(result[0]);
+    const user: UserPSQL | null = await this.repo
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: id })
+      .getOne();
+
+    return user ? user.mapToViewModel() : null;
   }
 
   async meView(id: string): Promise<MeViewModel | null> {
-    const result: UserDocument[] = await this.dataSource.query(
-      `SELECT * FROM "Users" WHERE id=$1`,
-      [id],
-    );
-    if (result.length !== 1) {
-      return null;
-    }
-    return User.mapSQLToMeViewModel(result[0]);
+    const user: UserPSQL | null = await this.repo
+      .createQueryBuilder('u')
+      .where('u.id = :id', { id: id })
+      .getOne();
+
+    return user ? user.mapToMeViewModel() : null;
   }
 }

@@ -3,6 +3,18 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { generateUuid } from '../../../Helpers/uuid';
 import { addOneDay } from '../../../Helpers/dateHelpers';
 import { IsEmail, Length } from 'class-validator';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { SessionPSQL } from '../sessions/sessions.models';
+import { LikePSQL } from '../../BloggerPlatform/likes/likes.models';
+import { CommentPSQL } from '../../BloggerPlatform/comments/comments.models';
+import { ConfirmationDataPSQL } from './confData.models';
 
 export class UserInputModel {
   @Length(3, 10)
@@ -36,6 +48,18 @@ export type MeViewModel = {
   email: string;
 };
 
+export interface User {
+  id: string;
+  login: string;
+  password: string;
+  email: string;
+  confirmationData: ConfirmationData;
+  readonly createdAt: Date;
+
+  mapToViewModel(this: Omit<User, 'confirmationData'>): UserViewModel;
+  mapToMeViewModel(this: Omit<User, 'confirmationData'>): MeViewModel;
+}
+
 @Schema({ _id: false })
 class ConfirmationData {
   @Prop({ type: String, maxlength: 100 })
@@ -52,7 +76,9 @@ const ConfirmationDataSchema = SchemaFactory.createForClass(ConfirmationData);
 ConfirmationDataSchema.loadClass(ConfirmationData);
 
 @Schema({ timestamps: true })
-export class User {
+export class UserMongo implements User {
+  readonly id: string;
+
   @Prop({ type: String, required: true, minlength: 1, maxlength: 100 })
   login: string;
 
@@ -111,10 +137,96 @@ export class User {
       email: this.email,
     };
   }
+}
 
-  //PSQL
+export const UserSchema = SchemaFactory.createForClass(UserMongo);
+UserSchema.loadClass(UserMongo);
 
-  static mapSQLToViewModel(user: UserDocument): UserViewModel {
+export type UserDocument = HydratedDocument<UserMongo>;
+export type UserModelType = Model<UserDocument> & typeof UserMongo;
+
+@Entity('Users')
+export class UserPSQL implements User {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column('varchar', { length: 100 })
+  login: string;
+
+  @Column('varchar', { length: 100 })
+  password: string;
+
+  @Column('varchar', { length: 100 })
+  email: string;
+
+  // @Column('json')
+  // confirmationData: ConfirmationDataPSQL;
+  @OneToOne(() => ConfirmationDataPSQL, (data) => data.user, {
+    cascade: true,
+    eager: true,
+  })
+  confirmationData: ConfirmationDataPSQL;
+
+  @Column('timestamp with time zone', { default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @OneToMany(() => SessionPSQL, (session) => session.user)
+  sessions: SessionPSQL[];
+
+  @OneToMany(() => LikePSQL, (like) => like.user)
+  likes: LikePSQL[];
+
+  @OneToMany(() => CommentPSQL, (comment) => comment.commentator)
+  comments: CommentPSQL[];
+
+  private static userSkeleton(inputUser: UserInputModel) {
+    const instance = new this();
+    instance.login = inputUser.login;
+    instance.email = inputUser.email;
+    instance.password = inputUser.password;
+    return instance;
+  }
+
+  static CreateRegularUser(inputUser: UserInputModel): UserPSQL {
+    const user = this.userSkeleton(inputUser);
+    const confData = new ConfirmationDataPSQL();
+    confData.confirmationCode = generateUuid();
+    confData.confirmationCodeExpDate = addOneDay(new Date());
+    confData.isConfirmed = false;
+    user.confirmationData = confData;
+    return user;
+  }
+
+  static CreateAdminUser(inputUser: UserInputModel): UserPSQL {
+    const user = this.userSkeleton(inputUser);
+    const confData = new ConfirmationDataPSQL();
+    confData.confirmationCode = generateUuid();
+    confData.confirmationCodeExpDate = new Date();
+    confData.isConfirmed = true;
+    user.confirmationData = confData;
+    return user;
+  }
+
+  mapToViewModel(this: Omit<UserPSQL, 'confirmationData'>): UserViewModel {
+    return {
+      id: this.id,
+      login: this.login,
+      email: this.email,
+      createdAt: this.createdAt,
+    };
+  }
+
+  mapToMeViewModel(this: Omit<UserPSQL, 'confirmationData'>): MeViewModel {
+    return {
+      userId: this.id,
+      login: this.login,
+      email: this.email,
+    };
+  }
+
+  static mapSQLToViewModel(
+    user: Omit<UserPSQL, 'confirmationData'>,
+  ): UserViewModel {
     return {
       id: user.id,
       login: user.login,
@@ -123,7 +235,9 @@ export class User {
     };
   }
 
-  static mapSQLToMeViewModel(user: UserDocument): MeViewModel {
+  static mapSQLToMeViewModel(
+    user: Omit<UserPSQL, 'confirmationData'>,
+  ): MeViewModel {
     return {
       userId: user.id,
       login: user.login,
@@ -131,9 +245,3 @@ export class User {
     };
   }
 }
-
-export const UserSchema = SchemaFactory.createForClass(User);
-UserSchema.loadClass(User);
-
-export type UserDocument = HydratedDocument<User>;
-export type UserModelType = Model<UserDocument> & typeof User;

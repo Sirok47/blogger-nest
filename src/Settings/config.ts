@@ -12,14 +12,14 @@ export const config = {
   SECRET_KEY: process.env.SECRET_KEY as string,
   MAILER_ADDRESS: process.env.MAILER_ADDR as string,
   MAILER_PASSWORD: process.env.MAILER_PASS as string,
-  accessTokenLifeSpan: 10000,
-  refreshTokenLifeSpan: 20000,
+  accessTokenLifeSpan: +(process.env.ACC_TOKEN_LIFESPAN as string),
+  refreshTokenLifeSpan: +(process.env.REF_TOKEN_LIFESPAN as string),
   COOKIE_PATH: '/',
   //PSQL
   PSQL_HOST: process.env.PSQL_HOST || 'localhost',
   PSQL_PORT: 5432,
   PSQL_USERNAME: process.env.PSQL_USERNAME,
   PSQL_PASSWORD: process.env.PSQL_PASSWORD,
-  PSQL_DB: 'postgres',
+  PSQL_DB: 'postgres1',
   PSQL_CONNECTION_STRING: process.env.PSQL_CONNECTION_STRING,
 };

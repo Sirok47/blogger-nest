@@ -1,11 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { Post, PostDocument, type PostModelType } from '../../posts.models';
+import {
+  PostDocument,
+  PostInputModel,
+  type PostModelType,
+  PostMongo,
+} from '../../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPostsRepository } from '../../Service/posts.service';
+import { BlogsRepository } from '../../../blogs/Repository/MongoDB/blogs.repository';
 
 @Injectable()
 export class PostsRepository implements IPostsRepository {
-  constructor(@InjectModel(Post.name) private PostModel: PostModelType) {}
+  constructor(@InjectModel(PostMongo.name) private PostModel: PostModelType) {}
+
+  create(
+    inputPost: PostInputModel,
+    blogRepo: BlogsRepository,
+  ): Promise<PostDocument> {
+    return this.PostModel.CreateDocument(inputPost, blogRepo);
+  }
 
   async save(post: PostDocument): Promise<PostDocument> {
     return post.save();

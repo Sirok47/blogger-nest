@@ -1,8 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
   Post,
-  PostDocument,
+  PostInputModel,
   type PostModelType,
+  PostMongo,
   PostViewModel,
 } from '../posts.models';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,6 +12,7 @@ import {
   BLOGS_REPOSITORY,
   type IBlogsRepository,
 } from '../../blogs/Service/blogs.service';
+import { BlogsRepositoryPSQL } from '../../blogs/Repository/PostgreSQL/blogs.repository.psql';
 
 /*changeLikeStatus = async (
     postId: string,
@@ -41,9 +43,11 @@ import {
   };*/
 
 export interface IPostsRepository {
-  save(post: PostDocument): Promise<PostDocument>;
+  create(inputPost: PostInputModel, blogRepo: IBlogsRepository): Promise<Post>;
 
-  findById(id: string): Promise<PostDocument | null>;
+  save(post: Post): Promise<Post>;
+
+  findById(id: string): Promise<Post | null>;
 
   delete(id: string): Promise<boolean>;
 
@@ -69,7 +73,7 @@ export class PostsService {
   constructor(
     @Inject(POSTS_REPOSITORY)
     private repository: IPostsRepository,
-    @InjectModel(Post.name) protected PostModel: PostModelType,
+    @InjectModel(PostMongo.name) protected PostModel: PostModelType,
     @Inject(BLOGS_REPOSITORY)
     private blogsRepository: IBlogsRepository,
   ) {}

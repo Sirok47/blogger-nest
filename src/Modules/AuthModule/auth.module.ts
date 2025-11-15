@@ -6,7 +6,7 @@ import {
   USERS_REPOSITORY,
   UsersService,
 } from './users/Service/users.service';
-import { User, UserSchema } from './users/users.models';
+import { UserMongo, UserPSQL, UserSchema } from './users/users.models';
 import { AuthController } from './auth/auth.controller';
 import {
   AuthService,
@@ -16,7 +16,11 @@ import {
 import { TokenModule } from '../JWT/jwt.module';
 import { MailerModule } from '../Mailer/mailer.module';
 import { HashModule } from '../Crypto/crypto.module';
-import { Session, SessionSchema } from './sessions/sessions.models';
+import {
+  SessionMongo,
+  SessionPSQL,
+  SessionSchema,
+} from './sessions/sessions.models';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DeleteUserHandler } from './users/Service/use-cases/deleteUserCommand';
 import { LoginHandler } from './auth/Service/use-cases/login.command';
@@ -35,6 +39,16 @@ import { SessionsRepositoryPSQL } from './sessions/Repository/PostgreSQL/session
 import { SessionsQueryRepoPSQL } from './sessions/Repository/PostgreSQL/sessions.queryRepo.psql';
 import { UsersQueryRepoPSQL } from './users/Repository/PostgreSQL/users.queryRepo.psql';
 import { UsersRepositoryPSQL } from './users/Repository/PostgreSQL/users.repository.psql';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { UsersRepository } from './users/Repository/MongoDB/users.repository';
+import { UsersRepositoryRawPSQL } from './users/Repository/RawSQL/users.repository.rawpsql';
+import { UsersQueryRepo } from './users/Repository/MongoDB/users.queryRepo';
+import { UsersQueryRepoRawPSQL } from './users/Repository/RawSQL/users.queryRepo.rawpsql';
+import { SessionsRepositoryRawPSQL } from './sessions/Repository/RawSQL/sessions.repository.rawpsql';
+import { SessionsRepository } from './sessions/Repository/MongoDB/sessions.repository';
+import { SessionsQueryRepo } from './sessions/Repository/MongoDB/sessions.queryRepo';
+import { SessionsQueryRepoRawPSQL } from './sessions/Repository/RawSQL/sessions.queryRepo.rawpsql';
+import { ConfirmationDataPSQL } from './users/confData.models';
 
 const UserCommandHandlers = [CreateUserHandler, DeleteUserHandler];
 const AuthCommandHandlers = [
@@ -47,18 +61,40 @@ const AuthCommandHandlers = [
   RecoverPasswordHandler,
   ConfirmPasswordChangeHandler,
 ];
+const UserRepos = [
+  UsersRepository,
+  UsersRepositoryPSQL,
+  UsersRepositoryRawPSQL,
+];
+const UserQueryRepos = [
+  UsersQueryRepo,
+  UsersQueryRepoPSQL,
+  UsersQueryRepoRawPSQL,
+];
+
 const SessionCommandHandlers = [
   DeleteAllButOneSessionsHandler,
   DeleteSessionHandler,
+];
+const SessionRepos = [
+  SessionsRepository,
+  SessionsRepositoryPSQL,
+  SessionsRepositoryRawPSQL,
+];
+const SessionQueryRepos = [
+  SessionsQueryRepo,
+  SessionsQueryRepoPSQL,
+  SessionsQueryRepoRawPSQL,
 ];
 
 @Module({
   imports: [
     CqrsModule,
     MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: Session.name, schema: SessionSchema },
+      { name: UserMongo.name, schema: UserSchema },
+      { name: SessionMongo.name, schema: SessionSchema },
     ]),
+    TypeOrmModule.forFeature([UserPSQL, SessionPSQL, ConfirmationDataPSQL]),
     TokenModule,
     MailerModule,
     HashModule,
@@ -66,6 +102,8 @@ const SessionCommandHandlers = [
   controllers: [UsersController, AuthController, SessionsController],
   providers: [
     UsersService,
+    ...UserRepos,
+    ...UserQueryRepos,
     {
       provide: USERS_REPOSITORY,
       useClass: UsersRepositoryPSQL,
@@ -75,6 +113,8 @@ const SessionCommandHandlers = [
       useClass: UsersQueryRepoPSQL,
     },
     AuthService,
+    ...SessionRepos,
+    ...SessionQueryRepos,
     {
       provide: SESSIONS_REPOSITORY,
       useClass: SessionsRepositoryPSQL,
@@ -87,6 +127,6 @@ const SessionCommandHandlers = [
     ...AuthCommandHandlers,
     ...SessionCommandHandlers,
   ],
-  exports: [USERS_REPOSITORY, SESSIONS_REPOSITORY],
+  exports: [TypeOrmModule, USERS_REPOSITORY, SESSIONS_REPOSITORY],
 })
 export class AuthModule {}

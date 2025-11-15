@@ -17,7 +17,7 @@ import {
   type ISessionsQueryRepo,
   SESSIONS_QUERY_REPO,
 } from '../auth/Service/auth.service';
-import { InputUUID } from '../../../Models/IDmodel';
+import { InputID } from '../../../Models/IDmodel';
 import { validateOrReject } from 'class-validator';
 
 @Controller('security/devices')
@@ -53,7 +53,7 @@ export class SessionsController {
     @Param('id') id: string,
     @Param() { userId }: UserFromRefToken,
   ): Promise<void> {
-    const uuid = new InputUUID();
+    const uuid = new InputID();
     uuid.id = id;
     await validateOrReject(uuid).catch((err) => {
       throw new NotFoundException(err);

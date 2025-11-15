@@ -1,74 +1,37 @@
 import { Injectable } from '@nestjs/common';
 import { IPostsRepository } from '../../Service/posts.service';
-import { PostDocument } from '../../posts.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { PostDocument, PostInputModel, PostPSQL } from '../../posts.models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { BlogsRepositoryPSQL } from '../../../blogs/Repository/PostgreSQL/blogs.repository.psql';
 
 @Injectable()
 export class PostsRepositoryPSQL implements IPostsRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(PostPSQL) private readonly repo: Repository<PostPSQL>,
+  ) {}
 
-  async save(post: PostDocument): Promise<PostDocument> {
-    if (!post.createdAt) {
-      return (
-        await this.dataSource.query<PostDocument[]>(
-          `
-          INSERT INTO "Posts"(id, title, "shortDescription", content, "blogId","blogName", "createdAt")
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-          RETURNING *`,
-          [
-            post.id,
-            post.title,
-            post.shortDescription,
-            post.content,
-            post.blogId,
-            post.blogName,
-            new Date(),
-          ],
-        )
-      )[0];
-    } else {
-      return (
-        await this.dataSource.query<PostDocument[]>(
-          `
-          UPDATE "Posts"
-          SET title=$2, "shortDescription"=$3, content=$4, "blogId"=$5, "blogName"=$6
-          WHERE id=$1
-          RETURNING *`,
-          [
-            post.id,
-            post.title,
-            post.shortDescription,
-            post.content,
-            post.blogId,
-            post.blogName,
-          ],
-        )
-      )[0];
-    }
+  create(
+    inputPost: PostInputModel,
+    blogRepo: BlogsRepositoryPSQL,
+  ): Promise<PostPSQL> {
+    return PostPSQL.CreateDocument(inputPost, blogRepo);
   }
 
-  async findById(id: string): Promise<PostDocument | null> {
-    const result = await this.dataSource.query<PostDocument[]>(
-      `SELECT * FROM "Posts"
-          WHERE "id" = $1`,
-      [id],
-    );
-    if (result.length < 1) {
-      return null;
-    }
-    return result[0];
+  async save(post: PostDocument): Promise<PostDocument> {
+    return this.repo.save(post);
+  }
+
+  async findById(id: string): Promise<PostPSQL | null> {
+    return this.repo.findOneBy({ id: id });
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.dataSource.query<unknown[]>(
-      `DELETE FROM "Posts" WHERE id=$1`,
-      [id],
-    );
-    return !!result[1];
+    const result = await this.repo.delete(id);
+    return !!result.affected;
   }
 
   async deleteAll(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "Posts"`);
+    await this.repo.deleteAll();
   }
 }

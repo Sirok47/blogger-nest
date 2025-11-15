@@ -3,18 +3,23 @@ import { TokenService } from '../../../JWT/jwt.service';
 import {
   type ILikesRepository,
   Like,
-  LikeDocument,
   type LikeModelType,
+  LikeMongo,
   LIKES_REPOSITORY,
   LikeStatus,
 } from '../../likes/likes.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserDocument } from '../../../AuthModule/users/users.models';
+import { User } from '../../../AuthModule/users/users.models';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../AuthModule/users/Service/users.service';
-import { CommentDocument, CommentViewModel } from '../comments.models';
+import {
+  Comment,
+  CommentatorInfo,
+  CommentInputModel,
+  CommentViewModel,
+} from '../comments.models';
 import { Paginated, Paginator } from '../../../../Models/paginator.models';
 
 export interface ICommentsQueryRepo {
@@ -30,9 +35,15 @@ export interface ICommentsQueryRepo {
 export const COMMENTS_QUERY_REPO = Symbol('ICommentsQueryRepo');
 
 export interface ICommentsRepository {
-  save(comment: CommentDocument): Promise<CommentDocument>;
+  create(
+    postId: string,
+    input: CommentInputModel,
+    commentatorInfo: CommentatorInfo,
+  ): Comment;
 
-  findById(id: string): Promise<CommentDocument | null>;
+  save(comment: Comment): Promise<Comment>;
+
+  findById(id: string): Promise<Comment | null>;
 
   delete(id: string): Promise<boolean>;
 
@@ -51,12 +62,11 @@ export class CommentsService {
     private readonly authToken: TokenService,
     @Inject(USERS_REPOSITORY)
     private readonly usersRepository: IUsersRepository,
-    @InjectModel(Like.name) private readonly LikeModel: LikeModelType,
+    @InjectModel(LikeMongo.name) private readonly LikeModel: LikeModelType,
   ) {}
 
   async checkOwnership(commentId: string, token: string): Promise<boolean> {
-    const masterId = (await this.repository.findById(commentId))
-      ?.commentatorInfo.userId;
+    const masterId = (await this.repository.findById(commentId))?.commentatorId;
     if (!masterId) throw new NotFoundException();
     const userId = this.authToken.extractJWTPayload(token)?.userId as string;
     return masterId === userId;
@@ -68,11 +78,10 @@ export class CommentsService {
     status: LikeStatus,
   ): Promise<boolean> {
     const userId = this.authToken.extractJWTPayload(token).userId as string;
-    const user: UserDocument | null =
-      await this.usersRepository.findById(userId);
+    const user: User | null = await this.usersRepository.findById(userId);
     if (commentId !== (await this.repository.findById(commentId))?.id || !user)
       return false;
-    let like: LikeDocument | null = await this.likesRepository.getLike(
+    let like: Like | null = await this.likesRepository.getLike(
       commentId,
       userId,
     );
@@ -80,13 +89,13 @@ export class CommentsService {
       like.status = status;
     } else {
       like = new this.LikeModel({
-        userId: user._id.toString(),
+        userId: user.id,
         login: user.login,
         targetId: commentId,
         status: status,
         createdAt: Date.now(),
       });
     }
-    return this.likesRepository.save(like);
+    return !!(await this.likesRepository.save(like));
   }
 }

@@ -23,10 +23,10 @@ export class DeleteSessionHandler
 
   async execute({ userId, deviceId }: DeleteSessionCommand): Promise<boolean> {
     const session = await this.repository.getSessionByDeviceId(deviceId);
+
     if (!session) {
       throw new NotFoundException();
     }
-
     if (session.userId !== userId) {
       throw new ForbiddenException();
     }

@@ -1,11 +1,14 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { LikesInfo } from '../comments/comments.models';
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { CommentPSQL, LikesInfo } from '../comments/comments.models';
+import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { NotFoundException } from '@nestjs/common';
-import { BlogDocument } from '../blogs/blogs.models';
-import { LikeDocument } from '../likes/likes.models';
+import { Blog, BlogMongo, BlogPSQL } from '../blogs/blogs.models';
+import { Like, LikeDocument, LikePSQL } from '../likes/likes.models';
 import { IsMongoId, Length } from 'class-validator';
-import { IBlogsRepository } from '../blogs/Service/blogs.service';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BlogsRepositoryPSQL } from '../blogs/Repository/PostgreSQL/blogs.repository.psql';
+import { BlogsRepository } from '../blogs/Repository/MongoDB/blogs.repository';
+import { UserMongo } from '../../AuthModule/users/users.models';
 
 export class PostUnderBlogInputModel {
   @Length(1, 30)
@@ -46,8 +49,23 @@ type ExtendedLikesInfo = LikesInfo & {
   newestLikes: LatestLikesVM[];
 };
 
+export interface Post {
+  id: string;
+  title: string;
+  shortDescription: string;
+  content: string;
+  blogId: string;
+  readonly createdAt: Date;
+
+  Update(newPost: PostInputModel, blog: Blog | null): void;
+  mapToViewModel(lInfo: LikesInfo, latestLikes: Like[]): Promise<PostViewModel>;
+}
+
 @Schema({ timestamps: true })
-export class Post {
+export class PostMongo implements Post {
+  @InjectModel(BlogMongo.name) private readonly blogsRepo: BlogsRepository;
+  readonly id: string;
+
   @Prop({ type: String, required: true, min: 1, max: 100 })
   title: string;
 
@@ -60,47 +78,41 @@ export class Post {
   @Prop({ type: String, required: true, min: 20, max: 40 })
   blogId: string;
 
-  @Prop({ type: String, required: true, min: 1, max: 50 })
-  blogName: string;
-
   readonly createdAt: Date;
 
   static async CreateDocument(
     inputPost: PostInputModel,
-    blogRepo: IBlogsRepository,
+    blogRepo: BlogsRepository,
   ): Promise<PostDocument> {
     const post = new this();
     post.title = inputPost.title;
     post.shortDescription = inputPost.shortDescription;
     post.content = inputPost.content;
-    const blog: BlogDocument | null = await blogRepo.findById(inputPost.blogId);
+    const blog: Blog | null = await blogRepo.findById(inputPost.blogId);
     if (!blog) throw new NotFoundException();
     post.blogId = blog.id;
-    post.blogName = blog.name;
     return post as PostDocument;
   }
 
-  Update(newPost: PostInputModel, blog: BlogDocument | null): void {
+  Update(newPost: PostInputModel, blog: Blog | null): void {
     this.title = newPost.title;
     this.shortDescription = newPost.shortDescription;
     this.content = newPost.content;
     if (!blog) throw new NotFoundException();
     this.blogId = blog.id;
-    this.blogName = blog.name;
   }
 
-  mapToViewModel(
-    this: PostDocument,
+  async mapToViewModel(
     lInfo: LikesInfo,
     latestLikes: LikeDocument[],
-  ): PostViewModel {
+  ): Promise<PostViewModel> {
     return {
       id: this.id,
       title: this.title,
       shortDescription: this.shortDescription,
       content: this.content,
       blogId: this.blogId,
-      blogName: this.blogName,
+      blogName: (await this.blogsRepo.findById(this.blogId))!.name,
       createdAt: this.createdAt,
       extendedLikesInfo: {
         ...lInfo,
@@ -110,7 +122,89 @@ export class Post {
             result.push({
               addedAt: like.createdAt.toISOString(),
               userId: like.userId,
-              login: like.login,
+              login: (like.user as UserMongo).login,
+            });
+          }
+          return result;
+        })(latestLikes),
+      },
+    };
+  }
+}
+
+export const PostSchema = SchemaFactory.createForClass(PostMongo);
+PostSchema.loadClass(PostMongo);
+
+export type PostDocument = HydratedDocument<PostMongo>;
+export type PostModelType = Model<PostDocument> & typeof PostMongo;
+
+@Entity('Posts')
+export class PostPSQL implements Post {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column('varchar', { length: 100 })
+  title: string;
+
+  @Column('varchar', { length: 300 })
+  shortDescription: string;
+
+  @Column('varchar', { length: 2000 })
+  content: string;
+
+  @ManyToOne(() => BlogPSQL, (blog) => blog.posts)
+  blog: BlogPSQL;
+  blogId: string;
+
+  @Column('timestamp without time zone', { default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date;
+
+  @ManyToOne(() => CommentPSQL, (comment) => comment.post)
+  comments: CommentPSQL;
+
+  static async CreateDocument(
+    inputPost: PostInputModel,
+    blogRepo: BlogsRepositoryPSQL,
+  ): Promise<PostPSQL> {
+    const post = new this();
+    post.title = inputPost.title;
+    post.shortDescription = inputPost.shortDescription;
+    post.content = inputPost.content;
+    const blog: BlogPSQL | null = await blogRepo.findById(inputPost.blogId);
+    if (!blog) throw new NotFoundException();
+    post.blog = blog;
+    return post;
+  }
+
+  Update(newPost: PostInputModel, blog: Blog | null): void {
+    this.title = newPost.title;
+    this.shortDescription = newPost.shortDescription;
+    this.content = newPost.content;
+    if (!blog) throw new NotFoundException();
+    this.blogId = blog.id;
+  }
+
+  async mapToViewModel(
+    lInfo: LikesInfo,
+    latestLikes: LikePSQL[],
+  ): Promise<PostViewModel> {
+    return {
+      id: this.id,
+      title: this.title,
+      shortDescription: this.shortDescription,
+      content: this.content,
+      blogId: this.blogId,
+      blogName: this.blog.name,
+      createdAt: this.createdAt,
+      extendedLikesInfo: {
+        ...lInfo,
+        newestLikes: ((likes: LikePSQL[]): LatestLikesVM[] => {
+          const result: LatestLikesVM[] = [];
+          for (const like of likes) {
+            result.push({
+              addedAt: like.createdAt.toISOString(),
+              userId: like.userId,
+              login: like.user.login,
             });
           }
           return result;
@@ -119,12 +213,10 @@ export class Post {
     };
   }
 
-  //SQL
-
   static mapSQLToViewModel(
-    post: PostDocument,
+    post: Post & { blogName: string },
     lInfo: LikesInfo,
-    latestLikes: LikeDocument[],
+    latestLikes: (Like & { login: string })[],
   ): PostViewModel {
     return {
       id: post.id,
@@ -136,7 +228,9 @@ export class Post {
       createdAt: post.createdAt,
       extendedLikesInfo: {
         ...lInfo,
-        newestLikes: ((likes: LikeDocument[]): LatestLikesVM[] => {
+        newestLikes: ((
+          likes: (Like & { login: string })[],
+        ): LatestLikesVM[] => {
           const result: LatestLikesVM[] = [];
           for (const like of likes) {
             result.push({
@@ -151,9 +245,3 @@ export class Post {
     };
   }
 }
-
-export const PostSchema = SchemaFactory.createForClass(Post);
-PostSchema.loadClass(Post);
-
-export type PostDocument = HydratedDocument<Post>;
-export type PostModelType = Model<PostDocument> & typeof Post;

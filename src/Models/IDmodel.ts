@@ -1,16 +1,16 @@
 import { IsMongoId, IsUUID } from 'class-validator';
 
-export class InputID {
+export class InputMongoID {
   @IsMongoId()
   id: string;
 }
 
-export class InputUUID {
+export class InputID {
   @IsUUID()
   id: string;
 }
 
 export class InputBlogID {
-  @IsMongoId()
+  @IsUUID()
   blogId: string;
 }

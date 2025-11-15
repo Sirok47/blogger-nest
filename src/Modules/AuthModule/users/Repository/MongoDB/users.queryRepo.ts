@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import {
   MeViewModel,
-  User,
   UserDocument,
   type UserModelType,
+  UserMongo,
   UserViewModel,
 } from '../../users.models';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
@@ -13,13 +13,15 @@ import { IUsersQueryRepo } from '../../Service/users.service';
 
 @Injectable()
 export class UsersQueryRepo implements IUsersQueryRepo {
-  constructor(@InjectModel(User.name) protected UserModel: UserModelType) {}
+  constructor(
+    @InjectModel(UserMongo.name) protected UserModel: UserModelType,
+  ) {}
   async findWithSearchAndPagination(
     paginationSettings: Paginator,
   ): Promise<Paginated<UserViewModel>> {
     const { searchLoginTerm, searchEmailTerm } = paginationSettings;
 
-    const filter: FilterQuery<User> = {
+    const filter: FilterQuery<UserMongo> = {
       $or: [
         { email: { $regex: searchEmailTerm ?? '', $options: 'i' } },
         { login: { $regex: searchLoginTerm ?? '', $options: 'i' } },
@@ -43,20 +45,14 @@ export class UsersQueryRepo implements IUsersQueryRepo {
   }
 
   async findOneById(id: string): Promise<UserViewModel | null> {
-    const result: UserDocument | null =
-      await this.UserModel.findById(id).exec();
-    if (!result) {
-      return null;
-    }
-    return result.mapToViewModel();
+    const user: UserDocument | null = await this.UserModel.findById(id).exec();
+
+    return user ? user.mapToViewModel() : null;
   }
 
   async meView(id: string): Promise<MeViewModel | null> {
-    const result: UserDocument | null =
-      await this.UserModel.findById(id).exec();
-    if (!result) {
-      return null;
-    }
-    return result.mapToMeViewModel();
+    const user: UserDocument | null = await this.UserModel.findById(id).exec();
+
+    return user ? user.mapToMeViewModel() : null;
   }
 }

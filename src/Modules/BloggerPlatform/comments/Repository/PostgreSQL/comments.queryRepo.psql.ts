@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import {
-  Comment,
-  CommentDocument,
+  CommentPSQL,
   CommentViewModel,
   LikesInfo,
 } from '../../comments.models';
@@ -10,17 +9,24 @@ import {
   type ILikesRepository,
   LIKES_REPOSITORY,
 } from '../../../likes/likes.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { SELECT_JSON_SERIALIZE_COMMENT } from './comments.repository.psql';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ICommentsQueryRepo } from '../../Service/comments.service';
+import {
+  type IUsersRepository,
+  USERS_REPOSITORY,
+} from '../../../../AuthModule/users/Service/users.service';
+import { User } from '../../../../AuthModule/users/users.models';
 
 @Injectable()
 export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
   constructor(
-    @InjectDataSource() private readonly dataSource: DataSource,
+    @InjectRepository(CommentPSQL)
+    private readonly repo: Repository<CommentPSQL>,
     @Inject(LIKES_REPOSITORY)
     private readonly likesRepo: ILikesRepository,
+    @Inject(USERS_REPOSITORY)
+    private readonly usersRepo: IUsersRepository,
   ) {}
 
   async findWithSearchAndPagination(
@@ -30,24 +36,17 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
   ): Promise<Paginated<CommentViewModel>> {
     const { pageSize, pageNumber, sortBy, sortDirection } = paginationSettings;
 
-    const comments = await this.dataSource.query<CommentDocument[]>(
-      `
-    SELECT ${SELECT_JSON_SERIALIZE_COMMENT} FROM "Comments"
-        WHERE "postId"=$1
-        ORDER BY "${sortBy}" ${sortDirection}
-        LIMIT $2
-        OFFSET $3
-    `,
-      [postId, pageSize, (pageNumber - 1) * pageSize],
-    );
-    const totalCount = (
-      await this.dataSource.query<{ count: string }[]>(
-        `
-        SELECT COUNT(*) FROM "Comments"
-        WHERE "postId"=$1`,
-        [postId],
-      )
-    )[0].count;
+    const baseQuery: SelectQueryBuilder<CommentPSQL> = this.repo
+      .createQueryBuilder('c')
+      .where('c.postId = :id', { id: postId });
+
+    const comments: CommentPSQL[] = await baseQuery
+      .orderBy(`c.${sortBy}`, sortDirection.toUpperCase() as 'ASC' | 'DESC')
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
+      .getMany();
+
+    const totalCount: number = await baseQuery.getCount();
 
     const commentsVM: CommentViewModel[] = [];
     for (const comment of comments) {
@@ -55,7 +54,8 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
         comment.id,
         userId,
       );
-      commentsVM.push(Comment.mapSQLToViewModel(comment, likeInfo));
+      const userInfo: User | null = await this.usersRepo.findById(userId);
+      commentsVM.push(comment.mapToViewModel(likeInfo, userInfo!));
     }
 
     return paginationSettings.Paginate<CommentViewModel>(
@@ -65,19 +65,18 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
   }
 
   async findById(id: string, userId: string): Promise<CommentViewModel | null> {
-    const result: CommentDocument[] = await this.dataSource.query<
-      CommentDocument[]
-    >(`SELECT ${SELECT_JSON_SERIALIZE_COMMENT} FROM "Comments" WHERE id=$1`, [
-      id,
-    ]);
-    if (result.length !== 1) {
+    const comment: CommentPSQL | null = await this.repo
+      .createQueryBuilder('c')
+      .where('c.id = :id', { id: id })
+      .getOne();
+    if (!comment) {
       return null;
     }
-    const comment = result[0];
+    const userInfo: User | null = await this.usersRepo.findById(userId);
     const likesInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       comment.id,
       userId,
     );
-    return Comment.mapSQLToViewModel(comment, likesInfo);
+    return comment.mapToViewModel(likesInfo, userInfo!);
   }
 }

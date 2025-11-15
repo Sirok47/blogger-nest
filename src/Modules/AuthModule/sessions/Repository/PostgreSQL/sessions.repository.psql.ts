@@ -1,68 +1,37 @@
 import { Injectable } from '@nestjs/common';
-import { Session, SessionDocument } from '../../sessions.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { Session, SessionPSQL } from '../../sessions.models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Not, Repository } from 'typeorm';
 import { ISessionsRepository } from '../../../auth/Service/auth.service';
 
 @Injectable()
 export class SessionsRepositoryPSQL implements ISessionsRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(SessionPSQL)
+    private readonly repo: Repository<SessionPSQL>,
+  ) {}
 
-  async getSessionByDeviceId(deviceId: string): Promise<Session | null> {
-    const result = await this.dataSource.query<SessionDocument[]>(
-      `
-      SELECT * FROM "Sessions" 
-      WHERE "deviceId" = $1`,
-      [deviceId],
-    );
-    if (result.length !== 1) {
-      return null;
-    }
-    return result[0];
+  create(session: Session): SessionPSQL {
+    return SessionPSQL.CreateDocument(session);
   }
 
-  async save(session: SessionDocument) {
-    return (
-      await this.dataSource.query<SessionDocument[]>(
-        `INSERT INTO "Sessions"
-            ("IP", title, "lastActiveDate", "expDate", "deviceId", "userId", "id")
-            VALUES ($1,$2,$3,$4,$5,$6,$7)
-            RETURNING *`,
-        [
-          session.ip,
-          session.title,
-          session.lastActiveDate,
-          session.expDate,
-          session.deviceId,
-          session.userId,
-          session.id,
-        ],
-      )
-    )[0];
+  async getSessionByDeviceId(deviceId: string): Promise<SessionPSQL | null> {
+    return this.repo.findOneBy({ deviceId });
   }
 
-  async refreshSession(newSession: SessionDocument): Promise<boolean> {
-    const session: SessionDocument[] = await this.dataSource.query<
-      SessionDocument[]
-    >(
-      `
-        SELECT id FROM "Sessions" 
-        WHERE "deviceId" = $1 
-        AND "userId" = $2`,
-      [newSession.deviceId, newSession.userId],
+  async save(session: Session): Promise<SessionPSQL> {
+    return this.repo.save(session);
+  }
+
+  async refreshSession(newSession: SessionPSQL): Promise<boolean> {
+    const result = await this.repo.update(
+      {
+        deviceId: newSession.deviceId,
+        user: { id: newSession.userId },
+      },
+      newSession,
     );
-    if (!session || session.length !== 1) {
-      return false;
-    }
-    session[0].lastActiveDate = newSession.lastActiveDate;
-    session[0].expDate = newSession.expDate;
-    return !!(await this.dataSource.query(
-      `
-        UPDATE "Sessions"
-        SET "lastActiveDate"=$2, "expDate"=$3
-        WHERE id=$1`,
-      [session[0].id, newSession.lastActiveDate, newSession.expDate],
-    ));
+    return !!result.affected;
   }
 
   async checkPresenceInTheList(
@@ -70,38 +39,25 @@ export class SessionsRepositoryPSQL implements ISessionsRepository {
     deviceId: string,
     issuedAt: Date,
   ): Promise<boolean> {
-    return !!(
-      await this.dataSource.query<SessionDocument[]>(
-        `
-        SELECT * FROM "Sessions"
-        WHERE "userId" = $1
-        AND "deviceId" = $2
-        AND "lastActiveDate" = $3`,
-        [userId, deviceId, issuedAt],
-      )
-    ).length;
+    return this.repo.existsBy({
+      user: { id: userId },
+      deviceId: deviceId,
+      lastActiveDate: issuedAt,
+    });
   }
 
   async terminateAllButOne(userId: string, deviceId: string): Promise<boolean> {
-    return !!(await this.dataSource.query(
-      `
-        DELETE FROM "Sessions"
-        WHERE "userId" = $1
-        AND NOT "deviceId" = $2`,
-      [userId, deviceId],
-    ));
+    return !!(await this.repo.delete({
+      deviceId: Not(deviceId),
+      userId: userId,
+    }));
   }
 
   async terminateSession(deviceId: string): Promise<boolean> {
-    return !!(await this.dataSource.query(
-      `
-        DELETE FROM "Sessions"
-        WHERE "deviceId" = $1`,
-      [deviceId],
-    ));
+    return !!(await this.repo.delete(deviceId));
   }
 
   async deleteAll(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "Sessions"`);
+    await this.repo.deleteAll();
   }
 }

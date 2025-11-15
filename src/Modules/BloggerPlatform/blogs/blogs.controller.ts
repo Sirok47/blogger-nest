@@ -19,12 +19,11 @@ import {
   type IBlogsQueryRepo,
   type IBlogsRepository,
 } from './Service/blogs.service';
-import { BlogDocument, BlogInputModel, BlogViewModel } from './blogs.models';
+import { Blog, BlogInputModel, BlogViewModel } from './blogs.models';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
-import { PostUnderBlogInputModel, PostViewModel } from '../posts/posts.models';
+import { PostViewModel } from '../posts/posts.models';
 import { InputID } from '../../../Models/IDmodel';
 import { CommandBus } from '@nestjs/cqrs';
-import { CreatePostCommand } from '../posts/Service/use-cases/create-post.command';
 import { DeleteBlogCommand } from './Service/use-cases/delete-blog.command';
 import { CreateBlogCommand } from './Service/use-cases/create-blog.command';
 import { UpdateBlogCommand } from './Service/use-cases/update-blog.command';
@@ -45,7 +44,6 @@ export class BlogsController {
     protected postsQueryRepo: IPostsQueryRepo,
     @Inject(BLOGS_REPOSITORY)
     protected repo: IBlogsRepository,
-    private readonly commandBus: CommandBus,
   ) {}
 
   @Get()
@@ -72,7 +70,7 @@ export class BlogsController {
     @Query() query: Paginator,
     @Param('userId') userId: string,
   ): Promise<Paginated<PostViewModel>> {
-    const blog: BlogDocument | null = await this.repo.findById(id);
+    const blog: Blog | null = await this.repo.findById(id);
     if (!blog) {
       throw new NotFoundException();
     }

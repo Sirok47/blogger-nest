@@ -3,7 +3,7 @@ import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../users/Service/users.service';
-import { UserDocument } from '../../../users/users.models';
+import { User } from '../../../users/users.models';
 import { Inject } from '@nestjs/common';
 
 export class ConfirmEmailCommand {
@@ -20,8 +20,7 @@ export class ConfirmEmailHandler
   ) {}
 
   async execute({ code }: ConfirmEmailCommand): Promise<boolean> {
-    const userToConfirm: UserDocument | null =
-      await this.usersRepo.findWithCode(code);
+    const userToConfirm: User | null = await this.usersRepo.findWithCode(code);
     if (!userToConfirm) {
       throw new Error('No such code');
     }

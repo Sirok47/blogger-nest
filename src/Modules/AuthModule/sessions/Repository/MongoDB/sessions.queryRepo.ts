@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import {
-  Session,
   SessionDocument,
   type SessionModelType,
+  SessionMongo,
   SessionViewModel,
 } from '../../sessions.models';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,7 +11,7 @@ import { ISessionsQueryRepo } from '../../../auth/Service/auth.service';
 @Injectable()
 export class SessionsQueryRepo implements ISessionsQueryRepo {
   constructor(
-    @InjectModel(Session.name) private SessionModel: SessionModelType,
+    @InjectModel(SessionMongo.name) private SessionModel: SessionModelType,
   ) {}
   async getSessions(userId: string): Promise<SessionViewModel[]> {
     const sessions: SessionDocument[] = await this.SessionModel.find({

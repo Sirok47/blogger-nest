@@ -1,4 +1,4 @@
-import { BlogDocument, BlogInputModel } from '../../blogs.models';
+import { Blog, BlogInputModel } from '../../blogs.models';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BLOGS_REPOSITORY, type IBlogsRepository } from '../blogs.service';
 import { Inject } from '@nestjs/common';
@@ -19,8 +19,7 @@ export class UpdateBlogHandler implements ICommandHandler<UpdateBlogCommand> {
 
   async execute(command: UpdateBlogCommand): Promise<boolean> {
     const { id, newBlog } = command;
-    const blogToUpdate: BlogDocument | null =
-      await this.blogsRepository.findById(id);
+    const blogToUpdate: Blog | null = await this.blogsRepository.findById(id);
 
     if (!blogToUpdate) {
       return false;

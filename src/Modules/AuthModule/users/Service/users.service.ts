@@ -2,8 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   MeViewModel,
   User,
-  UserDocument,
+  UserInputModel,
   type UserModelType,
+  UserMongo,
   UserViewModel,
 } from '../users.models';
 import { InjectModel } from '@nestjs/mongoose';
@@ -11,13 +12,17 @@ import { HashService } from '../../../Crypto/bcrypt';
 import { Paginated, Paginator } from '../../../../Models/paginator.models';
 
 export interface IUsersRepository {
-  save(user: UserDocument): Promise<UserDocument>;
+  createUser(inputUser: UserInputModel): User;
 
-  findByLoginOrEmail(loginOrEmail: string): Promise<UserDocument | null>;
+  createAdmin(inputUser: UserInputModel): User;
 
-  findById(id: string): Promise<UserDocument | null>;
+  save(user: User): Promise<User>;
 
-  findWithCode(code: string): Promise<UserDocument | null>;
+  findByLoginOrEmail(loginOrEmail: string): Promise<User | null>;
+
+  findById(id: string): Promise<User | null>;
+
+  findWithCode(code: string): Promise<User | null>;
 
   changePassword(userId: string, newPass: string): Promise<boolean>;
 
@@ -56,6 +61,6 @@ export class UsersService {
     @Inject(USERS_REPOSITORY)
     private repository: IUsersRepository,
     private crypto: HashService,
-    @InjectModel(User.name) protected UserModel: UserModelType,
+    @InjectModel(UserMongo.name) protected UserModel: UserModelType,
   ) {}
 }

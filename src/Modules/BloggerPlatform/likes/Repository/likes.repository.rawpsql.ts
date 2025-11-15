@@ -1,29 +1,33 @@
 import { Injectable } from '@nestjs/common';
-import { ILikesRepository, LikeDocument, LikeStatus } from './likes.models';
-import { LikesInfo } from '../comments/comments.models';
+import {
+  ILikesRepository,
+  Like,
+  LikeDocument,
+  LikePSQL,
+  LikeStatus,
+} from '../likes.models';
+import { LikesInfo } from '../../comments/comments.models';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { User } from '../../../AuthModule/users/users.models';
 
 @Injectable()
-export class LikesRepositoryPSQL implements ILikesRepository {
+export class LikesRepositoryRawPSQL implements ILikesRepository {
   constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
 
-  async save(like: LikeDocument) {
+  create(user: User, targetId: string, status: LikeStatus): Like {
+    return LikePSQL.CreateDoc(user, targetId, status);
+  }
+
+  async save(like: Like): Promise<Like> {
     if (!like.createdAt) {
       return (
         await this.dataSource.query<LikeDocument[]>(
           `
-          INSERT INTO "Likes"(id, "userId", login, "targetId", status, "createdAt")
-          VALUES ($1, $2, $3, $4, $5, $6)
+          INSERT INTO "Likes"(id, "userId", "targetId", status, "createdAt")
+          VALUES ($1, $2, $3, $4, $5)
           RETURNING *`,
-          [
-            like.id,
-            like.userId,
-            like.login,
-            like.targetId,
-            like.status,
-            new Date(),
-          ],
+          [like.id, like.userId, like.targetId, like.status, new Date()],
         )
       )[0];
     } else {
@@ -95,10 +99,11 @@ export class LikesRepositoryPSQL implements ILikesRepository {
     };
   }
 
-  async getLatestLikes(postId: string): Promise<LikeDocument[]> {
-    return this.dataSource.query<LikeDocument[]>(
+  async getLatestLikes(postId: string): Promise<(Like & { login: string })[]> {
+    return this.dataSource.query<(Like & { login: string })[]>(
       `
-    SELECT * FROM "Likes"
+    SELECT *, u.login as "login" FROM "Likes" l
+    LEFT JOIN "Users" u ON "l.userId" = u.id
     WHERE "targetId" = $1
     AND status = 'Like'
     ORDER BY "createdAt" DESC

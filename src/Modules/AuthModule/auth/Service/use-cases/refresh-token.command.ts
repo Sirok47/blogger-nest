@@ -1,16 +1,10 @@
-import {
-  Session,
-  type SessionModelType,
-} from '../../../sessions/sessions.models';
-import { oneSecond } from '../../../../../Helpers/dateHelpers';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../users/Service/users.service';
 import { TokenService } from '../../../../JWT/jwt.service';
-import { InjectModel } from '@nestjs/mongoose';
-import { UserDocument } from '../../../users/users.models';
+import { User } from '../../../users/users.models';
 import {
   AuthService,
   type ISessionsRepository,
@@ -36,7 +30,6 @@ export class RefreshTokenHandler
     @Inject(SESSIONS_REPOSITORY)
     private readonly sessionRepo: ISessionsRepository,
     private readonly jwt: TokenService,
-    @InjectModel(Session.name) private readonly SessionModel: SessionModelType,
   ) {}
 
   async execute({ token, reqMeta }: RefreshTokenCommand): Promise<{
@@ -45,7 +38,7 @@ export class RefreshTokenHandler
   } | null> {
     const { userId, deviceId } = this.jwt.extractJWTPayload(token);
 
-    const user: UserDocument | null = await this.usersRepo.findById(userId);
+    const user: User | null = await this.usersRepo.findById(userId);
     if (!user) {
       return null;
     }

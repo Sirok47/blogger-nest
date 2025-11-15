@@ -1,74 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { CommentDocument } from '../../comments.models';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import {
+  Comment,
+  CommentatorInfo,
+  CommentInputModel,
+  CommentPSQL,
+} from '../../comments.models';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { ICommentsRepository } from '../../Service/comments.service';
-
-export const SELECT_JSON_SERIALIZE_COMMENT = `
-id,
-content,
-"postId",
-"createdAt",
-JSON_OBJECT('userId': "userId", 'userLogin': "userLogin") as "commentatorInfo"
-`;
 
 @Injectable()
 export class CommentsRepositoryPSQL implements ICommentsRepository {
-  constructor(@InjectDataSource() private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectRepository(CommentPSQL)
+    private readonly repo: Repository<CommentPSQL>,
+  ) {}
 
-  async save(comment: CommentDocument): Promise<CommentDocument> {
-    if (!comment.createdAt) {
-      return (
-        await this.dataSource.query(
-          `
-          INSERT INTO "Comments"(id, content, "postId", "userId", "userLogin", "createdAt")
-          VALUES ($1, $2, $3, $4, $5, $6)
-          RETURNING ${SELECT_JSON_SERIALIZE_COMMENT}`,
-          [
-            comment.id,
-            comment.content,
-            comment.postId,
-            comment.commentatorInfo.userId,
-            comment.commentatorInfo.userLogin,
-            new Date(),
-          ],
-        )
-      )[0];
-    } else {
-      return (
-        await this.dataSource.query(
-          `
-          UPDATE "Comments"
-            SET content=$2
-            WHERE id=$1
-            RETURNING ${SELECT_JSON_SERIALIZE_COMMENT}`,
-          [comment.id, comment.content],
-        )
-      )[0];
-    }
+  create(
+    postId: string,
+    input: CommentInputModel,
+    commentatorInfo: CommentatorInfo,
+  ): Comment {
+    return CommentPSQL.CreateDocument(postId, input, commentatorInfo);
   }
 
-  async findById(id: string): Promise<CommentDocument | null> {
-    const result = await this.dataSource.query<CommentDocument[]>(
-      `SELECT ${SELECT_JSON_SERIALIZE_COMMENT} FROM "Comments"
-          WHERE "id" = $1`,
-      [id],
-    );
-    if (result.length !== 1) {
-      return null;
-    }
-    return result[0];
+  async save(comment: CommentPSQL): Promise<CommentPSQL> {
+    return this.repo.save(comment);
+  }
+
+  async findById(id: string): Promise<CommentPSQL | null> {
+    return this.repo.findOneBy({ id });
   }
 
   async delete(id: string): Promise<boolean> {
-    const result = await this.dataSource.query<unknown[]>(
-      `DELETE FROM "Comments" WHERE id=$1`,
-      [id],
-    );
-    return !!result[1];
+    const result = await this.repo.delete(id);
+    return !!result.affected;
   }
 
   async deleteAll(): Promise<void> {
-    await this.dataSource.query(`DELETE FROM "Comments"`);
+    await this.repo.deleteAll();
   }
 }

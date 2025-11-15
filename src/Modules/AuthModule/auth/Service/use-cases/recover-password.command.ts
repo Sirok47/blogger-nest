@@ -4,10 +4,10 @@ import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../users/Service/users.service';
-import { UserDocument } from '../../../users/users.models';
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { addOneDay } from '../../../../../Helpers/dateHelpers';
 import { Inject } from '@nestjs/common';
+import { User } from '../../../users/users.models';
 
 export class RecoverPasswordCommand {
   constructor(public readonly email: string) {}
@@ -24,7 +24,7 @@ export class RecoverPasswordHandler
   ) {}
 
   async execute({ email }: RecoverPasswordCommand): Promise<boolean> {
-    const userToSendTo: UserDocument | null =
+    const userToSendTo: User | null =
       await this.usersRepo.findByLoginOrEmail(email);
     if (!userToSendTo || !userToSendTo.confirmationData.isConfirmed) {
       return true;
