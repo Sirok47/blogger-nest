@@ -56,13 +56,11 @@ export class UsersRepositoryPSQL implements IUsersRepository {
     code: string,
     expDate: Date,
   ): Promise<boolean> {
-    const result = await this.repo.update(
-      { id: userId },
+    const result = await this.confDataRepo.update(
+      { userId: userId },
       {
-        confirmationData: {
-          confirmationCode: code,
-          confirmationCodeExpDate: expDate,
-        },
+        confirmationCode: code,
+        confirmationCodeExpDate: expDate,
       },
     );
 

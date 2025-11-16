@@ -15,7 +15,6 @@ export class SessionsQueryRepoPSQL implements ISessionsQueryRepo {
     const sessions: SessionPSQL[] = await this.repo
       .createQueryBuilder('s')
       .select([
-        's.id',
         's.title',
         's.lastActiveDate',
         's.expDate',
@@ -24,7 +23,7 @@ export class SessionsQueryRepoPSQL implements ISessionsQueryRepo {
       ])
       .addSelect('s.IP', 'ip')
       .where('s.userId = :id', { id: userId })
-      .andWhere('s.expDate = :date', { date: new Date() })
+      .andWhere('s.expDate > :date', { date: new Date() })
       .getMany();
 
     const result: SessionViewModel[] = [];
