@@ -31,8 +31,19 @@ export class PostsQueryRepoPSQL implements IPostsQueryRepo {
       baseQuery = baseQuery.where('p.blogId = :id', { id: blogId });
     }
 
+    if (sortBy === 'blogName') {
+      baseQuery = baseQuery.orderBy(
+        `"blog"."name"`,
+        sortDirection.toUpperCase() as 'ASC' | 'DESC',
+      );
+    } else {
+      baseQuery = baseQuery.orderBy(
+        `"p.${sortBy}"`,
+        sortDirection.toUpperCase() as 'ASC' | 'DESC',
+      );
+    }
+
     const posts: PostPSQL[] = await baseQuery
-      .orderBy(`p.${sortBy}`, sortDirection.toUpperCase() as 'ASC' | 'DESC')
       .limit(pageSize)
       .offset((pageNumber - 1) * pageSize)
       .getMany();
