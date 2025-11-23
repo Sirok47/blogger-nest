@@ -154,6 +154,7 @@ export class PostPSQL implements Post {
 
   @ManyToOne(() => BlogPSQL, (blog) => blog.posts)
   blog: BlogPSQL;
+  @Column()
   blogId: string;
 
   @Column('timestamp without time zone', { default: () => 'CURRENT_TIMESTAMP' })

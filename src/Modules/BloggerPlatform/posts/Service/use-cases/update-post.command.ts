@@ -39,7 +39,6 @@ export class UpdatePostHandler implements ICommandHandler<UpdatePostCommand> {
     postToUpdate.shortDescription = newPost.shortDescription;
     postToUpdate.content = newPost.content;
 
-    const updatedPost = await this.postsRepository.save(postToUpdate);
-    return !(await this.postsQueryRepo.findById(updatedPost.id, ''));
+    return !!(await this.postsRepository.save(postToUpdate));
   }
 }
