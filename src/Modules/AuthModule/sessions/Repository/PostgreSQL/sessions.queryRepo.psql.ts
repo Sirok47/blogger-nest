@@ -15,13 +15,13 @@ export class SessionsQueryRepoPSQL implements ISessionsQueryRepo {
     const sessions: SessionPSQL[] = await this.repo
       .createQueryBuilder('s')
       .select([
+        's.ip',
         's.title',
         's.lastActiveDate',
         's.expDate',
         's.deviceId',
         's.userId',
       ])
-      .addSelect('s.IP', 'ip')
       .where('s.userId = :id', { id: userId })
       .andWhere('s.expDate > :date', { date: new Date() })
       .getMany();
