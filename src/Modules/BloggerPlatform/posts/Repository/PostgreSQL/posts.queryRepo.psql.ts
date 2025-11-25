@@ -38,7 +38,7 @@ export class PostsQueryRepoPSQL implements IPostsQueryRepo {
       );
     } else {
       baseQuery = baseQuery.orderBy(
-        `"p.${sortBy}"`,
+        `p."${sortBy}"`,
         sortDirection.toUpperCase() as 'ASC' | 'DESC',
       );
     }
