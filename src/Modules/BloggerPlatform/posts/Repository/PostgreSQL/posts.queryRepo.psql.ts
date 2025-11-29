@@ -43,25 +43,42 @@ export class PostsQueryRepoPSQL implements IPostsQueryRepo {
       );
     }
 
-    const posts: PostPSQL[] = await baseQuery
-      .limit(pageSize)
-      .offset((pageNumber - 1) * pageSize)
-      .getMany();
+    // const posts: PostPSQL[] = await baseQuery
+    //   .limit(pageSize)
+    //   .offset((pageNumber - 1) * pageSize)
+    //   .getMany();
+    //
+    // const totalCount: number = await baseQuery.getCount();
 
-    const totalCount: number = await baseQuery.getCount();
+    const [posts, totalCount] = await Promise.all([
+      baseQuery
+        .limit(pageSize)
+        .offset((pageNumber - 1) * pageSize)
+        .getMany(),
+      baseQuery.getCount(),
+    ]);
 
-    const postsVM: PostViewModel[] = [];
+    const promises: Promise<[LikesInfo, LikePSQL[]]>[] = [];
     for (const post of posts) {
-      const likeInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
-        post.id,
-        userId,
+      promises.push(
+        (async () => {
+          return [
+            await this.likesRepo.gatherLikesInfoOf(post.id, userId),
+            await this.likesRepo.getLatestLikes(post.id),
+          ];
+        })(),
       );
-      const latestLikes: LikePSQL[] = await this.likesRepo.getLatestLikes(
-        post.id,
-      );
-      postsVM.push(await post.mapToViewModel(likeInfo, latestLikes));
     }
+    const postsVM: PostViewModel[] = [];
+    await Promise.all(promises).then(
+      async (arr: [LikesInfo, LikePSQL[]][]): Promise<void> => {
+        for (const id in posts) {
+          postsVM.push(await posts[id].mapToViewModel(arr[id][0], arr[id][1]));
+        }
+      },
+    );
 
+    //TODO: missed 'myStatus'
     return paginationSettings.Paginate(+totalCount, postsVM);
   }
 
