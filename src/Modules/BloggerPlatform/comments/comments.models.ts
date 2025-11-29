@@ -91,10 +91,12 @@ export class CommentPSQL implements Comment {
 
   @ManyToOne(() => PostPSQL, (post) => post.comments)
   post: PostPSQL;
+  @Column()
   postId: string;
 
   @ManyToOne(() => UserPSQL, (user) => user.comments)
   commentator: UserPSQL;
+  @Column()
   commentatorId: string;
 
   @Column('timestamp with time zone', { default: () => 'CURRENT_TIMESTAMP' })
