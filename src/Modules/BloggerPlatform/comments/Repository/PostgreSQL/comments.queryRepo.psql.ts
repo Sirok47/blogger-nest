@@ -41,6 +41,7 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
       .where('c.postId = :id', { id: postId });
 
     const comments: CommentPSQL[] = await baseQuery
+      .leftJoinAndSelect('c.commentator', 'u')
       .orderBy(`c.${sortBy}`, sortDirection.toUpperCase() as 'ASC' | 'DESC')
       .limit(pageSize)
       .offset((pageNumber - 1) * pageSize)
@@ -54,8 +55,8 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
         comment.id,
         userId,
       );
-      const userInfo: User | null = await this.usersRepo.findById(userId);
-      commentsVM.push(comment.mapToViewModel(likeInfo, userInfo!));
+      const userInfo: User = comment.commentator;
+      commentsVM.push(comment.mapToViewModel(likeInfo, userInfo));
     }
 
     return paginationSettings.Paginate<CommentViewModel>(
