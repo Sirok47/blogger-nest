@@ -16,7 +16,6 @@ import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../../AuthModule/users/Service/users.service';
-import { User } from '../../../../AuthModule/users/users.models';
 
 @Injectable()
 export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
@@ -55,8 +54,7 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
         comment.id,
         userId,
       );
-      const userInfo: User = comment.commentator;
-      commentsVM.push(comment.mapToViewModel(likeInfo, userInfo));
+      commentsVM.push(comment.mapToViewModel(likeInfo));
     }
 
     return paginationSettings.Paginate<CommentViewModel>(
@@ -68,16 +66,16 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
   async findById(id: string, userId: string): Promise<CommentViewModel | null> {
     const comment: CommentPSQL | null = await this.repo
       .createQueryBuilder('c')
+      .leftJoinAndSelect('c.commentator', 'u')
       .where('c.id = :id', { id: id })
       .getOne();
     if (!comment) {
       return null;
     }
-    const userInfo: User | null = await this.usersRepo.findById(userId);
     const likesInfo: LikesInfo = await this.likesRepo.gatherLikesInfoOf(
       comment.id,
       userId,
     );
-    return comment.mapToViewModel(likesInfo, userInfo!);
+    return comment.mapToViewModel(likesInfo);
   }
 }
