@@ -12,10 +12,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ICommentsQueryRepo } from '../../Service/comments.service';
-import {
-  type IUsersRepository,
-  USERS_REPOSITORY,
-} from '../../../../AuthModule/users/Service/users.service';
 
 @Injectable()
 export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
@@ -24,8 +20,6 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
     private readonly repo: Repository<CommentPSQL>,
     @Inject(LIKES_REPOSITORY)
     private readonly likesRepo: ILikesRepository,
-    @Inject(USERS_REPOSITORY)
-    private readonly usersRepo: IUsersRepository,
   ) {}
 
   async findWithSearchAndPagination(
@@ -54,7 +48,7 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
         comment.id,
         userId,
       );
-      commentsVM.push(comment.mapToViewModel(likeInfo));
+      commentsVM.push(comment.mapToViewModel(likeInfo, comment.commentator));
     }
 
     return paginationSettings.Paginate<CommentViewModel>(
@@ -76,6 +70,6 @@ export class CommentsQueryRepoPSQL implements ICommentsQueryRepo {
       comment.id,
       userId,
     );
-    return comment.mapToViewModel(likesInfo);
+    return comment.mapToViewModel(likesInfo, comment.commentator);
   }
 }

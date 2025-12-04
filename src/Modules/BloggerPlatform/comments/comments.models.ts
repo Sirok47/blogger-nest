@@ -114,13 +114,17 @@ export class CommentPSQL implements Comment {
     return comment;
   }
 
-  mapToViewModel(lInfo: LikesInfo): CommentViewModel {
+  mapToViewModel(
+    this: CommentPSQL,
+    lInfo: LikesInfo,
+    commentator: UserPSQL,
+  ): CommentViewModel {
     return {
       id: this.id,
       content: this.content,
       commentatorInfo: {
-        userId: this.commentator.id,
-        userLogin: this.commentator.login,
+        userId: commentator.id,
+        userLogin: commentator.login,
       },
       createdAt: this.createdAt.toISOString(),
       likesInfo: lInfo,
