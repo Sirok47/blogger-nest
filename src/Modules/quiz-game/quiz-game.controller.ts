@@ -14,6 +14,7 @@ import { UserAuthGuard } from '../../Request-Modifications/Guards/accessToken.gu
 import { GameQueryRepo } from './Repository/game.queryRepo';
 import { InputID } from '../../Models/IDmodel';
 import { PlayerRepository } from './Repository/player.repository';
+import { AnswerInputModel, AnswerViewModel } from './DTOs/answer.dto';
 
 @Controller('quiz-game/pairs')
 export class QuizGameController {
@@ -71,5 +72,14 @@ export class QuizGameController {
       throw new NotFoundException();
     }
     return game.mapToViewModel();
+  }
+
+  @Post('answer')
+  @UseGuards(UserAuthGuard)
+  async postAnswer(
+    @Param('userId') userId: string,
+    @Param() { answer }: AnswerInputModel,
+  ): Promise<AnswerViewModel> {
+    return this.service.receiveAnswer(userId, answer);
   }
 }

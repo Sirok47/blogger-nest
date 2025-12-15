@@ -62,7 +62,7 @@ export class QuizGameService {
     userId: string,
     answerBody: string,
   ): Promise<AnswerViewModel> {
-    const player =
+    let player =
       await this.playerRepository.getActiveOfUserWithRelations(userId);
     if (!player || player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT) {
       throw new ForbiddenException();
@@ -73,12 +73,41 @@ export class QuizGameService {
     if (status) {
       player.score++;
     }
-    const newAnswer = new AnswerPSQL(
-      answerBody,
-      status,
-      player,
-      currentQuestion,
+    let newAnswer = new AnswerPSQL(answerBody, status, player, currentQuestion);
+    player.answers.push(newAnswer);
+    [player, newAnswer] = await Promise.all([
+      this.playerRepository.save(player),
+      this.answerRepository.save(newAnswer),
+    ]);
+
+    if (player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT) {
+      this.onPlayerFinished(player.game);
+    }
+    return newAnswer.mapToViewModel();
+  }
+
+  private onPlayerFinished(game: GamePSQL): void {
+    const finishedPlayers: PlayerPSQL[] = game.players.filter(
+      (player) => player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT,
     );
-    return (await this.answerRepository.save(newAnswer)).mapToViewModel();
+    if (finishedPlayers.length === 1) {
+      const correctAnswers: number = finishedPlayers[0].answers.reduce(
+        (count: number, answer: AnswerPSQL): number => {
+          if (answer.status) count++;
+          return count;
+        },
+        0,
+      );
+
+      if (correctAnswers) {
+        finishedPlayers[0].score++;
+        void this.playerRepository.save(finishedPlayers[0]);
+      }
+    }
+    if (finishedPlayers.length >= config.QUIZ_GAME_PLAYER_COUNT) {
+      game.status = GameStatus.finished;
+      game.finishedAt = new Date();
+      void this.gameRepository.save(game);
+    }
   }
 }
