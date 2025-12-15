@@ -6,7 +6,6 @@ import { IsEmail, Length } from 'class-validator';
 import {
   Column,
   Entity,
-  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -15,6 +14,7 @@ import { SessionPSQL } from '../sessions/sessions.models';
 import { LikePSQL } from '../../BloggerPlatform/likes/likes.models';
 import { CommentPSQL } from '../../BloggerPlatform/comments/comments.models';
 import { ConfirmationDataPSQL } from './confData.models';
+import { PlayerPSQL } from '../../quiz-game/entities/player.entity';
 
 export class UserInputModel {
   @Length(3, 10)
@@ -169,6 +169,9 @@ export class UserPSQL implements User {
 
   @Column('timestamp with time zone', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @OneToMany(() => PlayerPSQL, (player) => player.user)
+  players: PlayerPSQL[];
 
   @OneToMany(() => SessionPSQL, (session) => session.user)
   sessions: SessionPSQL[];

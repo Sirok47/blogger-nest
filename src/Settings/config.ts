@@ -22,4 +22,7 @@ export const config = {
   PSQL_PASSWORD: process.env.PSQL_PASSWORD,
   PSQL_DB: 'postgres1',
   PSQL_CONNECTION_STRING: process.env.PSQL_CONNECTION_STRING,
+  //QUIZ_GAME
+  QUIZ_GAME_PLAYER_COUNT: 2,
+  QUIZ_GAME_QUESTION_COUNT: 5,
 };

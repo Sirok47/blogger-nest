@@ -9,6 +9,8 @@ import { config } from './Settings/config';
 import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
+import { QuizGameService } from './Modules/quiz-game/quiz-game.service';
 
 @Module({
   imports: [
@@ -36,6 +38,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         },
       ],
     }),
+    QuizGameModule,
   ],
   controllers: [AppController],
   providers: [AppService],
