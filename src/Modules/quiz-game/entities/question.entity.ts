@@ -1,4 +1,11 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { QuestionViewModel } from '../DTOs/question.dto';
 
 @Entity({ name: 'Questions' })
 export class QuestionPSQL {
@@ -12,5 +19,27 @@ export class QuestionPSQL {
   answers: string[];
 
   @Column('boolean')
-  isPublished: boolean;
+  isPublished: boolean = false;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date | null;
+
+  constructor(body: string, answers: string[]) {
+    this.body = body;
+    this.answers = answers;
+  }
+
+  mapToViewModel(): QuestionViewModel {
+    return {
+      id: this.id,
+      body: this.body,
+      published: this.isPublished,
+      correctAnswers: this.answers,
+      createdAt: this.createdAt.toISOString(),
+      updatedAt: this.updatedAt?.toISOString() ?? null,
+    };
+  }
 }

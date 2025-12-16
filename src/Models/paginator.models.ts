@@ -7,6 +7,12 @@ export enum SortDirections {
   desc = 'desc',
 }
 
+export enum StatusSearchTerms {
+  all = 'all',
+  published = 'published',
+  notPublished = 'notPublished',
+}
+
 export class Paginator {
   @IsOptional()
   @IsString()
@@ -19,6 +25,14 @@ export class Paginator {
   @IsOptional()
   @IsString()
   public searchNameTerm = '';
+
+  @IsOptional()
+  @IsString()
+  public bodySearchTerm = '';
+
+  @IsOptional()
+  @IsEnum(StatusSearchTerms)
+  public publishedStatus: StatusSearchTerms = StatusSearchTerms.all;
 
   @IsOptional()
   @IsString()

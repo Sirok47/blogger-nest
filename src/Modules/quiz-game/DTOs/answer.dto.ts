@@ -10,8 +10,8 @@ export enum AnswerStatus {
   Incorrect = 'Incorrect',
 }
 
-export class AnswerViewModel {
+export type AnswerViewModel = {
   questionId: string;
   answerStatus: AnswerStatus;
   addedAt: string;
-}
+};
