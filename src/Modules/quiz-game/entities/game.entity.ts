@@ -41,13 +41,16 @@ export class GamePSQL {
     cascade: true,
     eager: true,
   })
-  players: PlayerPSQL[] = [];
+  players: PlayerPSQL[];
 
   constructor(questions: QuestionPSQL[]) {
-    this.questions = [];
-    for (const question of questions) {
-      const gq = new GameQuestionPSQL(question);
-      this.questions.push(gq);
+    if (questions) {
+      this.players = [];
+      this.questions = [];
+      for (const question of questions) {
+        const gq = new GameQuestionPSQL(question);
+        this.questions.push(gq);
+      }
     }
   }
 

@@ -1,7 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { GamePSQL } from './game.entity';
 import { QuestionPSQL } from './question.entity';
-import { QuestionViewModel } from '../DTOs/question.dto';
+import { GameQuestionViewModel, QuestionViewModel } from '../DTOs/question.dto';
 
 @Entity({ name: 'GameQuestions' })
 export class GameQuestionPSQL {
@@ -22,7 +22,7 @@ export class GameQuestionPSQL {
     this.question = question;
   }
 
-  mapToViewModel(): QuestionViewModel {
+  mapToViewModel(): GameQuestionViewModel {
     return {
       id: this.id.toString(),
       body: this.question.body,

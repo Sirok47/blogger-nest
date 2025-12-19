@@ -10,7 +10,6 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
-import { QuizGameService } from './Modules/quiz-game/quiz-game.service';
 
 @Module({
   imports: [
@@ -25,8 +24,8 @@ import { QuizGameService } from './Modules/quiz-game/quiz-game.service';
       username: config.PSQL_USERNAME,
       password: config.PSQL_PASSWORD,
       database: config.PSQL_DB,
-      autoLoadEntities: true,
-      synchronize: true,
+      autoLoadEntities: false,
+      synchronize: false,
       url: config.PSQL_CONNECTION_STRING,
     }),
     CqrsModule.forRoot(),

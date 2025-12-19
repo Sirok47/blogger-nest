@@ -9,6 +9,11 @@ export class QuestionInputModel {
   correctAnswers: string[];
 }
 
+export type GameQuestionViewModel = {
+  id: string;
+  body: string;
+};
+
 export type QuestionViewModel = {
   id: string;
   body: string;

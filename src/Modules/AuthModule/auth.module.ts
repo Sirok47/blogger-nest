@@ -127,6 +127,11 @@ const SessionQueryRepos = [
     ...AuthCommandHandlers,
     ...SessionCommandHandlers,
   ],
-  exports: [TypeOrmModule, USERS_REPOSITORY, SESSIONS_REPOSITORY],
+  exports: [
+    TypeOrmModule,
+    USERS_REPOSITORY,
+    SESSIONS_REPOSITORY,
+    UsersRepositoryPSQL,
+  ],
 })
 export class AuthModule {}

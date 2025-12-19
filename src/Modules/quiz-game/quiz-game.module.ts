@@ -13,9 +13,14 @@ import { QuizGameController } from './quiz-game.controller';
 import { AnswerRepository } from './Repository/answer.repository';
 import { PlayerRepository } from './Repository/player.repository';
 import { QuestionRepository } from './Repository/question.repository';
+import { QuestionController } from './question.controller';
+import { QuestionQueryRepo } from './Repository/question.queryRepo';
+import { QuestionService } from './question.service';
+import { TokenModule } from '../JWT/jwt.module';
 
 @Module({
   imports: [
+    TokenModule,
     AuthModule,
     TypeOrmModule.forFeature([
       GamePSQL,
@@ -25,14 +30,16 @@ import { QuestionRepository } from './Repository/question.repository';
       GameQuestionPSQL,
     ]),
   ],
-  controllers: [QuizGameController],
+  controllers: [QuizGameController, QuestionController],
   providers: [
     GameRepository,
     AnswerRepository,
     PlayerRepository,
     QuestionRepository,
+    QuestionQueryRepo,
     GameQueryRepo,
     QuizGameService,
+    QuestionService,
   ],
 })
 export class QuizGameModule {}

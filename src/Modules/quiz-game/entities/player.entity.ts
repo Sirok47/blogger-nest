@@ -33,7 +33,7 @@ export class PlayerPSQL {
   gameId: string;
 
   @OneToMany(() => AnswerPSQL, (answer) => answer.player)
-  answers: AnswerPSQL[] = [];
+  answers: AnswerPSQL[];
 
   constructor(user: UserPSQL, game: GamePSQL) {
     this.user = user;
