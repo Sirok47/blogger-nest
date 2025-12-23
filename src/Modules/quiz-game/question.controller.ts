@@ -15,7 +15,11 @@ import {
 import { QuestionService } from './question.service';
 import { QuestionQueryRepo } from './Repository/question.queryRepo';
 import { AdminAuthGuard } from '../../Request-Modifications/Guards/basicAuth.guard';
-import { QuestionInputModel, QuestionViewModel } from './DTOs/question.dto';
+import {
+  InputPublishedStatus,
+  QuestionInputModel,
+  QuestionViewModel,
+} from './DTOs/question.dto';
 import { Paginated, Paginator } from '../../Models/paginator.models';
 import { InputID } from '../../Models/IDmodel';
 
@@ -60,7 +64,11 @@ export class QuestionController {
 
   @Put(':id/publish')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async publishQuestion(@Param() { id }: InputID): Promise<void> {
-    if (!(await this.service.publish(id))) throw new NotFoundException();
+  async publishQuestion(
+    @Param() { id }: InputID,
+    @Body() { status }: InputPublishedStatus,
+  ): Promise<void> {
+    if (!(await this.service.publish(id, status)))
+      throw new NotFoundException();
   }
 }

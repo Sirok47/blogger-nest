@@ -15,6 +15,7 @@ export const config = {
   accessTokenLifeSpan: +(process.env.ACC_TOKEN_LIFESPAN as string),
   refreshTokenLifeSpan: +(process.env.REF_TOKEN_LIFESPAN as string),
   COOKIE_PATH: '/',
+  THROTTLER_LIMIT: +process.env.THROTTLER_LIMIT!,
   //PSQL
   PSQL_HOST: process.env.PSQL_HOST || 'localhost',
   PSQL_PORT: 5432,

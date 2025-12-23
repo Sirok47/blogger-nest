@@ -33,7 +33,7 @@ import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
       throttlers: [
         {
           ttl: 10000,
-          limit: 5,
+          limit: config.THROTTLER_LIMIT,
         },
       ],
     }),

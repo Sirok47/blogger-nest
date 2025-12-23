@@ -15,13 +15,13 @@ export class QuestionService {
     return (await this.questionRepository.save(question)).mapToViewModel();
   }
 
-  async publish(id: string): Promise<boolean> {
+  async publish(id: string, status: boolean): Promise<boolean> {
     const question: QuestionPSQL | null =
       await this.questionRepository.findById(id);
     if (!question) return false;
     if (!question.answers.length)
       throw new BadRequestException('No answers found');
-    question.isPublished = true;
+    question.isPublished = status;
     return !!(await this.questionRepository.save(question));
   }
 

@@ -25,7 +25,7 @@ export class QuestionPSQL {
   createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date | null;
+  updatedAt: Date;
 
   constructor(body: string, answers: string[]) {
     this.body = body;
@@ -39,7 +39,8 @@ export class QuestionPSQL {
       published: this.isPublished,
       correctAnswers: this.answers,
       createdAt: this.createdAt.toISOString(),
-      updatedAt: this.updatedAt?.toISOString() ?? null,
+      updatedAt:
+        this.updatedAt === this.createdAt ? null : this.updatedAt.toISOString(),
     };
   }
 }
