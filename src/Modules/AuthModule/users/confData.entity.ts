@@ -5,7 +5,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserPSQL } from './users.models';
+import { UserPSQL } from './users.entity';
 
 @Entity('ConfirmationData')
 export class ConfirmationDataPSQL {

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { ILikesRepository, Like, LikePSQL, LikeStatus } from '../likes.models';
-import { LikesInfo } from '../../comments/comments.models';
+import { ILikesRepository, Like, LikePSQL, LikeStatus } from '../likes.entity';
+import { LikesInfo } from '../../comments/comments.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../../../AuthModule/users/users.models';
+import { User } from '../../../AuthModule/users/users.entity';
 import { SortDirections } from '../../../../Models/paginator.models';
 
 @Injectable()

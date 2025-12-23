@@ -4,7 +4,7 @@ import {
   USERS_REPOSITORY,
 } from '../../../users/Service/users.service';
 import { TokenService } from '../../../../JWT/jwt.service';
-import { User } from '../../../users/users.models';
+import { User } from '../../../users/users.entity';
 import {
   AuthService,
   type ISessionsRepository,

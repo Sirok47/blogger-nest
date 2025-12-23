@@ -4,7 +4,7 @@ import {
   type SessionModelType,
   SessionMongo,
   SessionViewModel,
-} from '../../sessions.models';
+} from '../../sessions.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { ISessionsQueryRepo } from '../../../auth/Service/auth.service';
 

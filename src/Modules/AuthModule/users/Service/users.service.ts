@@ -6,7 +6,7 @@ import {
   type UserModelType,
   UserMongo,
   UserViewModel,
-} from '../users.models';
+} from '../users.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { HashService } from '../../../Crypto/bcrypt';
 import { Paginated, Paginator } from '../../../../Models/paginator.models';

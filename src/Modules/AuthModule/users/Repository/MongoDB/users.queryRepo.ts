@@ -5,7 +5,7 @@ import {
   type UserModelType,
   UserMongo,
   UserViewModel,
-} from '../../users.models';
+} from '../../users.entity';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery } from 'mongoose';

@@ -24,8 +24,8 @@ import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
       username: config.PSQL_USERNAME,
       password: config.PSQL_PASSWORD,
       database: config.PSQL_DB,
-      autoLoadEntities: false,
-      synchronize: false,
+      autoLoadEntities: true,
+      synchronize: true,
       url: config.PSQL_CONNECTION_STRING,
     }),
     CqrsModule.forRoot(),
@@ -41,5 +41,6 @@ import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
   ],
   controllers: [AppController],
   providers: [AppService],
+  exports: [AppService],
 })
 export class AppModule {}

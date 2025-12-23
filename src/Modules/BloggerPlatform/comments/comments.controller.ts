@@ -10,12 +10,12 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CommentInputModel, CommentViewModel } from './comments.models';
+import { CommentInputModel, CommentViewModel } from './comments.entity';
 import { InputID } from '../../../Models/IDmodel';
 import { CommandBus } from '@nestjs/cqrs';
 import { UpdateCommentCommand } from './Service/use-cases/update-comment.command';
 import { DeleteCommentCommand } from './Service/use-cases/delete-comment.command';
-import { LikeInputModel } from '../likes/likes.models';
+import { LikeInputModel } from '../likes/likes.entity';
 import { ChangeLikeForCommentCommand } from './Service/use-cases/change-like-for-comment.command';
 import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
 import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';

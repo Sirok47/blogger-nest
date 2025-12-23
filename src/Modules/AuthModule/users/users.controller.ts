@@ -16,7 +16,7 @@ import {
   type IUsersQueryRepo,
   USERS_QUERY_REPO,
 } from './Service/users.service';
-import { UserDocument, UserInputModel, UserViewModel } from './users.models';
+import { UserDocument, UserInputModel, UserViewModel } from './users.entity';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import { InputID } from '../../../Models/IDmodel';
 import { AdminAuthGuard } from '../../../Request-Modifications/Guards/basicAuth.guard';

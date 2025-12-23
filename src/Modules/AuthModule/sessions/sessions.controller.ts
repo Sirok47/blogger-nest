@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { RefreshTokenGuard } from '../../../Request-Modifications/Guards/refreshToken.guard';
-import { SessionViewModel, UserFromRefToken } from './sessions.models';
+import { SessionViewModel, UserFromRefToken } from './sessions.entity';
 import { DeleteAllButOneSessionsCommand } from './Service/use-cases/terminate-all-but-one-session.command';
 import { DeleteSessionCommand } from './Service/use-cases/terminate-one-session.command';
 import {

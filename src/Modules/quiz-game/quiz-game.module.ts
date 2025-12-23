@@ -41,5 +41,11 @@ import { TokenModule } from '../JWT/jwt.module';
     QuizGameService,
     QuestionService,
   ],
+  exports: [
+    GameRepository,
+    AnswerRepository,
+    PlayerRepository,
+    QuestionRepository,
+  ],
 })
 export class QuizGameModule {}

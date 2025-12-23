@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MailerService } from '../../../../Mailer/mailer.service';
-import { User } from '../../../users/users.models';
+import { User } from '../../../users/users.entity';
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { addOneDay } from '../../../../../Helpers/dateHelpers';
 import {

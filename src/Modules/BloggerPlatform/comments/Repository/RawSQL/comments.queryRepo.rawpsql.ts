@@ -5,17 +5,17 @@ import {
   CommentPSQL,
   CommentViewModel,
   LikesInfo,
-} from '../../comments.models';
+} from '../../comments.entity';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import {
   type ILikesRepository,
   LIKES_REPOSITORY,
-} from '../../../likes/likes.models';
+} from '../../../likes/likes.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { SELECT_JSON_SERIALIZE_COMMENT } from './comments.repository.rawpsql';
 import { ICommentsQueryRepo } from '../../Service/comments.service';
-import { User } from '../../../../AuthModule/users/users.models';
+import { User } from '../../../../AuthModule/users/users.entity';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,

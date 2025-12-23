@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Post, PostInputModel, PostViewModel } from '../../posts.models';
+import { Post, PostInputModel, PostViewModel } from '../../posts.entity';
 import { Inject } from '@nestjs/common';
 import {
   type IPostsQueryRepo,

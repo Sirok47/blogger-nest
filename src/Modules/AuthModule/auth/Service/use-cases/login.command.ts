@@ -5,7 +5,7 @@ import {
 } from '../../../users/Service/users.service';
 import { HashService } from 'src/Modules/Crypto/bcrypt';
 import { generateUuid } from '../../../../../Helpers/uuid';
-import { User } from '../../../users/users.models';
+import { User } from '../../../users/users.entity';
 import {
   AuthService,
   type ISessionsRepository,

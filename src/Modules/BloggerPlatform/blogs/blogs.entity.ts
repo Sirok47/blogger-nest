@@ -2,7 +2,7 @@ import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsUrl, Length } from 'class-validator';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { PostPSQL } from '../posts/posts.models';
+import { PostPSQL } from '../posts/posts.entity';
 
 export class BlogInputModel {
   @Length(1, 15)

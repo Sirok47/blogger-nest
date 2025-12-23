@@ -13,6 +13,16 @@ export class GameRepository {
     return this.repo.save(game);
   }
 
+  async findById(id: string): Promise<GamePSQL | null> {
+    return this.repo.findOne({
+      where: { id: id },
+      relations: {
+        players: { answers: { question: true } },
+        questions: true,
+      },
+    });
+  }
+
   searchForOpenGame(): Promise<GamePSQL | null> {
     return this.repo.findOne({
       where: { status: GameStatus.pending },
@@ -30,13 +40,15 @@ export class GameRepository {
       where: [
         {
           status: Not(GameStatus.finished),
-        },
-        {
           players: {
             userId: userId,
           },
         },
       ],
     });
+  }
+
+  async deleteAll(): Promise<void> {
+    await this.repo.deleteAll();
   }
 }

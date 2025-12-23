@@ -1,7 +1,7 @@
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
-import { UserPSQL } from '../users/users.models';
+import { UserPSQL } from '../users/users.entity';
 
 export type SessionViewModel = Omit<Session, 'expDate' | 'userId'>;
 

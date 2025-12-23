@@ -1,14 +1,14 @@
 import { HydratedDocument, Model } from 'mongoose';
-import { CommentPSQL, LikesInfo } from '../comments/comments.models';
+import { CommentPSQL, LikesInfo } from '../comments/comments.entity';
 import { InjectModel, Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { NotFoundException } from '@nestjs/common';
-import { Blog, BlogMongo, BlogPSQL } from '../blogs/blogs.models';
-import { Like, LikeDocument, LikePSQL } from '../likes/likes.models';
+import { Blog, BlogMongo, BlogPSQL } from '../blogs/blogs.entity';
+import { Like, LikeDocument, LikePSQL } from '../likes/likes.entity';
 import { IsMongoId, Length } from 'class-validator';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { BlogsRepositoryPSQL } from '../blogs/Repository/PostgreSQL/blogs.repository.psql';
 import { BlogsRepository } from '../blogs/Repository/MongoDB/blogs.repository';
-import { UserMongo } from '../../AuthModule/users/users.models';
+import { UserMongo } from '../../AuthModule/users/users.entity';
 
 export class PostUnderBlogInputModel {
   @Length(1, 30)
@@ -63,7 +63,7 @@ export interface Post {
 
 @Schema({ timestamps: true })
 export class PostMongo implements Post {
-  @InjectModel(BlogMongo.name) private readonly blogsRepo: BlogsRepository;
+  @InjectModel('Blog') private readonly blogsRepo: BlogsRepository;
   readonly id: string;
 
   @Prop({ type: String, required: true, min: 1, max: 100 })

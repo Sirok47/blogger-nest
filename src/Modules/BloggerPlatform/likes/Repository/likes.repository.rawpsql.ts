@@ -5,11 +5,11 @@ import {
   LikeDocument,
   LikePSQL,
   LikeStatus,
-} from '../likes.models';
-import { LikesInfo } from '../../comments/comments.models';
+} from '../likes.entity';
+import { LikesInfo } from '../../comments/comments.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { User } from '../../../AuthModule/users/users.models';
+import { User } from '../../../AuthModule/users/users.entity';
 
 @Injectable()
 export class LikesRepositoryRawPSQL implements ILikesRepository {

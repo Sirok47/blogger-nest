@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { GameRepository } from './Repository/game.repository';
 import { GamePSQL, GameStatus } from './entities/game.entity';
-import { UserPSQL } from '../AuthModule/users/users.models';
+import { UserPSQL } from '../AuthModule/users/users.entity';
 import { UsersRepositoryPSQL } from '../AuthModule/users/Repository/PostgreSQL/users.repository.psql';
 import { PlayerPSQL } from './entities/player.entity';
 import { QuestionRepository } from './Repository/question.repository';
@@ -34,6 +34,11 @@ export class QuizGameService {
     if (hasGames) {
       throw new ForbiddenException();
     }
+
+    const user: UserPSQL | null = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
     let game: GamePSQL | null = await this.gameRepository.searchForOpenGame();
     if (!game) {
       game = new GamePSQL(
@@ -42,11 +47,8 @@ export class QuizGameService {
         ),
       );
     }
-    const user: UserPSQL | null = await this.userRepository.findById(userId);
-    if (!user) {
-      throw new UnauthorizedException();
-    }
     const player = new PlayerPSQL(user, game);
+
     game.players.push(player);
     if (game.players.length >= config.QUIZ_GAME_PLAYER_COUNT) {
       game.status = GameStatus.active;
@@ -58,17 +60,21 @@ export class QuizGameService {
     ))!.mapToViewModel();
   }
 
-  async receiveAnswer(
+  async ReceiveAnswer(
     userId: string,
     answerBody: string,
   ): Promise<AnswerViewModel> {
     let player =
       await this.playerRepository.getActiveOfUserWithRelations(userId);
-    if (!player || player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT) {
+    if (
+      !player ||
+      player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT ||
+      player.game.status !== GameStatus.active
+    ) {
       throw new ForbiddenException();
     }
     const currentQuestion =
-      player.game.questions[player.answers.length - 1].question;
+      player.game.questions[player.answers.length].question;
     const status: boolean = currentQuestion.answers.indexOf(answerBody) >= 0;
     if (status) {
       player.score++;
@@ -81,12 +87,14 @@ export class QuizGameService {
     ]);
 
     if (player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT) {
-      this.onPlayerFinished(player.game);
+      await this.onPlayerFinished(
+        (await this.gameQueryRepo.getGameProgressById(player.gameId))!,
+      );
     }
     return newAnswer.mapToViewModel();
   }
 
-  private onPlayerFinished(game: GamePSQL): void {
+  private async onPlayerFinished(game: GamePSQL): Promise<void> {
     const finishedPlayers: PlayerPSQL[] = game.players.filter(
       (player) => player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT,
     );
@@ -101,13 +109,14 @@ export class QuizGameService {
 
       if (correctAnswers) {
         finishedPlayers[0].score++;
-        void this.playerRepository.save(finishedPlayers[0]);
+        await this.playerRepository.save(finishedPlayers[0]);
       }
     }
     if (finishedPlayers.length >= config.QUIZ_GAME_PLAYER_COUNT) {
       game.status = GameStatus.finished;
       game.finishedAt = new Date();
-      void this.gameRepository.save(game);
+      await this.gameRepository.save(game);
     }
+    return;
   }
 }

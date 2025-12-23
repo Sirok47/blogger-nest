@@ -5,8 +5,8 @@ import {
   Like,
   LIKES_REPOSITORY,
   LikeStatus,
-} from '../../../likes/likes.models';
-import { User } from '../../../../AuthModule/users/users.models';
+} from '../../../likes/likes.entity';
+import { User } from '../../../../AuthModule/users/users.entity';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,

@@ -1,4 +1,4 @@
-import { Blog, BlogInputModel, BlogViewModel } from '../../blogs.models';
+import { Blog, BlogInputModel, BlogViewModel } from '../../blogs.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   BLOGS_QUERY_REPO,

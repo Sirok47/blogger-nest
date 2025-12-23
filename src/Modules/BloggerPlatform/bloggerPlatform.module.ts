@@ -6,14 +6,14 @@ import {
   BlogsService,
 } from './blogs/Service/blogs.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BlogMongo, BlogPSQL, BlogSchema } from './blogs/blogs.models';
+import { BlogMongo, BlogPSQL, BlogSchema } from './blogs/blogs.entity';
 import {
   POSTS_QUERY_REPO,
   POSTS_REPOSITORY,
   PostsService,
 } from './posts/Service/posts.service';
 import { PostsController, SAPostsController } from './posts/posts.controller';
-import { PostMongo, PostPSQL, PostSchema } from './posts/posts.models';
+import { PostMongo, PostPSQL, PostSchema } from './posts/posts.entity';
 import { CommentsController } from './comments/comments.controller';
 import {
   COMMENTS_QUERY_REPO,
@@ -24,7 +24,7 @@ import {
   CommentMongo,
   CommentPSQL,
   CommentSchema,
-} from './comments/comments.models';
+} from './comments/comments.entity';
 import { CreateBlogHandler } from './blogs/Service/use-cases/create-blog.command';
 import { UpdateBlogHandler } from './blogs/Service/use-cases/update-blog.command';
 import { DeleteBlogHandler } from './blogs/Service/use-cases/delete-blog.command';
@@ -36,7 +36,7 @@ import {
   LikePSQL,
   LIKES_REPOSITORY,
   LikeSchema,
-} from './likes/likes.models';
+} from './likes/likes.entity';
 import { TokenModule } from '../JWT/jwt.module';
 import { AuthModule } from '../AuthModule/auth.module';
 import { ChangeLikeForCommentHandler } from './comments/Service/use-cases/change-like-for-comment.command';
@@ -128,7 +128,7 @@ const LikeRepos = [
     AuthModule,
     TokenModule,
     MongooseModule.forFeature([
-      { name: BlogMongo.name, schema: BlogSchema },
+      { name: 'Blog', schema: BlogSchema },
       { name: PostMongo.name, schema: PostSchema },
       { name: CommentMongo.name, schema: CommentSchema },
       { name: LikeMongo.name, schema: LikeSchema },

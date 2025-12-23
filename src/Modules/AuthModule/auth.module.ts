@@ -6,7 +6,7 @@ import {
   USERS_REPOSITORY,
   UsersService,
 } from './users/Service/users.service';
-import { UserMongo, UserPSQL, UserSchema } from './users/users.models';
+import { UserMongo, UserPSQL, UserSchema } from './users/users.entity';
 import { AuthController } from './auth/auth.controller';
 import {
   AuthService,
@@ -20,7 +20,7 @@ import {
   SessionMongo,
   SessionPSQL,
   SessionSchema,
-} from './sessions/sessions.models';
+} from './sessions/sessions.entity';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DeleteUserHandler } from './users/Service/use-cases/deleteUserCommand';
 import { LoginHandler } from './auth/Service/use-cases/login.command';
@@ -48,7 +48,8 @@ import { SessionsRepositoryRawPSQL } from './sessions/Repository/RawSQL/sessions
 import { SessionsRepository } from './sessions/Repository/MongoDB/sessions.repository';
 import { SessionsQueryRepo } from './sessions/Repository/MongoDB/sessions.queryRepo';
 import { SessionsQueryRepoRawPSQL } from './sessions/Repository/RawSQL/sessions.queryRepo.rawpsql';
-import { ConfirmationDataPSQL } from './users/confData.models';
+import { ConfirmationDataPSQL } from './users/confData.entity';
+import { AppController } from '../../app.controller';
 
 const UserCommandHandlers = [CreateUserHandler, DeleteUserHandler];
 const AuthCommandHandlers = [

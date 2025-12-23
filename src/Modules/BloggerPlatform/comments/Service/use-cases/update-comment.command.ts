@@ -1,4 +1,4 @@
-import { Comment, CommentInputModel } from '../../comments.models';
+import { Comment, CommentInputModel } from '../../comments.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import {
   COMMENTS_REPOSITORY,

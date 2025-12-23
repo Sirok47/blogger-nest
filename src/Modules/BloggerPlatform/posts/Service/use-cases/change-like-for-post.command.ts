@@ -3,10 +3,10 @@ import {
   Like,
   LIKES_REPOSITORY,
   LikeStatus,
-} from '../../../likes/likes.models';
+} from '../../../likes/likes.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { TokenService } from '../../../../JWT/jwt.service';
-import { User } from '../../../../AuthModule/users/users.models';
+import { User } from '../../../../AuthModule/users/users.entity';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,

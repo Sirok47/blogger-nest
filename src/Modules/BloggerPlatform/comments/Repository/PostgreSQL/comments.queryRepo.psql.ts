@@ -3,12 +3,12 @@ import {
   CommentPSQL,
   CommentViewModel,
   LikesInfo,
-} from '../../comments.models';
+} from '../../comments.entity';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import {
   type ILikesRepository,
   LIKES_REPOSITORY,
-} from '../../../likes/likes.models';
+} from '../../../likes/likes.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ICommentsQueryRepo } from '../../Service/comments.service';

@@ -4,7 +4,7 @@ import {
   UserDocument,
   UserInputModel,
   UserPSQL,
-} from '../../users.models';
+} from '../../users.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IUsersRepository } from '../../Service/users.service';

@@ -1,4 +1,4 @@
-import { UserDocument, UserInputModel } from '../../../users/users.models';
+import { UserDocument, UserInputModel } from '../../../users/users.entity';
 import { CommandBus, CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { MailerService } from '../../../../Mailer/mailer.service';
 import { CreateUserCommand } from '../../../users/Service/use-cases/createUserCommand';

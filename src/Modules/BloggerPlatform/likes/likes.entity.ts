@@ -1,8 +1,8 @@
 import mongoose, { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { IsEnum } from 'class-validator';
-import { User, UserMongo, UserPSQL } from '../../AuthModule/users/users.models';
-import { LikesInfo } from '../comments/comments.models';
+import { User, UserMongo, UserPSQL } from '../../AuthModule/users/users.entity';
+import { LikesInfo } from '../comments/comments.entity';
 import {
   BaseEntity,
   Column,

@@ -12,12 +12,12 @@ import {
   UseGuards,
   Inject,
 } from '@nestjs/common';
-import { PostUnderBlogInputModel, PostViewModel } from './posts.models';
+import { PostUnderBlogInputModel, PostViewModel } from './posts.entity';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
 import {
   CommentInputModel,
   CommentViewModel,
-} from '../comments/comments.models';
+} from '../comments/comments.entity';
 import { InputBlogID, InputID } from '../../../Models/IDmodel';
 import { CreatePostCommand } from './Service/use-cases/create-post.command';
 import { CommandBus } from '@nestjs/cqrs';
@@ -31,7 +31,7 @@ import {
 import { UpdatePostCommand } from './Service/use-cases/update-post.command';
 import { CreateCommentCommand } from '../comments/Service/use-cases/create-comment.command';
 import { ChangeLikeForPostCommand } from './Service/use-cases/change-like-for-post.command';
-import { LikeInputModel } from '../likes/likes.models';
+import { LikeInputModel } from '../likes/likes.entity';
 import { AdminAuthGuard } from '../../../Request-Modifications/Guards/basicAuth.guard';
 import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';
 import { OptionalAccessTokenGuardGuard } from '../../../Request-Modifications/Guards/optionalAccessToken.guard';

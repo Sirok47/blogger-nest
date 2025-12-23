@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { UserPSQL } from '../../AuthModule/users/users.models';
+import { UserPSQL } from '../../AuthModule/users/users.entity';
 import { AnswerPSQL } from './answer.entity';
 import { GamePSQL } from './game.entity';
 import { PlayerProgressViewModel } from '../DTOs/player.dto';
@@ -16,7 +16,7 @@ export class PlayerPSQL {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => UserPSQL)
+  @ManyToOne(() => UserPSQL, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   user: UserPSQL;
   @Column()
   userId: string;
@@ -27,7 +27,10 @@ export class PlayerPSQL {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => GamePSQL, (gamePSQL) => gamePSQL.players)
+  @ManyToOne(() => GamePSQL, (gamePSQL) => gamePSQL.players, {
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE',
+  })
   game: GamePSQL;
   @Column()
   gameId: string;

@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { IPostsQueryRepo } from '../../Service/posts.service';
-import { Post, PostPSQL, PostViewModel } from '../../posts.models';
+import { Post, PostPSQL, PostViewModel } from '../../posts.entity';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
-import { LikesInfo } from '../../../comments/comments.models';
-import { Like } from '../../../likes/likes.models';
+import { LikesInfo } from '../../../comments/comments.entity';
+import { Like } from '../../../likes/likes.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { LikesRepositoryRawPSQL } from '../../../likes/Repository/likes.repository.rawpsql';

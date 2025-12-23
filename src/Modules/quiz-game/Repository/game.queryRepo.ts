@@ -13,14 +13,18 @@ export class GameQueryRepo {
   async getGameProgressById(gameId: string): Promise<GamePSQL | null> {
     const game: GamePSQL | null = await this.repo
       .createQueryBuilder('g')
-      .leftJoinAndSelect('players', 'p')
-      .leftJoinAndSelect('questions', 'q')
+      .leftJoinAndSelect('g.players', 'p')
       .leftJoinAndSelect('p.user', 'u')
-      .where('gameId = $1', [gameId])
-      .andWhere('status = $1 OR status = $2', [
-        GameStatus.pending,
-        GameStatus.active,
-      ])
+      .leftJoinAndSelect('p.answers', 'a')
+      .leftJoinAndSelect('g.questions', 'gq')
+      .leftJoinAndSelect('gq.question', 'q')
+      .where('g.id = :id', { id: gameId })
+      .andWhere('g.status = :pending OR g.status = :active', {
+        pending: GameStatus.pending,
+        active: GameStatus.active,
+      })
+      .addOrderBy('p."createdAt"', 'ASC')
+      .addOrderBy('gq.id', 'ASC')
       .getOne();
     if (!game) {
       return null;

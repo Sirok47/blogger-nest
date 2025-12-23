@@ -4,7 +4,7 @@ import {
   UserInputModel,
   type UserModelType,
   UserMongo,
-} from '../../users.models';
+} from '../../users.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Injectable } from '@nestjs/common';
 import { IUsersRepository } from '../../Service/users.service';

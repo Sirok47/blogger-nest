@@ -6,11 +6,11 @@ import {
   type LikeModelType,
   LikeMongo,
   LikeStatus,
-} from '../likes.models';
+} from '../likes.entity';
 import { SortDirections } from '../../../../Models/paginator.models';
 import { InjectModel } from '@nestjs/mongoose';
-import { LikesInfo } from '../../comments/comments.models';
-import { User } from '../../../AuthModule/users/users.models';
+import { LikesInfo } from '../../comments/comments.entity';
+import { User } from '../../../AuthModule/users/users.entity';
 
 @Injectable()
 export class LikesRepository implements ILikesRepository {

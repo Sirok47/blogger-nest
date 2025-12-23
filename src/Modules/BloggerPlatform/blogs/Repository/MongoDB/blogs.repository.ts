@@ -5,14 +5,13 @@ import {
   BlogDocument,
   BlogInputModel,
   type BlogModelType,
-  BlogMongo,
-} from '../../blogs.models';
+} from '../../blogs.entity';
 import { IBlogsRepository } from '../../Service/blogs.service';
 
 @Injectable()
 export class BlogsRepository implements IBlogsRepository {
   constructor(
-    @InjectModel(BlogMongo.name)
+    @InjectModel('Blog')
     private BlogModel: BlogModelType,
   ) {}
 

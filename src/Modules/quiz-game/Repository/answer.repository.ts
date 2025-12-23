@@ -12,4 +12,8 @@ export class AnswerRepository {
   async save(answer: AnswerPSQL): Promise<AnswerPSQL> {
     return this.repo.save(answer);
   }
+
+  async deleteAll(): Promise<void> {
+    await this.repo.deleteAll();
+  }
 }

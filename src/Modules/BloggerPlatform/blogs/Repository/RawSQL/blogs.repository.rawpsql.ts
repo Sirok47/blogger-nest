@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogInputModel, BlogPSQL } from '../../blogs.models';
+import { Blog, BlogInputModel, BlogPSQL } from '../../blogs.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { IBlogsRepository } from '../../Service/blogs.service';

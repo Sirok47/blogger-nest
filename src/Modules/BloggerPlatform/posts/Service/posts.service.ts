@@ -5,7 +5,7 @@ import {
   type PostModelType,
   PostMongo,
   PostViewModel,
-} from '../posts.models';
+} from '../posts.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Paginated, Paginator } from '../../../../Models/paginator.models';
 import {

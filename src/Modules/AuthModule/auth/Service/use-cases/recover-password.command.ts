@@ -7,7 +7,7 @@ import {
 import { generateUuid } from '../../../../../Helpers/uuid';
 import { addOneDay } from '../../../../../Helpers/dateHelpers';
 import { Inject } from '@nestjs/common';
-import { User } from '../../../users/users.models';
+import { User } from '../../../users/users.entity';
 
 export class RecoverPasswordCommand {
   constructor(public readonly email: string) {}

@@ -16,7 +16,7 @@ import {
   LoginInputModel,
   MeViewModel,
   UserInputModel,
-} from '../users/users.models';
+} from '../users/users.entity';
 import { AuthService } from './Service/auth.service';
 import { config } from '../../../Settings/config';
 import { UserAuthGuard } from '../../../Request-Modifications/Guards/accessToken.guard';

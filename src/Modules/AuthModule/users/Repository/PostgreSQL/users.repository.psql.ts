@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { User, UserInputModel, UserPSQL } from '../../users.models';
+import { User, UserInputModel, UserPSQL } from '../../users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { IUsersRepository } from '../../Service/users.service';
-import { ConfirmationDataPSQL } from '../../confData.models';
+import { ConfirmationDataPSQL } from '../../confData.entity';
 import {
   GamePSQL,
   GameStatus,
 } from '../../../../quiz-game/entities/game.entity';
+import { CommentPSQL } from '../../../../BloggerPlatform/comments/comments.entity';
 
 @Injectable()
 export class UsersRepositoryPSQL implements IUsersRepository {
@@ -98,5 +99,9 @@ export class UsersRepositoryPSQL implements IUsersRepository {
 
   async deleteAll(): Promise<void> {
     await this.repo.deleteAll();
+  }
+
+  async findRandom(): Promise<UserPSQL | null> {
+    return this.repo.findOneBy({});
   }
 }

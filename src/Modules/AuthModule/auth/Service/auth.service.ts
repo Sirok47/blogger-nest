@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { MeViewModel } from '../../users/users.models';
+import { MeViewModel } from '../../users/users.entity';
 import { TokenService } from '../../../JWT/jwt.service';
 import { oneSecond } from '../../../../Helpers/dateHelpers';
 import { config } from '../../../../Settings/config';
-import { Session, SessionViewModel } from '../../sessions/sessions.models';
+import { Session, SessionViewModel } from '../../sessions/sessions.entity';
 import {
   type IUsersQueryRepo,
   USERS_QUERY_REPO,

@@ -3,7 +3,7 @@ import {
   type BlogModelType,
   BlogMongo,
   BlogViewModel,
-} from '../../blogs.models';
+} from '../../blogs.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
@@ -11,7 +11,7 @@ import { IBlogsQueryRepo } from '../../Service/blogs.service';
 
 @Injectable()
 export class BlogsQueryRepo implements IBlogsQueryRepo {
-  constructor(@InjectModel(BlogMongo.name) private BlogModel: BlogModelType) {}
+  constructor(@InjectModel('Blog') private BlogModel: BlogModelType) {}
   async findWithSearchAndPagination(
     paginationSettings: Paginator,
   ): Promise<Paginated<BlogViewModel>> {

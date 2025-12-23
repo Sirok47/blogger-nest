@@ -80,6 +80,6 @@ export class QuizGameController {
     @Param('userId') userId: string,
     @Param() { answer }: AnswerInputModel,
   ): Promise<AnswerViewModel> {
-    return this.service.receiveAnswer(userId, answer);
+    return this.service.ReceiveAnswer(userId, answer);
   }
 }

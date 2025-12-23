@@ -5,7 +5,7 @@ import {
   CommentDocument,
   CommentInputModel,
   CommentPSQL,
-} from '../../comments.models';
+} from '../../comments.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ICommentsRepository } from '../../Service/comments.service';

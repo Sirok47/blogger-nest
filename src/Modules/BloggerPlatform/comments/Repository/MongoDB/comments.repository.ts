@@ -6,7 +6,7 @@ import {
   CommentInputModel,
   type CommentModelType,
   CommentMongo,
-} from '../../comments.models';
+} from '../../comments.entity';
 import { Injectable } from '@nestjs/common';
 import { ICommentsRepository } from '../../Service/comments.service';
 

@@ -5,7 +5,7 @@ import {
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { HashService } from '../../../../Crypto/bcrypt';
 import { Inject } from '@nestjs/common';
-import { User } from '../../../users/users.models';
+import { User } from '../../../users/users.entity';
 
 export class ConfirmPasswordChangeCommand {
   constructor(

@@ -7,9 +7,9 @@ import {
   LikeMongo,
   LIKES_REPOSITORY,
   LikeStatus,
-} from '../../likes/likes.models';
+} from '../../likes/likes.entity';
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from '../../../AuthModule/users/users.models';
+import { User } from '../../../AuthModule/users/users.entity';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,
@@ -19,7 +19,7 @@ import {
   CommentatorInfo,
   CommentInputModel,
   CommentViewModel,
-} from '../comments.models';
+} from '../comments.entity';
 import { Paginated, Paginator } from '../../../../Models/paginator.models';
 
 export interface ICommentsQueryRepo {

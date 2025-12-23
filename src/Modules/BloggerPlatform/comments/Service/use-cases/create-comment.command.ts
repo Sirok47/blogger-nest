@@ -3,11 +3,11 @@ import {
   Comment,
   CommentInputModel,
   CommentViewModel,
-} from '../../comments.models';
-import { Post } from '../../../posts/posts.models';
+} from '../../comments.entity';
+import { Post } from '../../../posts/posts.entity';
 import { TokenService } from '../../../../JWT/jwt.service';
-import { User } from '../../../../AuthModule/users/users.models';
-import { LikeStatus } from '../../../likes/likes.models';
+import { User } from '../../../../AuthModule/users/users.entity';
+import { LikeStatus } from '../../../likes/likes.entity';
 import { Inject } from '@nestjs/common';
 import {
   type IUsersRepository,

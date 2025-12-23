@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { BlogPSQL, BlogViewModel } from '../../blogs.models';
+import { BlogPSQL, BlogViewModel } from '../../blogs.entity';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';

@@ -6,14 +6,14 @@ import {
   CommentMongo,
   CommentViewModel,
   LikesInfo,
-} from '../../comments.models';
+} from '../../comments.entity';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
 import { ICommentsQueryRepo } from '../../Service/comments.service';
 import {
   type ILikesRepository,
   LIKES_REPOSITORY,
-} from '../../../likes/likes.models';
-import { User } from '../../../../AuthModule/users/users.models';
+} from '../../../likes/likes.entity';
+import { User } from '../../../../AuthModule/users/users.entity';
 import {
   type IUsersRepository,
   USERS_REPOSITORY,

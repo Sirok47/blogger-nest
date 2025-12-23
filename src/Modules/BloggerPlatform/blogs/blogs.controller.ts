@@ -19,9 +19,9 @@ import {
   type IBlogsQueryRepo,
   type IBlogsRepository,
 } from './Service/blogs.service';
-import { Blog, BlogInputModel, BlogViewModel } from './blogs.models';
+import { Blog, BlogInputModel, BlogViewModel } from './blogs.entity';
 import { Paginated, Paginator } from '../../../Models/paginator.models';
-import { PostViewModel } from '../posts/posts.models';
+import { PostViewModel } from '../posts/posts.entity';
 import { InputID } from '../../../Models/IDmodel';
 import { CommandBus } from '@nestjs/cqrs';
 import { DeleteBlogCommand } from './Service/use-cases/delete-blog.command';

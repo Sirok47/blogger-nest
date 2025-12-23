@@ -5,7 +5,7 @@ import {
   SessionDocument,
   type SessionModelType,
   SessionMongo,
-} from '../../sessions.models';
+} from '../../sessions.entity';
 import { ISessionsRepository } from '../../../auth/Service/auth.service';
 
 @Injectable()

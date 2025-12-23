@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IPostsRepository } from '../../Service/posts.service';
-import { PostDocument, PostInputModel, PostPSQL } from '../../posts.models';
+import { PostInputModel, PostPSQL } from '../../posts.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { BlogsRepositoryPSQL } from '../../../blogs/Repository/PostgreSQL/blogs.repository.psql';
@@ -18,7 +18,7 @@ export class PostsRepositoryPSQL implements IPostsRepository {
     return PostPSQL.CreateDocument(inputPost, blogRepo);
   }
 
-  async save(post: PostDocument): Promise<PostDocument> {
+  async save(post: PostPSQL): Promise<PostPSQL> {
     return this.repo.save(post);
   }
 
@@ -33,5 +33,9 @@ export class PostsRepositoryPSQL implements IPostsRepository {
 
   async deleteAll(): Promise<void> {
     await this.repo.deleteAll();
+  }
+
+  async findRandom(): Promise<PostPSQL | null> {
+    return this.repo.findOneBy({});
   }
 }

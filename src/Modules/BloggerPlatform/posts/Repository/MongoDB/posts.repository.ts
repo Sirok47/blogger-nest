@@ -4,7 +4,7 @@ import {
   PostInputModel,
   type PostModelType,
   PostMongo,
-} from '../../posts.models';
+} from '../../posts.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { IPostsRepository } from '../../Service/posts.service';
 import { BlogsRepository } from '../../../blogs/Repository/MongoDB/blogs.repository';

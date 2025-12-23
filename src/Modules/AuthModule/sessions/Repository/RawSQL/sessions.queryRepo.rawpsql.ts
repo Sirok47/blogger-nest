@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { SessionPSQL, SessionViewModel } from '../../sessions.models';
+import { SessionPSQL, SessionViewModel } from '../../sessions.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { ISessionsQueryRepo } from '../../../auth/Service/auth.service';

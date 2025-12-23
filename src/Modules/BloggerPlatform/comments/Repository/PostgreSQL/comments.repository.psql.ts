@@ -4,7 +4,7 @@ import {
   CommentatorInfo,
   CommentInputModel,
   CommentPSQL,
-} from '../../comments.models';
+} from '../../comments.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ICommentsRepository } from '../../Service/comments.service';
@@ -39,5 +39,9 @@ export class CommentsRepositoryPSQL implements ICommentsRepository {
 
   async deleteAll(): Promise<void> {
     await this.repo.deleteAll();
+  }
+
+  async findRandom(): Promise<CommentPSQL | null> {
+    return this.repo.findOneBy({});
   }
 }

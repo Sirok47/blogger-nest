@@ -1,4 +1,4 @@
-import { User, UserInputModel } from '../../users.models';
+import { User, UserInputModel } from '../../users.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { BadRequestException, Inject } from '@nestjs/common';
 import { HashService } from '../../../../Crypto/bcrypt';

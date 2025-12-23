@@ -24,11 +24,16 @@ export class PlayerRepository {
     userId: string,
   ): Promise<PlayerPSQL | null> {
     return this.repo.findOne({
-      relations: ['game', 'user', 'answers'],
-      where: [
-        { userId: userId },
-        { game: { status: Not(GameStatus.finished) } },
-      ],
+      relations: {
+        game: { questions: { question: true } },
+        user: true,
+        answers: true,
+      },
+      where: { userId: userId, game: { status: Not(GameStatus.finished) } },
     });
+  }
+
+  async deleteAll(): Promise<void> {
+    await this.repo.deleteAll();
   }
 }

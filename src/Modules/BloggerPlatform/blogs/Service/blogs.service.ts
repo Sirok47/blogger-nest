@@ -1,11 +1,10 @@
 import {
   Blog,
-  BlogDocument,
   BlogInputModel,
   type BlogModelType,
   BlogMongo,
   BlogViewModel,
-} from '../blogs.models';
+} from '../blogs.entity';
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Paginated, Paginator } from '../../../../Models/paginator.models';
@@ -39,6 +38,6 @@ export class BlogsService {
   constructor(
     @Inject(BLOGS_REPOSITORY)
     protected repository: IBlogsRepository,
-    @InjectModel(BlogMongo.name) protected BlogModel: BlogModelType,
+    @InjectModel('Blog') protected BlogModel: BlogModelType,
   ) {}
 }

@@ -3,7 +3,7 @@ import {
   type IUsersRepository,
   USERS_REPOSITORY,
 } from '../../../users/Service/users.service';
-import { User } from '../../../users/users.models';
+import { User } from '../../../users/users.entity';
 import { Inject } from '@nestjs/common';
 
 export class ConfirmEmailCommand {

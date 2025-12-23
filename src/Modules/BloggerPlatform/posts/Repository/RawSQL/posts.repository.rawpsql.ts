@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IPostsRepository } from '../../Service/posts.service';
-import { PostDocument, PostInputModel, PostPSQL } from '../../posts.models';
+import { PostDocument, PostInputModel, PostPSQL } from '../../posts.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { BlogsRepositoryPSQL } from '../../../blogs/Repository/PostgreSQL/blogs.repository.psql';

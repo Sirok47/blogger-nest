@@ -1,10 +1,10 @@
-import { LikeStatus } from '../likes/likes.models';
+import { LikeStatus } from '../likes/likes.entity';
 import { HydratedDocument, Model } from 'mongoose';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Length } from 'class-validator';
-import { User, UserPSQL } from '../../AuthModule/users/users.models';
+import { User, UserPSQL } from '../../AuthModule/users/users.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { PostPSQL } from '../posts/posts.models';
+import { PostPSQL } from '../posts/posts.entity';
 
 export class CommentInputModel {
   @Length(20, 300)

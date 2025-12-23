@@ -4,11 +4,11 @@ import {
   type PostModelType,
   PostMongo,
   PostViewModel,
-} from '../../posts.models';
+} from '../../posts.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { Paginated, Paginator } from '../../../../../Models/paginator.models';
-import { LikesInfo } from '../../../comments/comments.models';
-import { LikeDocument } from '../../../likes/likes.models';
+import { LikesInfo } from '../../../comments/comments.entity';
+import { LikeDocument } from '../../../likes/likes.entity';
 import { IPostsQueryRepo } from '../../Service/posts.service';
 import { LikesRepository } from '../../../likes/Repository/likes.repository';
 

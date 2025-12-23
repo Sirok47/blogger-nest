@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Blog, BlogInputModel, BlogPSQL } from '../../blogs.models';
+import { BlogInputModel, BlogPSQL } from '../../blogs.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { IBlogsRepository } from '../../Service/blogs.service';
@@ -10,7 +10,7 @@ export class BlogsRepositoryPSQL implements IBlogsRepository {
     @InjectRepository(BlogPSQL) private readonly repo: Repository<BlogPSQL>,
   ) {}
 
-  create(inputBlog: BlogInputModel): Blog {
+  create(inputBlog: BlogInputModel): BlogPSQL {
     return BlogPSQL.CreateDocument(inputBlog);
   }
 
@@ -29,5 +29,9 @@ export class BlogsRepositoryPSQL implements IBlogsRepository {
 
   async deleteAll(): Promise<void> {
     await this.repo.deleteAll();
+  }
+
+  async findRandom(): Promise<BlogPSQL | null> {
+    return this.repo.findOneBy({});
   }
 }

@@ -1,4 +1,4 @@
-import { Post, PostInputModel } from '../../posts.models';
+import { Post, PostInputModel } from '../../posts.entity';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import {
