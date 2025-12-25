@@ -66,9 +66,9 @@ export class QuestionController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async publishQuestion(
     @Param() { id }: InputID,
-    @Body() { status }: InputPublishedStatus,
+    @Body() { published }: InputPublishedStatus,
   ): Promise<void> {
-    if (!(await this.service.publish(id, status)))
+    if (!(await this.service.publish(id, published)))
       throw new NotFoundException();
   }
 }

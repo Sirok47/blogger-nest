@@ -2,7 +2,7 @@ import { IsBoolean, IsString, Length } from 'class-validator';
 
 export class InputPublishedStatus {
   @IsBoolean()
-  status: boolean;
+  published: boolean;
 }
 
 export class QuestionInputModel {
