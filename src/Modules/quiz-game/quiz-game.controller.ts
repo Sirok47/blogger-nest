@@ -16,7 +16,7 @@ import { InputID } from '../../Models/IDmodel';
 import { PlayerRepository } from './Repository/player.repository';
 import { AnswerInputModel, AnswerViewModel } from './DTOs/answer.dto';
 
-@Controller('pair-quiz-game/pairs')
+@Controller('pair-game-quiz/pairs')
 export class QuizGameController {
   constructor(
     private readonly service: QuizGameService,
