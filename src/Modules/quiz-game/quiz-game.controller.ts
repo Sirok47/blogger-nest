@@ -2,6 +2,8 @@ import {
   Controller,
   ForbiddenException,
   Get,
+  HttpCode,
+  HttpStatus,
   ImATeapotException,
   NotFoundException,
   Param,
@@ -25,6 +27,7 @@ export class QuizGameController {
   ) {}
 
   @Post('connection')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(UserAuthGuard)
   async connectToPair(
     @Param('userId') userId: string,
@@ -74,7 +77,8 @@ export class QuizGameController {
     return game.mapToViewModel();
   }
 
-  @Post('answer')
+  @Post('my-current/answers')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(UserAuthGuard)
   async postAnswer(
     @Param('userId') userId: string,

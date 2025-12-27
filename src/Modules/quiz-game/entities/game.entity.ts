@@ -33,13 +33,11 @@ export class GamePSQL {
 
   @OneToMany(() => GameQuestionPSQL, (gameQ) => gameQ.game, {
     cascade: true,
-    eager: true,
   })
   questions: GameQuestionPSQL[];
 
   @OneToMany(() => PlayerPSQL, (player) => player.game, {
     cascade: true,
-    eager: true,
   })
   players: PlayerPSQL[];
 

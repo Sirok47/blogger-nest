@@ -29,9 +29,7 @@ export class QuizGameService {
   ) {}
 
   async JoinGame(userId: string): Promise<GameProgressViewModel | null> {
-    const hasGames: boolean =
-      !!(await this.gameRepository.retrieveCurrentQuizGameOfUser(userId));
-    if (hasGames) {
+    if (await this.gameRepository.hasActiveGame(userId)) {
       throw new ForbiddenException();
     }
 

@@ -30,21 +30,12 @@ export class GameRepository {
     });
   }
 
-  async retrieveCurrentQuizGameOfUser(
-    userId: string,
-  ): Promise<GamePSQL | null> {
-    return this.repo.findOne({
-      relations: {
-        players: true,
+  async hasActiveGame(userId: string): Promise<boolean> {
+    return this.repo.existsBy({
+      status: Not(GameStatus.finished),
+      players: {
+        userId: userId,
       },
-      where: [
-        {
-          status: Not(GameStatus.finished),
-          players: {
-            userId: userId,
-          },
-        },
-      ],
     });
   }
 
