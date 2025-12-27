@@ -17,6 +17,7 @@ import { GameQueryRepo } from './Repository/game.queryRepo';
 import { InputID } from '../../Models/IDmodel';
 import { PlayerRepository } from './Repository/player.repository';
 import { AnswerInputModel, AnswerViewModel } from './DTOs/answer.dto';
+import { OptionalAccessTokenGuardGuard } from '../../Request-Modifications/Guards/optionalAccessToken.guard';
 
 @Controller('pair-game-quiz/pairs')
 export class QuizGameController {
@@ -28,7 +29,7 @@ export class QuizGameController {
 
   @Post('connection')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(UserAuthGuard)
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async connectToPair(
     @Param('userId') userId: string,
   ): Promise<GameProgressViewModel> {
@@ -40,7 +41,7 @@ export class QuizGameController {
   }
 
   @Get(':id')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async getGameById(
     @Param() { id }: InputID,
     @Param('userId') userId: string,
@@ -62,7 +63,7 @@ export class QuizGameController {
   }
 
   @Get('my-current')
-  @UseGuards(UserAuthGuard)
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async getCurrentGame(
     @Param('userId') userId: string,
   ): Promise<GameProgressViewModel> {
@@ -79,7 +80,7 @@ export class QuizGameController {
 
   @Post('my-current/answers')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(UserAuthGuard)
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async postAnswer(
     @Param('userId') userId: string,
     @Param() { answer }: AnswerInputModel,
