@@ -32,6 +32,7 @@ export class GameRepository {
   }
 
   async hasActiveGame(userId: string): Promise<boolean> {
+    console.log(userId);
     console.log(
       await this.repo.findOne({
         relations: ['players'],
