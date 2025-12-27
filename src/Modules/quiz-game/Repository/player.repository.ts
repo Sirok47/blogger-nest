@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PlayerPSQL } from '../entities/player.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
-import { GameStatus } from '../entities/game.entity';
+import { GameStatus } from '../DTOs/game.dto';
 
 @Injectable()
 export class PlayerRepository {

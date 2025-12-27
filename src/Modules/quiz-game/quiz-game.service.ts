@@ -4,13 +4,13 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { GameRepository } from './Repository/game.repository';
-import { GamePSQL, GameStatus } from './entities/game.entity';
+import { GamePSQL } from './entities/game.entity';
 import { UserPSQL } from '../AuthModule/users/users.entity';
 import { UsersRepositoryPSQL } from '../AuthModule/users/Repository/PostgreSQL/users.repository.psql';
 import { PlayerPSQL } from './entities/player.entity';
 import { QuestionRepository } from './Repository/question.repository';
 import { GameQueryRepo } from './Repository/game.queryRepo';
-import { GameProgressViewModel } from './DTOs/game.dto';
+import { GameProgressViewModel, GameStatus } from './DTOs/game.dto';
 import { AnswerViewModel } from './DTOs/answer.dto';
 import { PlayerRepository } from './Repository/player.repository';
 import { config } from '../../Settings/config';

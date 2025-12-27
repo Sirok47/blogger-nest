@@ -7,14 +7,12 @@ import {
 } from 'typeorm';
 import { PlayerPSQL } from './player.entity';
 import { GameQuestionPSQL } from './game-question.entity';
-import { GameProgressViewModel } from '../DTOs/game.dto';
+import {
+  GameProgressViewModel,
+  GameStatus,
+  GameStatusViewModel,
+} from '../DTOs/game.dto';
 import { QuestionPSQL } from './question.entity';
-
-export enum GameStatus {
-  pending = 'pending',
-  active = 'active',
-  finished = 'finished',
-}
 
 @Entity({ name: 'Games' })
 export class GamePSQL {
@@ -58,7 +56,7 @@ export class GamePSQL {
       pairCreatedDate: this.createdAt.toISOString(),
       startGameDate: this.startedAt?.toISOString() ?? null,
       finishGameDate: this.finishedAt?.toISOString() ?? null,
-      status: this.status,
+      status: GameStatusViewModel[this.status],
       questions:
         this.status === GameStatus.pending
           ? null

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { GamePSQL, GameStatus } from '../entities/game.entity';
+import { GamePSQL } from '../entities/game.entity';
+import { GameStatus } from '../DTOs/game.dto';
 
 @Injectable()
 export class GameQueryRepo {

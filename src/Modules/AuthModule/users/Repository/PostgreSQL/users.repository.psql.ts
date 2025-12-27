@@ -1,14 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { User, UserInputModel, UserPSQL } from '../../users.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { IUsersRepository } from '../../Service/users.service';
 import { ConfirmationDataPSQL } from '../../confData.entity';
-import {
-  GamePSQL,
-  GameStatus,
-} from '../../../../quiz-game/entities/game.entity';
-import { CommentPSQL } from '../../../../BloggerPlatform/comments/comments.entity';
 
 @Injectable()
 export class UsersRepositoryPSQL implements IUsersRepository {

@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { GamePSQL, GameStatus } from '../entities/game.entity';
+import { GamePSQL } from '../entities/game.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
+import { GameStatus } from '../DTOs/game.dto';
 
 @Injectable()
 export class GameRepository {
@@ -31,6 +32,17 @@ export class GameRepository {
   }
 
   async hasActiveGame(userId: string): Promise<boolean> {
+    console.log(
+      await this.repo.findOne({
+        relations: ['players'],
+        where: {
+          status: Not(GameStatus.finished),
+          players: {
+            userId: userId,
+          },
+        },
+      }),
+    );
     return this.repo.existsBy({
       status: Not(GameStatus.finished),
       players: {
