@@ -40,7 +40,7 @@ export class QuestionPSQL {
       correctAnswers: this.answers,
       createdAt: this.createdAt.toISOString(),
       updatedAt:
-        this.updatedAt.toString() === this.createdAt.toString()
+        this.updatedAt.getTime() === this.createdAt.getTime()
           ? null
           : this.updatedAt.toISOString(),
     };

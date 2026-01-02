@@ -18,10 +18,10 @@ export class TokenService {
     }
   }
 
-  extractJWTPayload(token: string): JwtPayload | null {
+  extractJWTPayload(token: string): JwtPayload {
     const payload = jwt.decode(token) as JwtPayload;
     if (!payload) {
-      return null;
+      return {};
     }
     return payload;
   }

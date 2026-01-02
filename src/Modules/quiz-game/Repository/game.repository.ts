@@ -32,18 +32,6 @@ export class GameRepository {
   }
 
   async hasActiveGame(userId: string): Promise<boolean> {
-    console.log(userId);
-    console.log(
-      await this.repo.findOne({
-        relations: ['players'],
-        where: {
-          status: Not(GameStatus.finished),
-          players: {
-            userId: userId,
-          },
-        },
-      }),
-    );
     return this.repo.existsBy({
       status: Not(GameStatus.finished),
       players: {

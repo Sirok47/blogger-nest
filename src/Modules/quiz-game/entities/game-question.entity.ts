@@ -24,7 +24,7 @@ export class GameQuestionPSQL {
 
   mapToViewModel(): GameQuestionViewModel {
     return {
-      id: this.id.toString(),
+      id: this.questionId,
       body: this.question.body,
     };
   }
