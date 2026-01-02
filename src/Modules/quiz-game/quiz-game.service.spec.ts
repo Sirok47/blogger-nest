@@ -1,4 +1,8 @@
-import { INestApplication } from '@nestjs/common';
+import {
+  ForbiddenException,
+  INestApplication,
+  NotFoundException,
+} from '@nestjs/common';
 import { config } from '../../Settings/config';
 import { QuizGameModule } from './quiz-game.module';
 import { QuizGameService } from './quiz-game.service';
@@ -10,7 +14,11 @@ import { AppService } from '../../app.service';
 import { QuestionInputModel } from './DTOs/question.dto';
 import { QuestionPSQL } from './entities/question.entity';
 import { QuestionRepository } from './Repository/question.repository';
-import { GameProgressViewModel, GameStatus } from './DTOs/game.dto';
+import {
+  GameProgressViewModel,
+  GameStatus,
+  GameStatusViewModel,
+} from './DTOs/game.dto';
 import { AnswerStatus } from './DTOs/answer.dto';
 import { GameRepository } from './Repository/game.repository';
 import { initTestingModule } from '../../../test/helpers/app-start';
@@ -93,7 +101,7 @@ describe('QuizGameService', () => {
         );
         const result = await service.JoinGame(user.id);
         expect(result).not.toBeNull();
-        expect(result!.status).toBe(GameStatus.pending);
+        expect(result!.status).toBe(GameStatusViewModel.pending);
         expect(result!.questions).toBeNull();
         expect(result!.secondPlayerProgress).toBeNull();
         expect(result!.startGameDate).toBeNull();
@@ -111,7 +119,7 @@ describe('QuizGameService', () => {
         );
         const result = await service.JoinGame(user.id);
         expect(result).not.toBeNull();
-        expect(result!.status).toBe(GameStatus.active);
+        expect(result!.status).toBe(GameStatusViewModel.active);
         expect(result!.questions).not.toBeNull();
         expect(result!.questions!.length).toBe(config.QUIZ_GAME_QUESTION_COUNT);
         expect(result!.secondPlayerProgress).not.toBeNull();
@@ -174,7 +182,7 @@ describe('QuizGameService', () => {
           ).toBe(AnswerStatus.Correct);
         }
         const result = (await gameRepo.findById(game.id))!;
-        expect(result.status).toBe(GameStatus.finished);
+        expect(result.status).toBe(GameStatusViewModel.finished);
         expect(result.finishedAt).not.toBeNull();
         expect(result.players[0].score).toBe(6);
         expect(result.players[1].score).toBe(5);
@@ -205,7 +213,9 @@ describe('QuizGameService', () => {
         const user3 = await commandBus.execute<CreateUserCommand, User>(
           new CreateUserCommand(someUserInput3, true),
         );
-        await expect(service.ReceiveAnswer(user3.id, 'text')).rejects.toThrow();
+        await expect(service.ReceiveAnswer(user3.id, 'text')).rejects.toThrow(
+          ForbiddenException,
+        );
       });
 
       it('Answering before game start (solo)', async () => {

@@ -18,10 +18,10 @@ export class TokenService {
     }
   }
 
-  extractJWTPayload(token: string): JwtPayload {
+  extractJWTPayload(token: string): JwtPayload | null {
     const payload = jwt.decode(token) as JwtPayload;
     if (!payload) {
-      throw new Error('Invalid refresh token');
+      return null;
     }
     return payload;
   }

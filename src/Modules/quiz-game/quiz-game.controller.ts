@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   ForbiddenException,
   Get,
@@ -40,28 +41,6 @@ export class QuizGameController {
     return result;
   }
 
-  @Get(':id')
-  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
-  async getGameById(
-    @Param() { id }: InputID,
-    @Param('userId') userId: string,
-  ): Promise<GameProgressViewModel> {
-    const game = await this.queryRepo.getGameProgressById(id);
-    if (!game) {
-      throw new NotFoundException();
-    }
-
-    let hasPermission: boolean = false;
-    for (const player of game.players) {
-      if (player.userId === userId) hasPermission = true;
-    }
-    if (!hasPermission) {
-      throw new ForbiddenException();
-    }
-
-    return game.mapToViewModel();
-  }
-
   @Get('my-current')
   @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async getCurrentGame(
@@ -83,8 +62,30 @@ export class QuizGameController {
   @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async postAnswer(
     @Param('userId') userId: string,
-    @Param() { answer }: AnswerInputModel,
+    @Body() { answer }: AnswerInputModel,
   ): Promise<AnswerViewModel> {
     return this.service.ReceiveAnswer(userId, answer);
+  }
+
+  @Get(':id')
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
+  async getGameById(
+    @Param() { id }: InputID,
+    @Param('userId') userId: string,
+  ): Promise<GameProgressViewModel> {
+    const game = await this.queryRepo.getGameProgressById(id);
+    if (!game) {
+      throw new NotFoundException();
+    }
+
+    let hasPermission: boolean = false;
+    for (const player of game.players) {
+      if (player.userId === userId) hasPermission = true;
+    }
+    if (!hasPermission) {
+      throw new ForbiddenException();
+    }
+
+    return game.mapToViewModel();
   }
 }
