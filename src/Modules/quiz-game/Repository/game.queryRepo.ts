@@ -25,6 +25,7 @@ export class GameQueryRepo {
         active: GameStatus.active,
       })
       .addOrderBy('p."createdAt"', 'ASC')
+      .addOrderBy('a."createdAt"', 'ASC')
       .addOrderBy('gq.id', 'ASC')
       .getOne();
     if (!game) {

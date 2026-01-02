@@ -28,7 +28,7 @@ export class AnswerPSQL {
   @Column()
   playerId: string;
 
-  @ManyToOne(() => QuestionPSQL)
+  @ManyToOne(() => QuestionPSQL, { onDelete: 'CASCADE' })
   question: QuestionPSQL;
   @Column()
   questionId: string;
