@@ -2,7 +2,6 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -24,6 +23,9 @@ export class PlayerPSQL {
 
   @Column('integer')
   score: number = 0;
+
+  @Column('boolean')
+  bonusForFirst: boolean = false;
 
   @CreateDateColumn()
   createdAt: Date;

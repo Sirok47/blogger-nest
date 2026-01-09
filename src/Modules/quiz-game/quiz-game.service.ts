@@ -106,11 +106,17 @@ export class QuizGameService {
       );
 
       if (correctAnswers) {
-        finishedPlayers[0].score++;
+        finishedPlayers[0].bonusForFirst = true;
         await this.playerRepository.save(finishedPlayers[0]);
       }
     }
-    if (finishedPlayers.length >= config.QUIZ_GAME_PLAYER_COUNT) {
+    if (finishedPlayers.length === config.QUIZ_GAME_PLAYER_COUNT) {
+      for (const player of game.players) {
+        if (player.bonusForFirst) {
+          player.score++;
+          break;
+        }
+      }
       game.status = GameStatus.finished;
       game.finishedAt = new Date();
       await this.gameRepository.save(game);
