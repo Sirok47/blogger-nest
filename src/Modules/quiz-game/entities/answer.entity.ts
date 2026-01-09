@@ -23,7 +23,9 @@ export class AnswerPSQL {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => PlayerPSQL, (player) => player.answers)
+  @ManyToOne(() => PlayerPSQL, (player) => player.answers, {
+    onDelete: 'CASCADE',
+  })
   player: PlayerPSQL;
   @Column()
   playerId: string;

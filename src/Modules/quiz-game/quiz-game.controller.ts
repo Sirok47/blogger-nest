@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  ImATeapotException,
   NotFoundException,
   Param,
   Post,
@@ -34,11 +33,7 @@ export class QuizGameController {
   async connectToPair(
     @Param('userId') userId: string,
   ): Promise<GameProgressViewModel> {
-    const result = await this.service.JoinGame(userId);
-    if (!result) {
-      throw new ImATeapotException();
-    }
-    return result;
+    return await this.service.JoinGame(userId);
   }
 
   @Get('my-current')

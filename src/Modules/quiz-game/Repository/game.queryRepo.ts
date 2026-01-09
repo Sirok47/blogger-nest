@@ -12,7 +12,7 @@ export class GameQueryRepo {
   ) {}
 
   async getGameProgressById(gameId: string): Promise<GamePSQL | null> {
-    const game: GamePSQL | null = await this.repo
+    return await this.repo
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.players', 'p')
       .leftJoinAndSelect('p.user', 'u')
@@ -28,9 +28,5 @@ export class GameQueryRepo {
       .addOrderBy('a."createdAt"', 'ASC')
       .addOrderBy('gq.id', 'ASC')
       .getOne();
-    if (!game) {
-      return null;
-    }
-    return game;
   }
 }

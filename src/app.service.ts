@@ -25,8 +25,6 @@ import {
 } from './Modules/AuthModule/auth/Service/auth.service';
 import { GameRepository } from './Modules/quiz-game/Repository/game.repository';
 import { QuestionRepository } from './Modules/quiz-game/Repository/question.repository';
-import { PlayerRepository } from './Modules/quiz-game/Repository/player.repository';
-import { AnswerRepository } from './Modules/quiz-game/Repository/answer.repository';
 
 @Injectable()
 export class AppService {
@@ -44,21 +42,14 @@ export class AppService {
     @Inject(SESSIONS_REPOSITORY)
     private sessionsRepository: ISessionsRepository,
     private gameRepository: GameRepository,
-    private playerRepository: PlayerRepository,
     private questionRepository: QuestionRepository,
-    private answerRepository: AnswerRepository,
   ) {}
   getHello(): string {
     return 'Gnezdo stoit';
   }
 
   async deleteAll(): Promise<void> {
-    const quizPromise = Promise.all([
-      this.answerRepository.deleteAll(),
-      this.questionRepository.deleteAll(),
-      this.gameRepository.deleteAll(),
-      this.playerRepository.deleteAll(),
-    ]);
+    const quizPromise = Promise.all([this.gameRepository.deleteAll()]);
     await Promise.all([
       this.likesRepository.deleteAll(),
       this.sessionsRepository.deleteAll(),
@@ -70,5 +61,6 @@ export class AppService {
       this.blogsRepository.deleteAll(),
     ]);
     await quizPromise;
+    await this.questionRepository.deleteAll();
   }
 }

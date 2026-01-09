@@ -28,7 +28,7 @@ export class QuizGameService {
     private readonly answerRepository: AnswerRepository,
   ) {}
 
-  async JoinGame(userId: string): Promise<GameProgressViewModel | null> {
+  async JoinGame(userId: string): Promise<GameProgressViewModel> {
     if (await this.gameRepository.hasActiveGame(userId)) {
       throw new ForbiddenException();
     }

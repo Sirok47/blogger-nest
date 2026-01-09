@@ -1,7 +1,7 @@
 import {
   ForbiddenException,
   INestApplication,
-  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { config } from '../../Settings/config';
 import { QuizGameModule } from './quiz-game.module';
@@ -18,6 +18,7 @@ import { GameProgressViewModel, GameStatusViewModel } from './DTOs/game.dto';
 import { AnswerStatus } from './DTOs/answer.dto';
 import { GameRepository } from './Repository/game.repository';
 import { initTestingModule } from '../../../test/helpers/app-start';
+import { generateUuid } from '../../Helpers/uuid';
 
 const someUserInput: UserInputModel = {
   login: 'loginnn',
@@ -36,24 +37,29 @@ function questionGenerator(count: number): QuestionInputModel[] {
   return result;
 }
 
+async function generateUser(
+  uniqueString: string,
+  commandBus: CommandBus,
+): Promise<User> {
+  const someUserInput2 = {
+    ...someUserInput,
+    login: someUserInput.login + uniqueString,
+    email: someUserInput.email + uniqueString,
+  };
+  return await commandBus.execute<CreateUserCommand, User>(
+    new CreateUserCommand(someUserInput2, true),
+  );
+}
+
 async function initializeGameWithPlayers(
   commandBus: CommandBus,
   service: QuizGameService,
 ) {
-  const user1 = await commandBus.execute<CreateUserCommand, User>(
-    new CreateUserCommand(someUserInput, true),
-  );
+  const user1 = await generateUser('1', commandBus);
   const promiseOfUser1 = service.JoinGame(user1.id);
-  const someUserInput2 = {
-    ...someUserInput,
-    login: someUserInput.login + '1',
-    email: someUserInput.email + '1',
-  };
-  const user2 = await commandBus.execute<CreateUserCommand, User>(
-    new CreateUserCommand(someUserInput2, true),
-  );
+  const user2 = await generateUser('2', commandBus);
+  const game = await service.JoinGame(user2.id);
   await promiseOfUser1;
-  const game = (await service.JoinGame(user2.id))!;
   return { user1, user2, game };
 }
 
@@ -94,36 +100,28 @@ describe('QuizGameService', () => {
   describe('JoinGame function', () => {
     describe('Positive tests', () => {
       it('Create game', async () => {
-        const user = await commandBus.execute<CreateUserCommand, User>(
-          new CreateUserCommand(someUserInput, true),
-        );
+        const user = await generateUser('', commandBus);
         const result = await service.JoinGame(user.id);
-        expect(result).not.toBeNull();
-        expect(result!.status).toBe(GameStatusViewModel.pending);
-        expect(result!.questions).toBeNull();
-        expect(result!.secondPlayerProgress).toBeNull();
-        expect(result!.startGameDate).toBeNull();
-        expect(result!.finishGameDate).toBeNull();
-        expect(result!.firstPlayerProgress.player.login).toBe(user.login);
+        expect(result.status).toBe(GameStatusViewModel.pending);
+        expect(result.questions).toBeNull();
+        expect(result.secondPlayerProgress).toBeNull();
+        expect(result.startGameDate).toBeNull();
+        expect(result.finishGameDate).toBeNull();
+        expect(result.firstPlayerProgress.player.login).toBe(user.login);
       });
       it('Join a game', async () => {
-        const someUserInput1 = {
-          ...someUserInput,
-          login: someUserInput.login + '1',
-          email: someUserInput.email + '1',
-        };
-        const user = await commandBus.execute<CreateUserCommand, User>(
-          new CreateUserCommand(someUserInput1, true),
-        );
-        const result = await service.JoinGame(user.id);
-        expect(result).not.toBeNull();
-        expect(result!.status).toBe(GameStatusViewModel.active);
-        expect(result!.questions).not.toBeNull();
-        expect(result!.questions!.length).toBe(config.QUIZ_GAME_QUESTION_COUNT);
-        expect(result!.secondPlayerProgress).not.toBeNull();
-        expect(result!.secondPlayerProgress!.player.login).toBe(user.login);
-        expect(result!.startGameDate).not.toBeNull();
-        expect(result!.finishGameDate).toBeNull();
+        const user1 = await generateUser('1', commandBus);
+        await service.JoinGame(user1.id);
+        const user2 = await generateUser('2', commandBus);
+        const result = await service.JoinGame(user2.id);
+        console.log(result);
+        expect(result.status).toBe(GameStatusViewModel.active);
+        expect(result.questions).not.toBeNull();
+        expect(result.questions!.length).toBe(config.QUIZ_GAME_QUESTION_COUNT);
+        expect(result.secondPlayerProgress).not.toBeNull();
+        expect(result.secondPlayerProgress!.player.login).toBe(user2.login);
+        expect(result.startGameDate).not.toBeNull();
+        expect(result.finishGameDate).toBeNull();
       });
     });
 
@@ -137,12 +135,20 @@ describe('QuizGameService', () => {
 
       it('Join 2 games at once, should 403', async () => {
         await service.JoinGame(user.id);
-        await expect(service.JoinGame(user.id)).rejects.toThrow();
+        await expect(service.JoinGame(user.id)).rejects.toThrow(
+          ForbiddenException,
+        );
       });
 
       it('Calling with non-existing user, should 401', async () => {
-        await expect(service.JoinGame('not-an-id')).rejects.toThrow();
+        await expect(service.JoinGame(generateUuid())).rejects.toThrow(
+          UnauthorizedException,
+        );
       });
+    });
+
+    describe('Long chains of tests', () => {
+      it('Create game', async () => {});
     });
   });
 
