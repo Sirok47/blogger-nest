@@ -11,16 +11,21 @@ export class GameQueryRepo {
     private readonly repo: Repository<GamePSQL>,
   ) {}
 
-  async getGameProgressById(gameId: string): Promise<GamePSQL | null> {
-    return await this.repo
+  async getGameProgressById(
+    gameId: string,
+    showFinished: boolean = false,
+  ): Promise<GamePSQL | null> {
+    let query = this.repo
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.players', 'p')
       .leftJoinAndSelect('p.user', 'u')
       .leftJoinAndSelect('p.answers', 'a')
       .leftJoinAndSelect('g.questions', 'gq')
       .leftJoinAndSelect('gq.question', 'q')
-      .where('g.id = :id', { id: gameId })
-      .andWhere(
+      .where('g.id = :id', { id: gameId });
+
+    if (!showFinished) {
+      query = query.andWhere(
         new Brackets((qb) => {
           qb.where('g.status = :pending', {
             pending: GameStatus.pending,
@@ -28,7 +33,10 @@ export class GameQueryRepo {
             active: GameStatus.active,
           });
         }),
-      )
+      );
+    }
+
+    return query
       .addOrderBy('p."createdAt"', 'ASC')
       .addOrderBy('a."createdAt"', 'ASC')
       .addOrderBy('gq.id', 'ASC')

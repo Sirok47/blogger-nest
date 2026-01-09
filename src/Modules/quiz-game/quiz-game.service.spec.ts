@@ -153,7 +153,7 @@ describe('QuizGameService', () => {
       });
     });
 
-    it('Long chains of tests', async () => {
+    it('Long chain of tests', async () => {
       const user1 = await generateUser('1', commandBus);
       await service.JoinGame(user1.id);
 
@@ -195,7 +195,6 @@ describe('QuizGameService', () => {
       await service.JoinGame(user3.id);
 
       const player3 = await playerRepo.getActiveOfUser(user3.id);
-      console.log(player3);
       const game2 = await gameQueryRepo.getGameProgressById(player3!.gameId);
       console.log(user1.id, user2.id, user3.id);
       console.log(game);

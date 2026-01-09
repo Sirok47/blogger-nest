@@ -68,7 +68,7 @@ export class QuizGameController {
     @Param() { id }: InputID,
     @Param('userId') userId: string,
   ): Promise<GameProgressViewModel> {
-    const game = await this.queryRepo.getGameProgressById(id);
+    const game = await this.queryRepo.getGameProgressById(id, true);
     if (!game) {
       throw new NotFoundException();
     }
