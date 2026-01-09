@@ -39,9 +39,8 @@ export class PlayerPSQL {
   @OneToMany(() => AnswerPSQL, (answer) => answer.player)
   answers: AnswerPSQL[];
 
-  constructor(user: UserPSQL, game: GamePSQL) {
+  constructor(user: UserPSQL) {
     this.user = user;
-    this.game = game;
   }
 
   mapToViewModel(): PlayerProgressViewModel {

@@ -15,10 +15,10 @@ export class PlayerRepository {
   }
 
   async getActiveOfUser(userId: string): Promise<PlayerPSQL | null> {
-    return this.repo.findOneBy([
-      { userId: userId },
-      { game: { status: Not(GameStatus.finished) } },
-    ]);
+    return this.repo.findOneBy({
+      userId: userId,
+      game: { status: Not(GameStatus.finished) },
+    });
   }
   async getActiveOfUserWithRelations(
     userId: string,

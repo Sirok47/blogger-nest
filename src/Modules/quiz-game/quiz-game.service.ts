@@ -45,7 +45,7 @@ export class QuizGameService {
         ),
       );
     }
-    const player = new PlayerPSQL(user, game);
+    const player = new PlayerPSQL(user);
 
     game.players.push(player);
     if (game.players.length >= config.QUIZ_GAME_PLAYER_COUNT) {

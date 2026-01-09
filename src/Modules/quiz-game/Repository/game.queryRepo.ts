@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { GamePSQL } from '../entities/game.entity';
 import { GameStatus } from '../DTOs/game.dto';
 
@@ -20,10 +20,15 @@ export class GameQueryRepo {
       .leftJoinAndSelect('g.questions', 'gq')
       .leftJoinAndSelect('gq.question', 'q')
       .where('g.id = :id', { id: gameId })
-      .andWhere('g.status = :pending OR g.status = :active', {
-        pending: GameStatus.pending,
-        active: GameStatus.active,
-      })
+      .andWhere(
+        new Brackets((qb) => {
+          qb.where('g.status = :pending', {
+            pending: GameStatus.pending,
+          }).orWhere('g.status = :active', {
+            active: GameStatus.active,
+          });
+        }),
+      )
       .addOrderBy('p."createdAt"', 'ASC')
       .addOrderBy('a."createdAt"', 'ASC')
       .addOrderBy('gq.id', 'ASC')
