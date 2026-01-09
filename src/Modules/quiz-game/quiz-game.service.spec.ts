@@ -19,6 +19,8 @@ import { AnswerStatus } from './DTOs/answer.dto';
 import { GameRepository } from './Repository/game.repository';
 import { initTestingModule } from '../../../test/helpers/app-start';
 import { generateUuid } from '../../Helpers/uuid';
+import { GameQueryRepo } from './Repository/game.queryRepo';
+import { PlayerRepository } from './Repository/player.repository';
 
 const someUserInput: UserInputModel = {
   login: 'loginnn',
@@ -70,6 +72,8 @@ describe('QuizGameService', () => {
   let appService: AppService;
   let questionRepo: QuestionRepository;
   let gameRepo: GameRepository;
+  let gameQueryRepo: GameQueryRepo;
+  let playerRepo: PlayerRepository;
 
   beforeAll(async () => {
     const moduleRef = await initTestingModule([
@@ -85,6 +89,8 @@ describe('QuizGameService', () => {
     appService = moduleRef.get(AppService);
     questionRepo = moduleRef.get(QuestionRepository);
     gameRepo = moduleRef.get(GameRepository);
+    gameQueryRepo = moduleRef.get(GameQueryRepo);
+    playerRepo = moduleRef.get(PlayerRepository);
   });
 
   beforeEach(async () => {
@@ -147,8 +153,61 @@ describe('QuizGameService', () => {
       });
     });
 
-    describe('Long chains of tests', () => {
-      it('Create game', async () => {});
+    it('Long chains of tests', async () => {
+      const user1 = await generateUser('1', commandBus);
+      await service.JoinGame(user1.id);
+
+      let game = await gameQueryRepo.getGameProgressById(
+        (await playerRepo.getActiveOfUser(user1.id))!.gameId,
+      );
+      expect(game).not.toBeNull();
+      let result = game!.mapToViewModel();
+      expect(result.status).toBe(GameStatusViewModel.pending);
+      expect(result.questions).toBeNull();
+      expect(result.secondPlayerProgress).toBeNull();
+      expect(result.firstPlayerProgress.player.id).toBe(user1.id);
+      expect(result.firstPlayerProgress.answers.length).toBe(0);
+
+      const user2 = await generateUser('2', commandBus);
+      await service.JoinGame(user2.id);
+
+      game = await gameQueryRepo.getGameProgressById(
+        (await playerRepo.getActiveOfUser(user1.id))!.gameId,
+      );
+      expect(game).not.toBeNull();
+      expect(game).toStrictEqual(
+        await gameQueryRepo.getGameProgressById(
+          (await playerRepo.getActiveOfUser(user2.id))!.gameId,
+        ),
+      );
+
+      result = game!.mapToViewModel();
+      expect(result.status).toBe(GameStatusViewModel.active);
+      expect(result.questions?.length).toBe(5);
+      expect(result.secondPlayerProgress).not.toBeNull();
+      expect(result.startGameDate).not.toBeNull();
+      expect(result.firstPlayerProgress.player.id).toBe(user1.id);
+      expect(result.firstPlayerProgress.answers.length).toBe(0);
+      expect(result.secondPlayerProgress!.player.id).toBe(user2.id);
+      expect(result.secondPlayerProgress!.answers.length).toBe(0);
+
+      const user3 = await generateUser('3', commandBus);
+      await service.JoinGame(user3.id);
+
+      const player3 = await playerRepo.getActiveOfUser(user3.id);
+      console.log(player3);
+      const game2 = await gameQueryRepo.getGameProgressById(player3!.gameId);
+      console.log(user1.id, user2.id, user3.id);
+      console.log(game);
+      console.log(game2);
+      expect(game2).not.toBeNull();
+      expect(game2?.players.length).toBe(1);
+      expect(game?.players.length).toBe(2);
+      const result2 = game!.mapToViewModel();
+
+      //expect(result2.status).toBe(GameStatusViewModel.pending);
+      //expect(result2.secondPlayerProgress).not.toBeNull();
+      //expect(result2.status).toBe(GameStatusViewModel.pending);
     });
   });
 
