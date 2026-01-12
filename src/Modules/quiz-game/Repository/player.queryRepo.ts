@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Not, Repository } from 'typeorm';
 import { PlayerPSQL } from '../entities/player.entity';
 import { PlayerStats } from '../DTOs/player.dto';
 
@@ -14,6 +14,7 @@ export class PlayerQueryRepo {
   async getStatsOfUser(userId: string): Promise<PlayerStats> {
     const players = await this.repo.findBy({
       id: userId,
+      result: Not(IsNull()),
     });
 
     const stats = new PlayerStats();
