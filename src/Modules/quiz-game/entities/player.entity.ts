@@ -24,7 +24,7 @@ export class PlayerPSQL {
   @Column('integer')
   score: number = 0;
 
-  @Column('enum', { enum: PlayerResult, nullable: true, default: 'NULL' })
+  @Column('enum', { enum: PlayerResult, nullable: true, default: null })
   result: PlayerResult | null;
 
   @Column('boolean')

@@ -17,6 +17,7 @@ import { QuestionController } from './question.controller';
 import { QuestionQueryRepo } from './Repository/question.queryRepo';
 import { QuestionService } from './question.service';
 import { TokenModule } from '../JWT/jwt.module';
+import { PlayerQueryRepo } from './Repository/player.queryRepo';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TokenModule } from '../JWT/jwt.module';
     GameQueryRepo,
     QuizGameService,
     QuestionService,
+    PlayerQueryRepo,
   ],
   exports: [
     GameRepository,
