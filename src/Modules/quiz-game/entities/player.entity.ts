@@ -9,7 +9,7 @@ import {
 import { UserPSQL } from '../../AuthModule/users/users.entity';
 import { AnswerPSQL } from './answer.entity';
 import { GamePSQL } from './game.entity';
-import { PlayerProgressViewModel } from '../DTOs/player.dto';
+import { PlayerProgressViewModel, PlayerResult } from '../DTOs/player.dto';
 
 @Entity({ name: 'Players' })
 export class PlayerPSQL {
@@ -23,6 +23,9 @@ export class PlayerPSQL {
 
   @Column('integer')
   score: number = 0;
+
+  @Column('enum', { enum: PlayerResult, nullable: true, default: 'NULL' })
+  result: PlayerResult | null;
 
   @Column('boolean')
   bonusForFirst: boolean = false;

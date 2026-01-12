@@ -16,6 +16,7 @@ import { PlayerRepository } from './Repository/player.repository';
 import { config } from '../../Settings/config';
 import { AnswerPSQL } from './entities/answer.entity';
 import { AnswerRepository } from './Repository/answer.repository';
+import { PlayerResult } from './DTOs/player.dto';
 
 @Injectable()
 export class QuizGameService {
@@ -116,6 +117,21 @@ export class QuizGameService {
           player.score++;
           break;
         }
+      }
+
+      switch (true) {
+        case finishedPlayers[0].score > finishedPlayers[1].score:
+          finishedPlayers[1].result = PlayerResult.loss;
+          finishedPlayers[0].result = PlayerResult.victory;
+          break;
+        case finishedPlayers[0].score < finishedPlayers[1].score:
+          finishedPlayers[0].result = PlayerResult.loss;
+          finishedPlayers[1].result = PlayerResult.victory;
+          break;
+        case finishedPlayers[0].score === finishedPlayers[1].score:
+          finishedPlayers.forEach((player: PlayerPSQL) => {
+            player.result = PlayerResult.draw;
+          });
       }
       game.status = GameStatus.finished;
       game.finishedAt = new Date();

@@ -13,6 +13,15 @@ export enum GameStatusViewModel {
   finished = 'Finished',
 }
 
+export enum GameViewModelNaming {
+  pairCreatedDate = 'createdAt',
+  createdAt = pairCreatedDate,
+  startGameDate = 'startedAt',
+  finishGameDate = 'finishedAt',
+  id = 'id',
+  status = 'status',
+}
+
 export type GameProgressViewModel = {
   id: string;
   firstPlayerProgress: PlayerProgressViewModel;
