@@ -21,6 +21,8 @@ import { initTestingModule } from '../../../test/helpers/app-start';
 import { generateUuid } from '../../Helpers/uuid';
 import { GameQueryRepo } from './Repository/game.queryRepo';
 import { PlayerRepository } from './Repository/player.repository';
+import { PlayerQueryRepo } from './Repository/player.queryRepo';
+import { Paginator } from '../../Models/paginator.models';
 
 const someUserInput: UserInputModel = {
   login: 'loginnn',
@@ -74,6 +76,7 @@ describe('QuizGameService', () => {
   let gameRepo: GameRepository;
   let gameQueryRepo: GameQueryRepo;
   let playerRepo: PlayerRepository;
+  let playerQueryRepo: PlayerQueryRepo;
 
   beforeAll(async () => {
     const moduleRef = await initTestingModule([
@@ -91,6 +94,7 @@ describe('QuizGameService', () => {
     gameRepo = moduleRef.get(GameRepository);
     gameQueryRepo = moduleRef.get(GameQueryRepo);
     playerRepo = moduleRef.get(PlayerRepository);
+    playerQueryRepo = moduleRef.get(PlayerQueryRepo);
   });
 
   beforeEach(async () => {
@@ -196,17 +200,17 @@ describe('QuizGameService', () => {
 
       const player3 = await playerRepo.getActiveOfUser(user3.id);
       const game2 = await gameQueryRepo.getGameProgressById(player3!.gameId);
-      console.log(user1.id, user2.id, user3.id);
-      console.log(game);
-      console.log(game2);
       expect(game2).not.toBeNull();
       expect(game2?.players.length).toBe(1);
       expect(game?.players.length).toBe(2);
-      const result2 = game!.mapToViewModel();
+      const result2 = game2!.mapToViewModel();
 
-      //expect(result2.status).toBe(GameStatusViewModel.pending);
-      //expect(result2.secondPlayerProgress).not.toBeNull();
-      //expect(result2.status).toBe(GameStatusViewModel.pending);
+      expect(result2.secondPlayerProgress).toBeNull();
+      expect(result2.status).toBe(GameStatusViewModel.pending);
+
+      console.log(
+        await gameQueryRepo.getGameHistoryOfUser(user1.id, new Paginator()),
+      );
     });
   });
 

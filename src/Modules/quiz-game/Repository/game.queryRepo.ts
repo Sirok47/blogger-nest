@@ -71,11 +71,11 @@ export class GameQueryRepo {
       .addOrderBy('gq.id', 'ASC');
 
     const games: GamePSQL[] = await query
-      .orderBy(
+      .addOrderBy(
         `g.${GameViewModelNaming[sortBy]}`,
         sortDirection.toUpperCase() as 'ASC' | 'DESC',
       )
-      .orderBy(
+      .addOrderBy(
         'g."createdAt"',
         SortDirections.desc.toUpperCase() as 'ASC' | 'DESC',
       )
