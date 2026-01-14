@@ -41,16 +41,16 @@ export class QuizGameController {
     return await this.service.JoinGame(userId);
   }
 
-  @Get('users/my-statistic/:userId')
+  @Get('users/my-statistic')
   @HttpCode(HttpStatus.OK)
-  //@UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async getMyStats(@Param('userId') userId: string): Promise<PlayerStats> {
     return this.playerQueryRepo.getStatsOfUser(userId);
   }
 
-  @Get('pairs/my/:userId')
+  @Get('pairs/my')
   @HttpCode(HttpStatus.OK)
-  //@UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
+  @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
   async getGameHistory(
     @Param('userId') userId: string,
     @Query() paginationSettings: Paginator,
