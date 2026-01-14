@@ -13,7 +13,7 @@ export class PlayerQueryRepo {
 
   async getStatsOfUser(userId: string): Promise<PlayerStats> {
     const players = await this.repo.findBy({
-      id: userId,
+      userId: userId,
       result: Not(IsNull()),
     });
 

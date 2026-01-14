@@ -7,11 +7,7 @@ import {
   GameStatus,
   GameViewModelNaming,
 } from '../DTOs/game.dto';
-import {
-  Paginated,
-  Paginator,
-  SortDirections,
-} from '../../../Models/paginator.models';
+import { Paginated, Paginator } from '../../../Models/paginator.models';
 
 @Injectable()
 export class GameQueryRepo {
@@ -58,38 +54,57 @@ export class GameQueryRepo {
   ): Promise<Paginated<GameProgressViewModel>> {
     const { sortBy, pageSize, pageNumber, sortDirection } = paginationSettings;
 
-    const query = this.repo
+    const baseQuery = this.repo
+      .createQueryBuilder('g')
+      .innerJoin('g.players', 'p')
+      .where('p."userId" = :userId', { userId });
+
+    const totalCount = await baseQuery
+      .clone()
+      .select('COUNT(DISTINCT g.id)', 'cnt')
+      .getRawOne()
+      .then((r) => Number(r.cnt));
+
+    const sortColumn = `g.${GameViewModelNaming[sortBy]}`;
+
+    const gameIdsRaw = await baseQuery
+      .clone()
+      .select('g.id', 'id')
+      .addSelect(sortColumn, 'sortValue')
+      .distinct(true)
+      .orderBy(
+        `g.${GameViewModelNaming[sortBy]}`,
+        sortDirection.toUpperCase() as 'ASC' | 'DESC',
+      )
+      .addOrderBy('g."createdAt"', 'DESC')
+      .limit(pageSize)
+      .offset((pageNumber - 1) * pageSize)
+      .getRawMany();
+
+    const gameIds = gameIdsRaw.map((g) => g.id);
+
+    if (!gameIds.length) {
+      return paginationSettings.Paginate<GameProgressViewModel>(0, []);
+    }
+
+    const games = await this.repo
       .createQueryBuilder('g')
       .leftJoinAndSelect('g.players', 'p')
       .leftJoinAndSelect('p.user', 'u')
       .leftJoinAndSelect('p.answers', 'a')
       .leftJoinAndSelect('g.questions', 'gq')
       .leftJoinAndSelect('gq.question', 'q')
-      .where('p."userId" = :id', { id: userId })
+      .where('g.id IN (:...ids)', { ids: gameIds })
+      .orderBy('array_position(:ids, g.id)')
+      .setParameter('ids', gameIds)
       .addOrderBy('p."createdAt"', 'ASC')
       .addOrderBy('a."createdAt"', 'ASC')
-      .addOrderBy('gq.id', 'ASC');
-
-    const games: GamePSQL[] = await query
-      .addOrderBy(
-        `g.${GameViewModelNaming[sortBy]}`,
-        sortDirection.toUpperCase() as 'ASC' | 'DESC',
-      )
-      .addOrderBy(
-        'g."createdAt"',
-        SortDirections.desc.toUpperCase() as 'ASC' | 'DESC',
-      )
-      .limit(pageSize)
-      .offset((pageNumber - 1) * pageSize)
+      .addOrderBy('gq.id', 'ASC')
       .getMany();
 
-    const totalCount: number = await query.getCount();
-
     return paginationSettings.Paginate<GameProgressViewModel>(
-      +totalCount,
-      games.map(
-        (game: GamePSQL): GameProgressViewModel => game.mapToViewModel(),
-      ),
+      totalCount,
+      games.map((g) => g.mapToViewModel()),
     );
   }
 }
