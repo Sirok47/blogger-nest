@@ -71,6 +71,7 @@ export class GameQueryRepo {
       .clone()
       .select('g.id', 'id')
       .addSelect(sortColumn, 'sortValue')
+      .addSelect('g."createdAt"', 'createdAt')
       .distinct(true)
       .orderBy(
         `g.${GameViewModelNaming[sortBy]}`,
