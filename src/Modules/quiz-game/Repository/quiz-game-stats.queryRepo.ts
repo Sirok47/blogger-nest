@@ -38,7 +38,8 @@ export class QuizGameStatsQueryRepo {
   async getLeaderboard(
     paginationSettings: Paginator,
   ): Promise<Paginated<QuizGameStatsWithUserViewModel>> {
-    const { sort, pageSize, pageNumber } = paginationSettings;
+    let { sort } = paginationSettings;
+    const { pageSize, pageNumber } = paginationSettings;
 
     const baseQuery = this.repo
       .createQueryBuilder('s')
@@ -50,6 +51,9 @@ export class QuizGameStatsQueryRepo {
       .getRawOne()
       .then((r) => Number(r.cnt));
 
+    if (typeof sort === 'string') {
+      sort = [sort];
+    }
     const sorting: SortingInstruction[] = [];
     for (const instruction of sort) {
       const [field, dir] = instruction.split(' ');
