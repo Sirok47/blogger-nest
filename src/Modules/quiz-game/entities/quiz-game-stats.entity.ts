@@ -63,13 +63,13 @@ export class QuizGameStatsPSQL {
           this.drawsCount++;
       }
     }
-    this.avgScores = Math.ceil((this.sumScore / this.gamesCount) * 100) / 100;
+    this.avgScores = Math.round((this.sumScore / this.gamesCount) * 100) / 100;
   }
 
   updateStats(player: PlayerPSQL): this {
     this.sumScore += player.score;
     this.gamesCount++;
-    this.avgScores = Math.ceil((this.sumScore / this.gamesCount) * 100) / 100;
+    this.avgScores = Math.round((this.sumScore / this.gamesCount) * 100) / 100;
     switch (player.result) {
       case PlayerResult.victory:
         this.winsCount++;
