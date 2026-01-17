@@ -14,6 +14,7 @@ import { SessionPSQL } from '../sessions/sessions.entity';
 import { LikePSQL } from '../../BloggerPlatform/likes/likes.entity';
 import { CommentPSQL } from '../../BloggerPlatform/comments/comments.entity';
 import { ConfirmationDataPSQL } from './confData.entity';
+import { QuizGameStatsPSQL } from '../../quiz-game/entities/quiz-game-stats.entity';
 
 export class UserInputModel {
   @Length(3, 10)
@@ -166,6 +167,12 @@ export class UserPSQL implements User {
 
   @Column('timestamp with time zone', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  @OneToOne(() => QuizGameStatsPSQL, (stats) => stats.user, {
+    cascade: true,
+    eager: true,
+  })
+  quizGameStats: QuizGameStatsPSQL;
 
   @OneToMany(() => SessionPSQL, (session) => session.user)
   sessions: SessionPSQL[];

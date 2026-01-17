@@ -21,7 +21,6 @@ import { initTestingModule } from '../../../test/helpers/app-start';
 import { generateUuid } from '../../Helpers/uuid';
 import { GameQueryRepo } from './Repository/game.queryRepo';
 import { PlayerRepository } from './Repository/player.repository';
-import { PlayerQueryRepo } from './Repository/player.queryRepo';
 import { Paginator } from '../../Models/paginator.models';
 
 const someUserInput: UserInputModel = {
@@ -76,7 +75,6 @@ describe('QuizGameService', () => {
   let gameRepo: GameRepository;
   let gameQueryRepo: GameQueryRepo;
   let playerRepo: PlayerRepository;
-  let playerQueryRepo: PlayerQueryRepo;
 
   beforeAll(async () => {
     const moduleRef = await initTestingModule([
@@ -94,7 +92,6 @@ describe('QuizGameService', () => {
     gameRepo = moduleRef.get(GameRepository);
     gameQueryRepo = moduleRef.get(GameQueryRepo);
     playerRepo = moduleRef.get(PlayerRepository);
-    playerQueryRepo = moduleRef.get(PlayerQueryRepo);
   });
 
   beforeEach(async () => {

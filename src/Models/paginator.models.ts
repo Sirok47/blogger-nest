@@ -1,6 +1,13 @@
 import { Query } from 'mongoose';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export enum SortDirections {
   asc = 'asc',
@@ -12,6 +19,11 @@ export enum StatusSearchTerms {
   published = 'published',
   notPublished = 'notPublished',
 }
+
+export type SortingInstruction = {
+  field: string;
+  direction: SortDirections;
+};
 
 export class Paginator {
   @IsOptional()
@@ -37,6 +49,10 @@ export class Paginator {
   @IsOptional()
   @IsString()
   public sortBy = 'createdAt';
+
+  @IsOptional()
+  @IsString({ each: true })
+  public sort = ['avgScores desc', 'sumScore desc'];
 
   @IsOptional()
   @IsEnum(SortDirections)

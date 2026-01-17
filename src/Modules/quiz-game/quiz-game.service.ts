@@ -17,6 +17,7 @@ import { config } from '../../Settings/config';
 import { AnswerPSQL } from './entities/answer.entity';
 import { AnswerRepository } from './Repository/answer.repository';
 import { PlayerResult } from './DTOs/player.dto';
+import { QuizGameStatsRepository } from './Repository/quiz-game-stats.repository';
 
 @Injectable()
 export class QuizGameService {
@@ -27,6 +28,7 @@ export class QuizGameService {
     private readonly questionRepository: QuestionRepository,
     private readonly playerRepository: PlayerRepository,
     private readonly answerRepository: AnswerRepository,
+    private readonly statsRepository: QuizGameStatsRepository,
   ) {}
 
   async JoinGame(userId: string): Promise<GameProgressViewModel> {
@@ -135,7 +137,11 @@ export class QuizGameService {
       }
       game.status = GameStatus.finished;
       game.finishedAt = new Date();
-      await this.gameRepository.save(game);
+      await Promise.all([
+        this.gameRepository.save(game),
+        this.statsRepository.updateStatsOfUser(finishedPlayers[0]),
+        this.statsRepository.updateStatsOfUser(finishedPlayers[1]),
+      ]);
     }
     return;
   }

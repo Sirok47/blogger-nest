@@ -20,8 +20,12 @@ import { PlayerRepository } from './Repository/player.repository';
 import { AnswerInputModel, AnswerViewModel } from './DTOs/answer.dto';
 import { OptionalAccessTokenGuardGuard } from '../../Request-Modifications/Guards/optionalAccessToken.guard';
 import { Paginated, Paginator } from '../../Models/paginator.models';
-import { PlayerStats } from './DTOs/player.dto';
-import { PlayerQueryRepo } from './Repository/player.queryRepo';
+import { QuizGameStatsQueryRepo } from './Repository/quiz-game-stats.queryRepo';
+import {
+  QuizGameStatsViewModel,
+  QuizGameStatsWithUserViewModel,
+} from './DTOs/stats.dto';
+import { QuizGameStatsRepository } from './Repository/quiz-game-stats.repository';
 
 @Controller('pair-game-quiz/')
 export class QuizGameController {
@@ -29,7 +33,8 @@ export class QuizGameController {
     private readonly service: QuizGameService,
     private readonly queryRepo: GameQueryRepo,
     private readonly playerRepo: PlayerRepository,
-    private readonly playerQueryRepo: PlayerQueryRepo,
+    private readonly statsRepository: QuizGameStatsRepository,
+    private readonly statsQueryRepo: QuizGameStatsQueryRepo,
   ) {}
 
   @Post('pairs/connection')
@@ -44,8 +49,26 @@ export class QuizGameController {
   @Get('users/my-statistic')
   @HttpCode(HttpStatus.OK)
   @UseGuards(UserAuthGuard, OptionalAccessTokenGuardGuard)
-  async getMyStats(@Param('userId') userId: string): Promise<PlayerStats> {
-    return this.playerQueryRepo.getStatsOfUser(userId);
+  async getMyStats(
+    @Param('userId') userId: string,
+  ): Promise<QuizGameStatsViewModel> {
+    let stats = await this.statsQueryRepo.getStatsOfUser(userId);
+    if (!stats) {
+      await this.statsRepository.createStatsForUser(userId);
+      stats = await this.statsQueryRepo.getStatsOfUser(userId);
+      if (!stats) {
+        throw new NotFoundException();
+      }
+    }
+    return stats.mapToViewModel();
+  }
+
+  @Get('users/top')
+  @HttpCode(HttpStatus.OK)
+  async getLeaderboard(
+    @Query() paginationSettings: Paginator,
+  ): Promise<Paginated<QuizGameStatsWithUserViewModel>> {
+    return this.statsQueryRepo.getLeaderboard(paginationSettings);
   }
 
   @Get('pairs/my')

@@ -17,7 +17,9 @@ import { QuestionController } from './question.controller';
 import { QuestionQueryRepo } from './Repository/question.queryRepo';
 import { QuestionService } from './question.service';
 import { TokenModule } from '../JWT/jwt.module';
-import { PlayerQueryRepo } from './Repository/player.queryRepo';
+import { QuizGameStatsRepository } from './Repository/quiz-game-stats.repository';
+import { QuizGameStatsQueryRepo } from './Repository/quiz-game-stats.queryRepo';
+import { QuizGameStatsPSQL } from './entities/quiz-game-stats.entity';
 
 @Module({
   imports: [
@@ -29,6 +31,7 @@ import { PlayerQueryRepo } from './Repository/player.queryRepo';
       AnswerPSQL,
       QuestionPSQL,
       GameQuestionPSQL,
+      QuizGameStatsPSQL,
     ]),
   ],
   controllers: [QuizGameController, QuestionController],
@@ -41,7 +44,8 @@ import { PlayerQueryRepo } from './Repository/player.queryRepo';
     GameQueryRepo,
     QuizGameService,
     QuestionService,
-    PlayerQueryRepo,
+    QuizGameStatsRepository,
+    QuizGameStatsQueryRepo,
   ],
   exports: [
     GameRepository,

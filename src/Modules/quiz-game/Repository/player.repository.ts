@@ -14,6 +14,13 @@ export class PlayerRepository {
     return this.repo.save(player);
   }
 
+  async getAllFinishedOfUser(userId: string): Promise<PlayerPSQL[]> {
+    return await this.repo.findBy({
+      userId: userId,
+      game: { status: GameStatus.finished },
+    });
+  }
+
   async getActiveOfUser(userId: string): Promise<PlayerPSQL | null> {
     return this.repo.findOneBy({
       userId: userId,
