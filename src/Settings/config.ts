@@ -26,4 +26,6 @@ export const config = {
   //QUIZ_GAME
   QUIZ_GAME_PLAYER_COUNT: 2,
   QUIZ_GAME_QUESTION_COUNT: 5,
+
+  REDIS_URL: process.env.REDIS_URL,
 };

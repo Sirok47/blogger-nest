@@ -10,6 +10,7 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -27,6 +28,12 @@ import { QuizGameModule } from './Modules/quiz-game/quiz-game.module';
       autoLoadEntities: true,
       synchronize: true,
       url: config.PSQL_CONNECTION_STRING,
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
     }),
     CqrsModule.forRoot(),
     ThrottlerModule.forRoot({

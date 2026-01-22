@@ -18,6 +18,8 @@ import { AnswerPSQL } from './entities/answer.entity';
 import { AnswerRepository } from './Repository/answer.repository';
 import { PlayerResult } from './DTOs/player.dto';
 import { QuizGameStatsRepository } from './Repository/quiz-game-stats.repository';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 
 @Injectable()
 export class QuizGameService {
@@ -29,6 +31,7 @@ export class QuizGameService {
     private readonly playerRepository: PlayerRepository,
     private readonly answerRepository: AnswerRepository,
     private readonly statsRepository: QuizGameStatsRepository,
+    @InjectQueue('GameCleaner') private gameQueue: Queue,
   ) {}
 
   async JoinGame(userId: string): Promise<GameProgressViewModel> {
@@ -112,37 +115,53 @@ export class QuizGameService {
         finishedPlayers[0].bonusForFirst = true;
         await this.playerRepository.save(finishedPlayers[0]);
       }
+
+      await this.gameQueue.add(
+        'playerFinished',
+        {
+          gameId: game.id,
+        },
+        { delay: 9500 },
+      );
     }
     if (finishedPlayers.length === config.QUIZ_GAME_PLAYER_COUNT) {
-      for (const player of game.players) {
-        if (player.bonusForFirst) {
-          player.score++;
-          break;
-        }
-      }
-
-      switch (true) {
-        case finishedPlayers[0].score > finishedPlayers[1].score:
-          finishedPlayers[1].result = PlayerResult.loss;
-          finishedPlayers[0].result = PlayerResult.victory;
-          break;
-        case finishedPlayers[0].score < finishedPlayers[1].score:
-          finishedPlayers[0].result = PlayerResult.loss;
-          finishedPlayers[1].result = PlayerResult.victory;
-          break;
-        case finishedPlayers[0].score === finishedPlayers[1].score:
-          finishedPlayers.forEach((player: PlayerPSQL) => {
-            player.result = PlayerResult.draw;
-          });
-      }
-      game.status = GameStatus.finished;
-      game.finishedAt = new Date();
-      await Promise.all([
-        this.gameRepository.save(game),
-        this.statsRepository.updateStatsOfUser(finishedPlayers[0]),
-        this.statsRepository.updateStatsOfUser(finishedPlayers[1]),
-      ]);
+      await this.onGameFinished(game);
     }
+    return;
+  }
+
+  async onGameFinished(game: GamePSQL): Promise<void> {
+    const finishedPlayers: PlayerPSQL[] = game.players.filter(
+      (player) => player.answers.length >= config.QUIZ_GAME_QUESTION_COUNT,
+    );
+    for (const player of game.players) {
+      if (player.bonusForFirst) {
+        player.score++;
+        break;
+      }
+    }
+
+    switch (true) {
+      case finishedPlayers[0].score > finishedPlayers[1].score:
+        finishedPlayers[1].result = PlayerResult.loss;
+        finishedPlayers[0].result = PlayerResult.victory;
+        break;
+      case finishedPlayers[0].score < finishedPlayers[1].score:
+        finishedPlayers[0].result = PlayerResult.loss;
+        finishedPlayers[1].result = PlayerResult.victory;
+        break;
+      case finishedPlayers[0].score === finishedPlayers[1].score:
+        finishedPlayers.forEach((player: PlayerPSQL) => {
+          player.result = PlayerResult.draw;
+        });
+    }
+    game.status = GameStatus.finished;
+    game.finishedAt = new Date();
+    await Promise.all([
+      this.gameRepository.save(game),
+      this.statsRepository.updateStatsOfUser(finishedPlayers[0]),
+      this.statsRepository.updateStatsOfUser(finishedPlayers[1]),
+    ]);
     return;
   }
 }

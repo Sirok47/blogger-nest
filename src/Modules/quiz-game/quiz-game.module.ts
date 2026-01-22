@@ -20,11 +20,16 @@ import { TokenModule } from '../JWT/jwt.module';
 import { QuizGameStatsRepository } from './Repository/quiz-game-stats.repository';
 import { QuizGameStatsQueryRepo } from './Repository/quiz-game-stats.queryRepo';
 import { QuizGameStatsPSQL } from './entities/quiz-game-stats.entity';
+import { GameCleanerService } from './quiz-game-cleaner.service';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
     TokenModule,
     AuthModule,
+    BullModule.registerQueue({
+      name: 'GameCleaner',
+    }),
     TypeOrmModule.forFeature([
       GamePSQL,
       PlayerPSQL,
@@ -46,6 +51,7 @@ import { QuizGameStatsPSQL } from './entities/quiz-game-stats.entity';
     QuestionService,
     QuizGameStatsRepository,
     QuizGameStatsQueryRepo,
+    GameCleanerService,
   ],
   exports: [
     GameRepository,

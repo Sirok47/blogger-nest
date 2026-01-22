@@ -20,4 +20,7 @@ async function bootstrap(): Promise<void> {
   app.set('trust proxy', 1);
   await app.listen(process.env.PORT || 3000);
 }
+
+console.log('REDIS_URL (raw) =', JSON.stringify(process.env.REDIS_URL));
+
 bootstrap().catch(console.error);
