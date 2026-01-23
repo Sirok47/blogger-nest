@@ -15,26 +15,33 @@ export class GameCleanerService extends WorkerHost {
     super();
   }
   async process(job: Job): Promise<boolean> {
-    const game = await this.gameQueryRepo.getGameProgressById(job.data.gameId);
-    if (!game) {
-      console.error('No game found with ID: ' + job.data.gameId);
-      return false;
-    }
-    if (game.status === GameStatus.finished) {
-      return true;
-    }
-    for (const player of game.players) {
-      while (player.answers.length < config.QUIZ_GAME_QUESTION_COUNT) {
-        const answer = new AnswerPSQL(
-          'Out of time',
-          false,
-          player,
-          game.questions[player.answers.length + 1].question,
-        );
-        player.answers.push(answer);
+    try {
+      const game = await this.gameQueryRepo.getGameProgressById(
+        job.data.gameId,
+        true,
+      );
+      if (!game) {
+        console.error('No game found with ID: ' + job.data.gameId);
+        return false;
       }
+      if (game.status === GameStatus.finished) {
+        return true;
+      }
+      for (const player of game.players) {
+        while (player.answers.length < config.QUIZ_GAME_QUESTION_COUNT) {
+          const answer = new AnswerPSQL(
+            'Out of time',
+            false,
+            player,
+            game.questions[player.answers.length].question,
+          );
+          player.answers.push(answer);
+        }
+      }
+      await this.gameService.onGameFinished(game);
+    } catch (e) {
+      console.error(e);
     }
-    await this.gameService.onGameFinished(game);
     return true;
   }
 }

@@ -248,6 +248,26 @@ describe('QuizGameService', () => {
         expect(result.players[0].score).toBe(6);
         expect(result.players[1].score).toBe(5);
       });
+
+      it('Close game aster 10 secs pass since last answer', async () => {
+        for (const q of game.questions!) {
+          expect(
+            (
+              await service.ReceiveAnswer(
+                user1.id,
+                'answer' + q.body[q.body.length - 1],
+              )
+            ).answerStatus,
+          ).toBe(AnswerStatus.Correct);
+        }
+        await (async () => {
+          return new Promise((resolve) => setTimeout(resolve, 11000));
+        })();
+        //await sleep(11000);
+        const result = await gameQueryRepo.getGameProgressById(user1.id, true);
+        expect(result?.status).toBe(GameStatusViewModel.finished);
+        expect(result?.finishedAt).not.toBeNull();
+      });
     });
 
     describe('Negative tests', () => {
